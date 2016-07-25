@@ -986,7 +986,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   selo(1, 'JavaExecutor.classPathPrefix', 'edu.stanford.nlp.sempre.interactive.blocks.MagnetWorld',
    'edu.stanford.nlp.sempre.interactive.blocks.ActionLDCSWorld'),
   o('Params.initWeightsRandomly', false),
-  selo(1, 'Grammar.inPaths', './shrdlurn/magnetic.grammar', './shrdlurn/actionLDCS.grammar'),
+  selo(1, 'Grammar.inPaths', './shrdlurn/magnetic.grammar', './shrdlurn/actionLDCS_calendar.grammar'),
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
   o('LanguageAnalyzer.lowerCaseTokens', true),
