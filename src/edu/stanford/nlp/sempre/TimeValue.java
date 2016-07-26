@@ -11,6 +11,19 @@ public class TimeValue extends Value {
   public final int hour;
   public final int minute;
 
+  public static TimeValue parseTimeValue(String timeStr) {
+	
+	// [3:00|03:00|3] pm
+	// 15:00
+	  
+	int hour = 0;
+	int minute = 0;
+	
+	
+	return new TimeValue(hour, minute);
+	
+  }
+  
   public TimeValue(int hour, int minute) {
     if (hour > 23 || hour < 0) throw new RuntimeException("Illegal hour: " + hour);
     if (minute > 59 || minute < 0) throw new RuntimeException("Illegal minute: " + minute);
@@ -48,4 +61,6 @@ public class TimeValue extends Value {
     result = 31 * result + minute;
     return result;
   }
+  
+
 }
