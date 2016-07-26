@@ -1,0 +1,22 @@
+(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",\"pam\",[]],[2,2,1,\"Blue\",\"john\",[]]]) (name b) (name c))))
+(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",[]]]) (name b) (name c))))
+
+
+find has title : good
+find has title : good and has weekday : wed
+find has title : good and has weekday : wed and has duration hours : 3
+
+
+(context (graph NaiveKnowledgeGraph ((string [[1,3,2,\"Red\",[]],[2,2,1,\"Blue\",[]],[2,2,2,\"Red\",[]],[1,3,3,\"Red\",[]],[1,3,1,\"Green\",[]]]) (name b) (name c))))
+
+
+    (string [[1,3,2,\"Red\",[]],[2,2,3,\"Red\",[]],[2,2,1,\"Blue\",[]],[2,2,2,\"Red\",[]],[1,3,3,\"Red\",[]],[1,3,1,\"Green\",[]],[1,3,4,\"Red\",[]]]) (name b) (name c)
+
+add red all
+
+
+
+ant clean
+ant core
+ant core interactive
+./run @mode=interactive -interactive -server false 

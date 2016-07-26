@@ -30,7 +30,8 @@ public class ActionExecutor extends Executor {
     public String classPathPrefix = "edu.stanford.nlp.sempre";
 
     @Option(gloss = "The type of FlatWorld used")
-    public String FlatWorldType = "BlocksWorld";
+    public String FlatWorldType = "EventsWorld";
+//    public String FlatWorldType = "BlocksWorld";
   }
   public static Options opts = new Options();
   

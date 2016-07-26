@@ -18,6 +18,8 @@ public abstract class FlatWorld {
   public static FlatWorld fromContext(String worldname, ContextValue context) {
     if (worldname.equals("BlocksWorld"))
       return BlocksWorld.fromContext(context);
+    if (worldname.equals("EventsWorld"))
+      return EventsWorld.fromContext(context);
     throw new RuntimeException("World does not exist: " + worldname);
   }
   
