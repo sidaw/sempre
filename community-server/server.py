@@ -158,7 +158,7 @@ def emit_structs():
                 struct = json.loads(lines[2].strip())
 
                 score = score_struct(timestamp, len(upvotes))
-                message = {"uid": scrub_uid(uid), "id": fname, "score": score, "upvotes": upvotes, "struct": struct}
+                message = {"uid": uid, "id": str(fname), "score": score, "upvotes": [scrub_uid(up) for up in upvotes], "struct": struct}
                 emit("struct", message)
 
 
@@ -248,7 +248,7 @@ def handle_share(data):
     current score of the struct and ID is the unique index (auto-incremented) of
     this particular struct.."""
 
-    user_structs_folder = os.path.join(STRUCTS_FOLDER, session.uid)
+    user_structs_folder = os.path.join(STRUCTS_FOLDER, scrub_uid(session.uid))
     make_dir_if_necessary(user_structs_folder)
     names = os.listdir(user_structs_folder)
     new_struct_id = "1"
@@ -281,10 +281,11 @@ def upvote(data):
         return
 
     user_structs_folder = os.path.join(STRUCTS_FOLDER, data["uid"])
-    struct_path = os.path.join(STRUCTS_FOLDER, data["uid"], data["id"] + ".json")
+    struct_path = os.path.join(STRUCTS_FOLDER, data["uid"], str(data["id"]) + ".json")
 
     # if the struct does not exist, do nothing
     if not os.path.isfile(struct_path):
+        print("not", struct_path)
         return
 
     # Read the first line of the file to get the number of upvotes
@@ -303,11 +304,11 @@ def upvote(data):
                 fw.write(timestamp)  # rewrite the timestamp
                 fw.write(f.readline())  # rewrite the actual struct
 
-    score = score_struct(timestamp, len(upvotes))
+                score = score_struct(timestamp, len(upvotes))
 
-    # and then broadcast the new upvote to the room:
-    message = {"uid": data["uid"], "id": data["id"], "up": scrub_uid(session.uid), "score": score}
-    emit("upvote", message, broadcast=True, room="community")
+                # and then broadcast the new upvote to the room:
+                message = {"uid": data["uid"], "id": data["id"], "up": scrub_uid(session.uid), "score": score}
+                emit("upvote", message, broadcast=True, room="community")
 
 
 @socketio.on('log')
