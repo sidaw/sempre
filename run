@@ -1047,6 +1047,12 @@ o('Derivation.showValues', false),
 o('Derivation.showRules', true),
 nil) })
 
+## Run the community server
+
+addMode('community', 'run the community server', lambda { |e| l(
+  'python community-server/server.py -- port 8406',
+nil) })
+
 ############################################################
 
 if ARGV.size == 0

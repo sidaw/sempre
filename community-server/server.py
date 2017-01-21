@@ -90,7 +90,7 @@ CORS(app)
 socketio = SocketIO(app)
 
 # Hardcoded folders for the data (mirrored in data_rotate.py)
-DATA_FOLDER = "data/"
+DATA_FOLDER = "community-server/data/"
 LOG_FOLDER = os.path.join(DATA_FOLDER, "log/")
 STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 
