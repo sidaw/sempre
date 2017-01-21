@@ -1,0 +1,109 @@
+(rule
+  $Action
+  (add 3 $Color)
+  (interactive.ApplyFn (lambda $Color0 (:for (color green) (:loop (number 3) (: add (var $Color0) top)))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Action
+  (add 3 $Color on top of the green block)
+  (interactive.ApplyFn (lambda $Color0 (:for (color green) (:loop (number 3) (: add (var $Color0) top)))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Action
+  (add 3 $Color)
+  (interactive.ApplyFn (lambda $Color0 (:for (color green) (:loop (number 3) (: add (var $Color0) top)))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Action
+  (add $Color left)
+  (interactive.ApplyFn (lambda $Color0 (:for (color (var $Color0)) (:loop (number 3) (: add red top)))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Core 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Action
+  (add 3 $Color on top of the green block)
+  (interactive.ApplyFn (lambda $Color0 (:for (color green) (:loop (number 3) (: add (var $Color0) top)))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule $Action (add a $Color block on base) (interactive.ApplyFn (lambda $Color0 (: add (var $Color0) top))) (session:deadbeef 1.0) (Cover 1.0) (Full 1.0) (anchored 1.0))
+(rule $Action (add some $Color) (interactive.ApplyFn (lambda $Color0 (: add (var $Color0) top))) (session:deadbeef 1.0) (Cover 1.0) (Full 1.0) (anchored 1.0))
+(rule
+  $Action
+  (add some really good $Color)
+  (interactive.ApplyFn (lambda $Color0 (:loop (number 3) (: add (var $Color0) top))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Action
+  (add some really good woot $Color)
+  (interactive.ApplyFn (lambda $Color0 (:loop (number 3) (: add (var $Color0) top))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Action
+  (add eafefasdf $Color)
+  (interactive.ApplyFn (lambda $Color0 (:loop (number 3) (: add (var $Color0) top))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Actions
+  (add 2 x 3 $Color cube)
+  (interactive.ApplyFn
+    (lambda $Color0 (:s (:s (: add (var $Color0) top) (:loop (number 2) (: add (var $Color0) back))) (:for (color (var $Color0)) (:loop (number 3) (: add (var $Color0) left)))))
+  )
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Actions
+  (add 2 x 3 $Color cube)
+  (interactive.ApplyFn
+    (lambda $Color0 (:s (:s (:loop (number 2) (: add (var $Color0) back)) (:for (color (var $Color0)) (: select))) (:isolate selected (:loop (number 3) (: add (var $Color0) left)))))
+  )
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Full 1.0)
+  (anchored 1.0)
+)
+(rule
+  $Action
+  (_ add $Color eree)
+  (interactive.ApplyFn (lambda $Color0 (:loop (number 2) (: add (var $Color0) top))))
+  (session:deadbeef 1.0)
+  (Cover 1.0)
+  (Induced 1.0)
+  (induced 1.0)
+)
+(rule $Action (_ add $Color ear) (interactive.ApplyFn (lambda $Color0 (:loop (number 3) (: add (var $Color0) top)))) (session:deadbeef 1.0) (Cover 1.0) (Induced 1.0) (induced 1.0))
+(rule $Action (add $Color ear) (interactive.ApplyFn (lambda $Color0 (: add (var $Color0) right))) (session:deadbeef 1.0) (Cover 1.0) (Induced 1.0) (induced 1.0))
+(rule $Action (add $Color ear) (interactive.ApplyFn (lambda $Color0 (: add (var $Color0) right))) (session:deadbeef 1.0) (Cover 1.0) (Induced 1.0) (induced 1.0))
+(rule $Action (add $Color ere) (interactive.ApplyFn (lambda $Color0 (: add (var $Color0) right))) (session:deadbeef 1.0) (Cover 1.0) (Induced 1.0) (induced 1.0))
