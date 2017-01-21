@@ -1,0 +1,7 @@
+date=Fri Aug 12 21:37:33 CDT 2016	sessionId=1	remote=localhost	format=html	query=	response=(no answer)
+date=Fri Aug 12 21:37:37 CDT 2016	sessionId=1	remote=localhost	format=html	query=(statistics)	response=
+date=Fri Aug 12 21:37:38 CDT 2016	sessionId=1	remote=localhost	format=html	query=(statistics)	response=
+date=Fri Aug 12 21:37:41 CDT 2016	sessionId=1	remote=localhost	format=html	query=statistics	response=(no answer)
+date=Fri Aug 12 21:37:46 CDT 2016	sessionId=1	remote=localhost	format=html	query=(statistics)	response=
+date=Fri Aug 12 21:37:50 CDT 2016	sessionId=1	remote=localhost	format=html	query=(statistics "")	response=
+date=Fri Aug 12 21:37:53 CDT 2016	sessionId=1	remote=localhost	format=html	query=	response=(no answer)

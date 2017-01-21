@@ -1,0 +1,183 @@
+date=Wed Oct 19 16:04:34 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:04:36 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:04:51 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:04:59 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:05:17 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:05:40 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:06:17 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:08:03 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:08:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:08:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 16:08:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 16:08:48 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:08:48 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 16:08:48 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 16:09:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:09:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 16:09:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 16:12:28 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:13:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 16:13:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 16:13:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:20:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=  (context (date 2016 9 19))
+date=Wed Oct 19 20:20:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:20:22 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=  (context (date 2016 9 19))
+date=Wed Oct 19 20:24:20 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=  (context (date 2016 9 19))
+date=Wed Oct 19 20:24:55 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=  (context (date 2016 9 19))
+date=Wed Oct 19 20:25:08 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=  (context (date 2016 9 19))
+date=Wed Oct 19 20:26:34 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:27:09 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:28:05 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:28:21 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:28:21 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:29:13 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:29:13 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:29:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:29:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:30:20 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:30:40 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:31:48 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:31:48 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:31:52 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:31:52 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:32:20 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:32:20 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:33:23 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:33:23 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:33:25 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:33:25 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:33:37 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:33:37 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:34:28 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:34:28 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:34:51 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:34:51 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:35:08 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:35:08 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:35:27 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:35:27 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:36:40 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:36:40 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:38:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:38:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:39:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:39:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:39:46 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:39:46 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:40:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:40:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:40:09 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:40:09 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:43:14 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:43:14 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:43:17 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:43:17 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:43:18 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:43:18 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:43:35 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:43:35 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:43:56 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context)	response=
+date=Wed Oct 19 20:43:56 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 20:44:20 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 20:44:20 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:03:05 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:03:05 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:06:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:06:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:06:45 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:06:45 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:07:09 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:07:09 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:07:25 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:07:25 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:07:38 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:07:38 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:08:09 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:08:09 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:08:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:08:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:26:19 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:26:19 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:26:44 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:26:44 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add blue	response=(: add blue top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Blue\",[]]])
+date=Wed Oct 19 22:26:46 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:26:46 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:27:53 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:27:53 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:00 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:29:00 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:03 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:05 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:06 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:30 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:29:30 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:31 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:33 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:33 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:41 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:29:41 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:29:42 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:30:11 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 22:30:11 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:30:12 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:30:13 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:30:14 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 22:30:17 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]]") (name b) (name c))))	response=
+date=Wed Oct 19 22:30:17 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add orange	response=(: add orange top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Orange\",[]]])
+date=Wed Oct 19 22:30:27 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add orange	response=(: add orange top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Orange\",[]]])
+date=Wed Oct 19 23:45:32 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:45:32 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:45:49 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:45:49 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:46:11 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:46:11 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:47:05 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:47:24 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:48:34 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:48:50 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:48:50 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:49:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:49:01 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:54:07 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:54:36 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:54:36 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:54:46 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:54:46 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:55:00 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:55:10 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:55:18 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:55:18 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:55:39 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:55:39 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:55:43 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:55:58 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:55:58 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:56:33 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:56:33 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:56:48 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:56:48 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:56:55 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:56:55 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:57:25 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:57:25 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:57:37 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:57:37 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:58:02 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:58:02 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:58:27 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:58:27 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Wed Oct 19 23:58:31 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[]") (name b) (name c))))	response=
+date=Wed Oct 19 23:58:31 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add orange	response=(: add orange top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Orange\",[]]])
+date=Wed Oct 19 23:59:45 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[[0,0,0,\"Red\",[]]]") (name b) (name c))))	response=
+date=Wed Oct 19 23:59:45 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Thu Oct 20 00:00:28 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[[0,0,0,\"Red\",[]]]") (name b) (name c))))	response=
+date=Thu Oct 20 00:00:28 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Thu Oct 20 00:00:47 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[[0,0,0,\"Red\",[]]]") (name b) (name c))))	response=
+date=Thu Oct 20 00:00:47 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Thu Oct 20 00:01:06 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[[0,0,0,\"Red\",[]]]") (name b) (name c))))	response=
+date=Thu Oct 20 00:01:06 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Thu Oct 20 00:02:03 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[[0,0,0,\"Red\",[]]]") (name b) (name c))))	response=
+date=Thu Oct 20 00:02:03 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
+date=Thu Oct 20 00:02:14 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=(context (graph NaiveKnowledgeGraph ((string "[[0,0,0,\"Red\",[]]]") (name b) (name c))))	response=
+date=Thu Oct 20 00:02:14 PDT 2016	sessionId=null	remote=localhost	format=lisp2json	query=add red	response=(: add red top) => (string [[4,4,1,\"Blue\",[]],[3,3,1,\"Gray\",[\"S\"]],[3,3,2,\"Red\",[]]])
