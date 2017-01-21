@@ -144,8 +144,9 @@ def emit_structs():
 
     for uid in [name for name in os.listdir(STRUCTS_FOLDER) if os.path.isdir(os.path.join(STRUCTS_FOLDER, name))]:
         uid_folder = os.path.join(STRUCTS_FOLDER, uid)
-        for fname in os.listdir(uid_folder):
-            path = os.path.join(uid_folder, fname)
+        # get the most recent 7 structs
+        for fname in sorted([int(n[:-5]) for n in os.listdir(uid_folder)])[:7]:
+            path = os.path.join(uid_folder, str(fname) + ".json")
 
             with open(path, 'r') as f:
                 lines = f.readlines()
@@ -157,7 +158,7 @@ def emit_structs():
                 struct = json.loads(lines[2].strip())
 
                 score = score_struct(timestamp, len(upvotes))
-                message = {"uid": scrub_uid(uid), "id": fname[:-5], "score": score, "upvotes": upvotes, "struct": struct}
+                message = {"uid": scrub_uid(uid), "id": fname, "score": score, "upvotes": upvotes, "struct": struct}
                 emit("struct", message)
 
 
