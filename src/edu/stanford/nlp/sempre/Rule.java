@@ -5,7 +5,9 @@ import com.google.common.collect.Lists;
 import fig.basic.LispTree;
 import fig.basic.Pair;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A rule specifies how to take a right hand of terminals and non-terminals.
@@ -23,7 +25,7 @@ public class Rule {
   public static final String phraseCat = "$PHRASE";  // Sequence of tokens
   public static final String lemmaTokenCat = "$LEMMA_TOKEN";  // Lemmatized version
   public static final String lemmaPhraseCat = "$LEMMA_PHRASE";  // Lemmatized version
-
+  public static final List<String> specialCats = Lists.newArrayList(rootCat, tokenCat, phraseCat, lemmaTokenCat, lemmaPhraseCat);
   public final String lhs;  // Left-hand side: category.
   public final List<String> rhs;  // Right-hand side: sequence of categories (have $ prefix) and tokens.
   public final SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.
@@ -99,7 +101,7 @@ public class Rule {
   }
 
   /* Extract tag info */
-  private double getInfoTag(String infoTag) {
+  public double getInfoTag(String infoTag) {
     if (info != null) {
       for (Pair<String, Double> p : info) {
         if (p.getFirst().equals(infoTag)) return p.getSecond();
@@ -128,5 +130,33 @@ public class Rule {
       return false;
     else
       return f == 1.0 ? false : !FloatingParser.opts.defaultIsFloating;
+  }
+  
+  public boolean isInduced() {
+    double a = getInfoTag("induced");
+    if (a == 1.0) return true;
+    return false;
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Rule)) return false;
+    return ((Rule)o).toString().equals(this.toString());
+  }
+  @Override
+  public int hashCode() {
+    return this.toString().hashCode();
+  }
+  
+  public String toJson() {
+    Map<String, Object> jsonMap = new LinkedHashMap<>();
+    jsonMap.put("lhs", lhs);
+    jsonMap.put("rhs", rhs);
+    jsonMap.put("sem", sem.toString());
+    if (info != null) {
+      for (Pair<String, Double> p : info)
+        jsonMap.put(p.getFirst(), p.getSecond());
+    }
+    return Json.writeValueAsStringHard(jsonMap);
   }
 }

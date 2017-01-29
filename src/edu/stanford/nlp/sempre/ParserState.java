@@ -1,14 +1,7 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.Fmt;
-import fig.basic.LogInfo;
-import fig.basic.NumUtils;
-import fig.basic.Evaluation;
-import fig.basic.Option;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import fig.basic.*;
 
 /**
  * Actually does the parsing.  Main method is infer(), whose job is to fill in
@@ -20,10 +13,14 @@ public abstract class ParserState {
   public static class Options {
     @Option(gloss = "Use a custom distribution for computing expected counts")
     public CustomExpectedCount customExpectedCounts = CustomExpectedCount.NONE;
+    @Option(gloss = "For customExpectedCounts = TOP, only update if good < bad + margin")
+    public double contrastiveMargin = 1e6;    // default = always update
     @Option(gloss = "Whether to prune based on probability difference")
     public boolean pruneByProbDiff = false;
     @Option(gloss = "Difference in probability for pruning by prob diff")
     public double probDiffPruningThresh = 100;
+    @Option(gloss = "Throw features away after scoring to save memory")
+    public boolean throwFeaturesAway = false;
   }
   public static Options opts = new Options();
 
@@ -79,9 +76,12 @@ public abstract class ParserState {
     // Compute score
     deriv.computeScoreLocal(params);
 
+    if (opts.throwFeaturesAway)
+      deriv.clearFeatures();
+
     if (parser.verbose(5)) {
       LogInfo.logs("featurizeAndScoreDerivation(score=%s) %s %s: %s [rule: %s]",
-              Fmt.D(deriv.score), deriv.cat, ex.spanString(deriv.start, deriv.end), deriv, deriv.rule);
+          Fmt.D(deriv.score), deriv.cat, ex.spanString(deriv.start, deriv.end), deriv, deriv.rule);
     }
     numOfFeaturizedDerivs++;
   }
@@ -99,7 +99,8 @@ public abstract class ParserState {
       maxCellSize = derivations.size();
       maxCellDescription = cellDescription;
       if (maxCellSize > 5000)
-        LogInfo.logs("ParserState.pruneCell %s: %s entries", maxCellDescription, maxCellSize);
+        LogInfo.logs("ParserState.pruneCell %s: maxCellSize = %s entries (not pruned yet)",
+            maxCellDescription, maxCellSize);
     }
 
     // The extra code blocks in here that set |deriv.maxXBeamPosition|
@@ -133,14 +134,12 @@ public abstract class ParserState {
     Derivation.sortByScore(derivations);
 
     // Print out information
-    if (parser.opts.verbose >= 3) {
+    if (Parser.opts.verbose >= 3) {
       LogInfo.begin_track("ParserState.pruneCell(%s): %d derivations", cellDescription, derivations.size());
       for (Derivation deriv : derivations) {
         LogInfo.logs("%s(%s,%s): %s %s, [score=%s]", deriv.cat, deriv.start, deriv.end, deriv.formula,
-                deriv.canonicalUtterance, deriv.score);
+            deriv.canonicalUtterance, deriv.score);
       }
-
-
       LogInfo.end_track();
     }
 
@@ -168,6 +167,9 @@ public abstract class ParserState {
     else {
       // Keep only the top hypotheses
       int beamSize = getBeamSize();
+      if (derivations.size() > beamSize && Parser.opts.verbose >= 1) {
+        LogInfo.logs("ParserState.pruneCell %s: Pruning %d -> %d derivations", cellDescription, derivations.size(), beamSize);
+      }
       while (derivations.size() > beamSize) {
         derivations.remove(derivations.size() - 1);
         fallOffBeam = true;
@@ -228,7 +230,7 @@ public abstract class ParserState {
   }
 
   // Ensure that all the logical forms are executed and compatibilities are computed.
-  protected void ensureExecuted() {
+  public void ensureExecuted() {
     LogInfo.begin_track("Parser.ensureExecuted");
     // Execute predicted derivations to get value.
     for (Derivation deriv : predDerivations) {
@@ -271,7 +273,7 @@ public abstract class ParserState {
 
     trueScores = new double[n];
     predScores = new double[n];
-    // For update schemas that choose one good and one bad candidate to update
+    // Experimental (ice): For update schemas that choose one good and one bad candidate to update
     int[] goodAndBad = null;
     if (opts.customExpectedCounts == CustomExpectedCount.TOP) {
       goodAndBad = getTopDerivations(derivations);
@@ -281,6 +283,7 @@ public abstract class ParserState {
       if (goodAndBad == null) return;
     }
 
+    boolean hasPostive = opts.customExpectedCounts != CustomExpectedCount.NONE;
     for (int i = 0; i < n; i++) {
       Derivation deriv = derivations.get(i);
       double logReward = Math.log(compatibilityToReward(deriv.compatibility));
@@ -289,6 +292,7 @@ public abstract class ParserState {
         case NONE:
           trueScores[i] = deriv.score + logReward;
           predScores[i] = deriv.score;
+          if (logReward > Double.NEGATIVE_INFINITY) hasPostive = true;
           break;
         case UNIFORM:
           trueScores[i] = logReward;
@@ -304,7 +308,13 @@ public abstract class ParserState {
     }
 
     // Usually this happens when there are no derivations.
-    if (!NumUtils.expNormalize(trueScores)) return;
+    // sidaw: allow rejection updates of everything
+    if (hasPostive) {
+      if(!NumUtils.expNormalize(trueScores)) return;
+    } else {
+      for (int i = 0; i < n; i++) trueScores[i] = 0;
+    }
+      
     if (!NumUtils.expNormalize(predScores)) return;
 
     // Update parameters
@@ -331,11 +341,14 @@ public abstract class ParserState {
         }
       }
     }
-    return (chosenGood == -1 || chosenBad == -1) ? null : new int[] {chosenGood, chosenBad};
+    if (chosenGood == -1 || chosenBad == -1 || chosenGoodScore >= chosenBadScore + opts.contrastiveMargin)
+      return null;
+    return new int[] {chosenGood, chosenBad};
   }
 
   private static int[] getRandomDerivations(List<Derivation> derivations) {
     int chosenGood = -1, chosenBad = -1, numGoodSoFar = 0, numBadSoFar = 0;
+    // Get a uniform random sample from the stream
     for (int i = 0; i < derivations.size(); i++) {
       Derivation deriv = derivations.get(i);
       if (deriv.compatibility == 1) {
