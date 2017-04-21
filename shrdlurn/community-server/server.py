@@ -37,7 +37,7 @@ DATA_FOLDER = "community-server/data/"
 LOG_FOLDER = os.path.join(DATA_FOLDER, "log/")
 STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 
-CITATION_FOLDER = "../int-output/citation"
+CITATION_FOLDER = "int-output/citation"
 
 # Scoring function parameters
 GRAVITY = 1.1  # higher the gravity, the faster old structs lose score
@@ -46,8 +46,6 @@ TIME_INTERVAL = 7200.0  # break off by every 30 minutes
 # Default port for the server
 DEFAULT_PORT = 8406
 
-# JWT_SECRET = "hello world this is a secret"
-# SLACK_SECRET = "a1ccf3fcde6b249b7ad4855214c37663"
 JWT_SECRET = os.environ['SEMPRE_JWT_SECRET']
 SLACK_SECRET = os.environ['SLACK_OAUTH_SECRET']
 
@@ -344,12 +342,8 @@ def handle_share(data):
     where UID is the uid of the user who submitted the struct, SCORE is the
     current score of the struct and ID is the unique index (auto-incremented) of
     this particular struct.."""
-
     user = current_user(data['token'])
-    if not user:
-        return
-
-    uid = user['id']
+    uid = user['id'] if user else "_l_" + data['uid']
 
     user_structs_folder = os.path.join(STRUCTS_FOLDER, uid)
     if not is_safe_path(STRUCTS_FOLDER, user_structs_folder):
