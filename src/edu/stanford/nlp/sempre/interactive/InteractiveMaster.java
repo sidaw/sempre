@@ -211,6 +211,12 @@ public class InteractiveMaster extends Master {
           if (session.isLearning()) {
             for (Rule rule : inducedRules) {
               InteractiveUtils.addRuleInteractive(rule, builder.parser);
+              stats.put("rhssize", rule.rhs.size());
+              stats.put("argsize", rule.rhs.stream().filter(t -> t.startsWith("$")).count());
+              stats.put("argnum", rule.rhs.stream().filter(t -> t.startsWith("$Number")).count());
+              stats.put("argcolor", rule.rhs.stream().filter(t -> t.startsWith("$Color")).count());
+              stats.put("argset", rule.rhs.stream().filter(t -> t.startsWith("$Set")).count());
+              stats.put("argaction", rule.rhs.stream().filter(t -> t.startsWith("$Action")).count());
             }
             stats.put("total_rules", ((InteractiveBeamParser)builder.parser).allRules.size());
             stats.put("total_unicat", ((InteractiveBeamParser)builder.parser).interactiveCatUnaryRules.size());
@@ -266,7 +272,7 @@ public class InteractiveMaster extends Master {
     ex.preprocess();
     return ex;
   }
-
+  
   public static List<Rule> induceRulesHelper(String command, String head, String jsonDef, Parser parser, Params params,
       Session session, Ref<Response> refResponse) throws BadInteractionException {
     Example exHead = exampleFromUtterance(head, session);
@@ -290,8 +296,9 @@ public class InteractiveMaster extends Master {
         .combine(InteractiveUtils.derivsfromJson(jsonDef, parser, params, refResponse));
     if (refResponse != null) {
       refResponse.value.ex = exHead;
+      InteractiveUtils.addCatFormulaStats(bodyDeriv, refResponse);
     }
-
+    
     List<Rule> inducedRules = new ArrayList<>();
     GrammarInducer grammarInducer = new GrammarInducer(exHead.getTokens(), bodyDeriv, state.chartList);
     inducedRules.addAll(grammarInducer.getRules());

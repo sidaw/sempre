@@ -252,17 +252,90 @@ public class DALExecutorTest {
   
   @Test(groups = { "Interactive" })
   public void testUnsupported() {
-    // a rare unsupported operations bug
-    
+    // a rare unsupported operations bug due to immutable sets
     String defaultBlocks = "[[1,1,1,\"fake\",[\"S\"]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testUnsuported");
     executor.opts.verbose = 1;
-    runFormula(executor, "  (:isolate (:s (:isolate (:loop (number 3) (:s (: select (call adj front)) (: add yellow here)))) (:s (:isolate (:s (: select (call adj left)) (: add yellow here))) (:isolate (:s (:s (: select (call adj front)) (: add yellow here)) (:loop (number 2) (:s (: select (call adj left)) (: add yellow here))))) (:isolate (:s (:s (:isolate (: select (call adj back))) (:isolate (: select (call adj left)))) (: add yellow here))) (: select (color yellow)) (:loop (number 4) (: add yellow top)) (:loop (number 2) (: select (call adj top))) (: select (and (call adj left) (call adj front))) (:blk (:s (: select (call adj right)) (: move back))) (:blk (:s (:s (:isolate (: select (call adj right))) (:isolate (: select (call adj top)))) (: move back))) (:s (:s (:s (: select (call adj right)) (:loop (number 2) (: select (call adj top)))) (: select)) (: move back)) (:s (:s (:s (:s (:isolate (: select (call adj right))) (: select (call adj front))) (: select)) (: move back)) (:isolate (:s (:s (: select (call adj left)) (: select (call adj bot this))) (: add yellow here))) (:s (:s (:s (: select (call adj top)) (: select (call adj left))) (: select)) (: move back)) (:s (:s (:s (: select (call adj bot this)) (: select (call adj front))) (: select)) (: move back)) (:isolate (:s (:s (: select (call adj top)) (:loop (number 3) (: select (call adj right)))) (: add yellow here))) (:isolate (:s (:s (:isolate (: select (call adj front))) (:isolate (: select (call adj right)))) (: remove))) (:isolate (:s (:s (:isolate (: select (call adj front))) (:isolate (: select (call adj left)))) (: remove))) (:s (:s (:s (:isolate (:s (: select (call adj left)) (: select (call adj left)))) (:isolate (: select (call adj left)))) (:s (: select (call adj back)) (: select (call adj back)))) (: move back)) (: select (color yellow))))))", context,
+    runFormula(executor, "  (:isolate (:s (:isolate (:loop (number 3) (:s (: select (call adj front)) (: add yellow here)))) (:s (:isolate (:s (: select (call adj left)) (: add yellow here))) (:isolate (:s (:s (: select (call adj front)) (: add yellow here)) (:loop (number 2) (:s (: select (call adj left)) (: add yellow here))))) (:isolate (:s (:s (:isolate (: select (call adj back))) (:isolate (: select (call adj left)))) (: add yellow here))) (: select (color yellow)) (:loop (number 4) (: add yellow top)) (:loop (number 2) (: select (call adj top))) (: select (and (call adj left) (call adj front))) (:blk (:s (: select (call adj right)) (: move back))) (:blk (:s (:s (:isolate (: select (call adj right))) (:isolate (: select (call adj top)))) (: move back))) (:s (:s (:s (: select (call adj right)) (:loop (number 2) (: select (call adj top)))) (: select)) (: move back)) (:s (:s (:s (:s (:isolate (: select (call adj right))) (: select (call adj front))) (: select)) (: move back)) (:isolate (:s (:s (: select (call adj left)) (: select (call adj bot this))) (: add yellow here))) (:s (:s (:s (: select (call adj top)) (: select (call adj left))) (: select)) (: move back)) (:s (:s (:s (: select (call adj bot this)) (: select (call adj front))) (: select)) (: move back)) (:isolate (:s (:s (: select (call adj top)) (:loop (number 3) (: select (call adj right)))) (: add yellow here))) (:isolate (:s (:s (:isolate (: select (call adj front))) (:isolate (: select (call adj right)))) (: remove))) (:isolate (:s (:s (:isolate (: select (call adj front))) (:isolate (: select (call adj left)))) (: remove))) (:s (:s (:s (:isolate (:s (: select (call adj left)) (: select (call adj left)))) (:isolate (: select (call adj left)))) (:s (: select (call adj back)) (: select (call adj back)))) (: move back)) (: select (color yellow))))))",
+        context,
         x -> true);
     executor.opts.verbose = 0;
     LogInfo.end_track();
   }
   
+  @Test(groups = { "Interactive" })
+  public void testBasicSub() {
+    // a rare unsupported operations bug
+    String defaultBlocks = "[[1,1,1,\"fake\",[\"S\"]]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testUnsuported");
 
+    // def adds red_tower to symbol table
+    runFormula(executor, " (:def red_tower (:loop (number 3) (: add red top)))",
+        context, x -> true);
+    runFormula(executor, "red_tower",
+        context, x -> x.allItems.size() == 4 && 
+        x.allItems.stream().allMatch(i -> ((Voxel)i).color.equals(Color.fromString("red"))));
+    runFormula(executor, " (:sub red_tower red yellow)",
+        context, x -> x.allItems.size() == 4 && 
+        x.allItems.stream().allMatch(i -> ((Voxel)i).color.equals(Color.fromString("yellow"))));
+    runFormula(executor, " (:sub red_tower 3 5)",
+        context, x -> x.allItems.size() == 6 && 
+        x.allItems.stream().allMatch(i -> ((Voxel)i).color.equals(Color.fromString("red"))));
+    runFormula(executor, "(:sub (:sub red_tower 3 5) red yellow)",
+        context, x -> x.allItems.size() == 6 && 
+        x.allItems.stream().allMatch(i -> ((Voxel)i).color.equals(Color.fromString("yellow"))));
+
+    LogInfo.end_track();
+  }
+  
+  @Test(groups = { "Interactive" })
+  public void testRecursiveSub() {
+    // a rare unsupported operations bug
+    String defaultBlocks = "[[1,1,1,\"fake\",[\"S\"]]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testUnsuported");
+
+    // def adds red_tower to symbol table
+    runFormula(executor, " (:def trunk (:loop (number 5) (:s (: add red here) (call adj top this))))",
+        context, x -> true);
+    runFormula(executor, " (:def leaves (:s (: select (or (call adj left this) (call adj right this))) (: add green here)))",
+        context, x -> true);
+    runFormula(executor, " (:def tree (: trunk leaves))",
+        context, x -> true);
+    
+    runFormula(executor, " (:s trunk leaves)",
+        context, x -> x.allItems.size() == 7);
+    runFormula(executor, " (:s tree)",
+        context, x -> x.allItems.size() == 7);
+    
+    // red tree
+    runFormula(executor, " (:sub tree green red)",
+        context,
+        x -> x.allItems.stream().filter(i -> ((Voxel)i).color.equals(Color.fromString("red"))).count() == 2 );
+    
+    // red tree
+    runFormula(executor, " (:sub tree * red)",
+        context,
+        x -> x.allItems.stream().filter(i -> ((Voxel)i).color.equals(Color.fromString("red"))).count() == 7 );
+    
+     // tree with red trunk
+    runFormula(executor, " (:sub tree trunk (:sub trunk * red))", // should be same as previous
+        context,
+        x -> x.allItems.stream().filter(i -> ((Voxel)i).color.equals(Color.fromString("red"))).count() == 5 );
+    
+    // tree with red trunk and red leaves
+    runFormula(executor, " (:sub (:sub tree trunk (:sub trunk * red)) leaves (:sub leaves * red))", // should be same as previous
+        context,
+        x -> x.allItems.stream().filter(i -> ((Voxel)i).color.equals(Color.fromString("red"))).count() == 7 );
+
+    
+    // red tree with green leaves
+    runFormula(executor, " (:sub (:sub tree * red) * (:sub leaves * green))", // should be same as previous
+        context,
+        x -> x.allItems.stream().filter(i -> ((Voxel)i).color.equals(Color.fromString("red"))).count() == 5 );
+    
+    LogInfo.end_track();
+  }
 }

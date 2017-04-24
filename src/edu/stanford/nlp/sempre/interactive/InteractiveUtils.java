@@ -1,7 +1,10 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.testng.collections.Lists;
@@ -17,12 +20,14 @@ import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.IdentityFn;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.Master;
+import edu.stanford.nlp.sempre.Master.Response;
 import edu.stanford.nlp.sempre.Params;
 import edu.stanford.nlp.sempre.Parser;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
+import fig.basic.MapUtils;
 import fig.basic.Option;
 import fig.basic.Ref;
 
@@ -174,6 +179,34 @@ public final class InteractiveUtils {
     return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), b);
   }
 
+  public static void addCatFormulaStats(Derivation body, Ref<Response> refResponse) {
+    // count how many different categories and etc can be potential arguments
+    Map<String, Integer> catFormCounts = new HashMap<>();
+    recursiveStats(body, catFormCounts);
+    Set<String> keys = catFormCounts.keySet();
+    refResponse.value.stats.put("dist_children", catFormCounts.size());
+    refResponse.value.stats.put("dist_color", keys.stream().filter(k -> k.startsWith("$Color")).count());
+    refResponse.value.stats.put("all_color", catFormCounts.entrySet().stream().filter(e -> e.getKey().startsWith("$Color")).reduce(0, (count, entry) -> count + entry.getValue(), (c1, c2) -> c1 + c2));
+    
+    refResponse.value.stats.put("dist_number", keys.stream().filter(k -> k.startsWith("$Number")).count());
+    refResponse.value.stats.put("all_number", catFormCounts.entrySet().stream().filter(e -> e.getKey().startsWith("$Number")).reduce(0, (count, entry) -> count + entry.getValue(), (c1, c2) -> c1 + c2));
+
+    refResponse.value.stats.put("dist_set", keys.stream().filter(k -> k.startsWith("$Set")).count());
+    refResponse.value.stats.put("all_set", catFormCounts.entrySet().stream().filter(e -> e.getKey().startsWith("$Set")).reduce(0, (count, entry) -> count + entry.getValue(), (c1, c2) -> c1 + c2));
+
+    refResponse.value.stats.put("dist_action", keys.stream().filter(k -> k.startsWith("$Action")).count());
+    refResponse.value.stats.put("all_action", catFormCounts.entrySet().stream().filter(e -> e.getKey().startsWith("$Action")).reduce(0, (count, entry) -> count + entry.getValue(), (c1, c2) -> c1 + c2));
+
+  }
+  private static void recursiveStats(Derivation deriv, Map<String, Integer> count) {
+    MapUtils.incr(count, deriv.cat + "::" + deriv.formula.toString());
+
+    for (Derivation child : deriv.children) {
+      recursiveStats(child, count);
+    }
+  }
+
+  
   public static Derivation combine(List<Derivation> children) {
     ActionFormula.Mode mode = ActionFormula.Mode.sequential;
     if (children.size() == 1) {
