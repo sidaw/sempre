@@ -1,4 +1,4 @@
-# SEMPRE 2.2: Semantic Parsing with Execution
+# SEMPRE 2.3: Semantic Parsing with Execution
 
 ## What is semantic parsing?
 
@@ -168,5 +168,9 @@ Changes from SEMPRE 2.0 to SEMPRE 2.1:
 - Add and `overnight` package for the paper *Building a semantic parser overnight* (ACL 2015).
 
 Changes from SEMPRE 2.1 to SEMPRE 2.2:
+
+- Added code for the paper *Inferring Logical Forms From Denotations* (ACL 2016).
+
+Changes from SEMPRE 2.2 to SEMPRE 2.3:
 
 - Added the `interactive` package for the paper *Naturalizing a programming language through interaction* (ACL 2017).
