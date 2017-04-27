@@ -33,6 +33,7 @@ public class RuleSource {
   public boolean align = false;
   @JsonProperty
   public String alignInfo = "";
+  public String defId;
 
   public RuleSource(String uid, String head, List<String> body) {
     this.uid = uid;

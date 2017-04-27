@@ -101,11 +101,12 @@ public final class InteractiveUtils {
 
       boolean found = false;
       Formula targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
+      Derivation matchedDeriv = null;
       for (Derivation d : ex.predDerivations) {
         // LogInfo.logs("considering: %s", d.formula.toString());
         if (d.formula.equals(targetFormula)) {
           found = true;
-          allDerivs.add(stripDerivation(d));
+          matchedDeriv = stripDerivation(d);
           break;
         }
       }
@@ -116,15 +117,16 @@ public final class InteractiveUtils {
       // just making testing easier, use top derivation when we formula is not
       // given
       if (!found && ex.predDerivations.size() > 0 && (formula.equals("?") || formula == null || opts.useBestFormula))
-        allDerivs.add(stripDerivation(ex.predDerivations.get(0)));
+        matchedDeriv =stripDerivation(ex.predDerivations.get(0));
       else if (!found) {
-        Derivation res = new Derivation.Builder().formula(targetFormula)
+        matchedDeriv = new Derivation.Builder().formula(targetFormula)
             // setting start to -1 is important,
             // which grammarInducer interprets to mean we do not want partial
             // rules
             .withCallable(new SemanticFn.CallInfo("$Action", -1, -1, null, new ArrayList<>())).createDerivation();
-        allDerivs.add(res);
       }
+      matchedDeriv.grammarInfo.tokens = new ArrayList<>(ex.getTokens());
+      allDerivs.add(matchedDeriv);
     }
     if (refResponse != null) {
       refResponse.value.stats.put("num_failed", numFailed);
@@ -206,7 +208,6 @@ public final class InteractiveUtils {
     }
   }
 
-  
   public static Derivation combine(List<Derivation> children) {
     ActionFormula.Mode mode = ActionFormula.Mode.sequential;
     if (children.size() == 1) {

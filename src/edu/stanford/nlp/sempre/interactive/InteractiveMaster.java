@@ -14,10 +14,10 @@ import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.Formulas;
+import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Params;
 import edu.stanford.nlp.sempre.Parser;
-import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.RuleSource;
 import edu.stanford.nlp.sempre.Session;
@@ -292,8 +292,9 @@ public class InteractiveMaster extends Master {
     List<String> bodyList = InteractiveUtils.utterancefromJson(jsonDef, false);
     LogInfo.logs("bodyutterances:\n %s", String.join("\t", bodyList));
 
+    List<Derivation> bodyDerivs = InteractiveUtils.derivsfromJson(jsonDef, parser, params, refResponse);
     Derivation bodyDeriv = InteractiveUtils
-        .combine(InteractiveUtils.derivsfromJson(jsonDef, parser, params, refResponse));
+        .combine(bodyDerivs);
     if (refResponse != null) {
       refResponse.value.ex = exHead;
       InteractiveUtils.addCatFormulaStats(bodyDeriv, refResponse);
@@ -303,8 +304,12 @@ public class InteractiveMaster extends Master {
     GrammarInducer grammarInducer = new GrammarInducer(exHead.getTokens(), bodyDeriv, state.chartList);
     inducedRules.addAll(grammarInducer.getRules());
 
+    String joined = String.join("_" , exHead.getTokens());
+    String ruleid =  String.format("%s_%d", joined, ((InteractiveBeamParser)parser).allRules.size());
+
     for (Rule rule : inducedRules) {
       rule.source = new RuleSource(session.id, head, bodyList);
+      rule.source.defId = ruleid;
     }
 
     if (opts.useAligner && bodyList.size() == 1) {
@@ -312,11 +317,20 @@ public class InteractiveMaster extends Master {
           InteractiveUtils.utterancefromJson(jsonDef, true), bodyDeriv, state.chartList);
       for (Rule rule : alignedRules) {
         rule.source = new RuleSource(session.id, head, bodyList);
+        rule.source.defId = ruleid;
         rule.source.align = true;
       }
       inducedRules.addAll(alignedRules);
     }
-
+    
+    if (inducedRules.size() > 0 && session.isWritingGrammar()) {
+      DefinitionTree defTree = new DefinitionTree(ruleid, exHead.getTokens(), bodyDerivs, inducedRules);
+      PrintWriter out = IOUtils
+          .openOutAppendHard(Paths.get(InteractiveMaster.opts.intOutputPath, "deftree.json").toString());
+      out.println(defTree.toJson());
+      out.close();
+    }
+    
     exHead.predDerivations = Lists.newArrayList(bodyDeriv);
     return inducedRules;
   }

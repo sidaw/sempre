@@ -316,7 +316,7 @@ public class DALExecutorTest {
         x -> x.allItems.stream().filter(i -> ((Voxel)i).color.equals(Color.fromString("red"))).count() == 2 );
     
     // red tree
-    runFormula(executor, " (:sub tree * red)",
+    runFormula(executor, " (:sub tree green red)",
         context,
         x -> x.allItems.stream().filter(i -> ((Voxel)i).color.equals(Color.fromString("red"))).count() == 7 );
     
