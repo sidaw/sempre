@@ -38,6 +38,7 @@ LOG_FOLDER = os.path.join(DATA_FOLDER, "log/")
 STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 
 CITATION_FOLDER = "int-output/citation"
+DEFINITIONS_FILE = "int-output/deftree.json"
 
 # Scoring function parameters
 GRAVITY = 1.1  # higher the gravity, the faster old structs lose score
@@ -474,6 +475,17 @@ def disconnect():
     """Log the fact that a user disconnected."""
     if 'uid' in session:
         log({"uid": session.uid, "type": "disconnect"})
+
+
+@socketio.on('get_definitions')
+def get_definitions(data):
+    """Get the definitions to display them on the client."""
+    definitions = []
+    with open(DEFINITIONS_FILE) as f:
+        for line in f:
+            definitions.append(json.loads(line))
+
+    emit("definitions", {"definitions": definitions})
 
 
 @socketio.on('sign_in')
