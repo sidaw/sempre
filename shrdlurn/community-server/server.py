@@ -117,12 +117,10 @@ def emit_structs():
                     message = {"uid": uid, "id": fname, "score": score, "upvotes": [
                         up for up in upvotes], "struct": struct, "image": image}
 
-                    structs.append(message)
+                    emit("struct", message)
                     count += 1
             except:
                 pass
-
-    emit("structs", structs)
 
 
 def emit_user_structs_count(uid):
