@@ -22,7 +22,6 @@
 (rule $Action (if $Sets $Action) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
 
 # basic actions, local scope "for has color red [add red left; add red top]"
-# (rule $Action (for $Sets $Action ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
 (rule $Action (foreach $Sets $Action ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
 (rule $Action (foreach $Action ) (lambda a (:foreach this (var a))) (anchored 1))
 (rule $Action (isolate $Action ) (lambda a (:isolate (var a))) (anchored 1))
@@ -80,16 +79,21 @@
 (rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
 
 #############################
-# Partial rules
+# Generic combination rules
 #############################
 ## argument passing
-(rule $Func ($Func $Arg) (SubFn right))  # substitution by type of the right partial
-(rule $Func ($Arg $Func) (SubFn left))
-(rule $Arg ($Arg $TOKEN) (DescribeFn right) ) # eat a parameter descriptor
-(rule $Arg ($TOKEN $Arg) (DescribeFn left) )
+(rule $Expr ($Expr $Expr) (SubFn right))  # substitution by type of the right partial
+(rule $Expr ($Expr $Expr) (SubFn left))
+(rule $Expr ($Expr $TOKEN) (DescribeFn right) ) # eat a parameter descriptor
+(rule $Expr ($TOKEN $Expr) (DescribeFn left) )
 
-## force ordering
-(rule $Partial ( \( $Partial \) ) (IdentityFn))
-(rule $Arg ( \( $Partial \) ) (IdentityFn))
-(rule $Partial ($Partial [ $Partial / $Partial] ) (SubFn right) ) # more precise call by analogy
-(rule $Partial ([ $Partial / $Partial] $Partial) (SubFn left) )
+## forced chunking
+(rule $Expr ( [ $Expr ] ) (IdentityFn))
+
+# (rule $Expr ($Expr [ $Expr / $Expr ] ) (SubFn right) ) # more precise call by analogy
+
+# key problems
+* compile time vs run time resolution
+* without substitution formula, what can you do with regular methods?
+* handle both within a symbol table implementation, which manipulates formulas
+* whats the point of declaration time abstraction?

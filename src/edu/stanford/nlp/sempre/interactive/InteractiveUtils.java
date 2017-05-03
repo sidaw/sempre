@@ -117,7 +117,7 @@ public final class InteractiveUtils {
       // just making testing easier, use top derivation when we formula is not
       // given
       if (!found && ex.predDerivations.size() > 0 && (formula.equals("?") || formula == null || opts.useBestFormula))
-        matchedDeriv =stripDerivation(ex.predDerivations.get(0));
+        matchedDeriv = stripDerivation(ex.predDerivations.get(0));
       else if (!found) {
         matchedDeriv = new Derivation.Builder().formula(targetFormula)
             // setting start to -1 is important,
@@ -125,6 +125,12 @@ public final class InteractiveUtils {
             // rules
             .withCallable(new SemanticFn.CallInfo("$Action", -1, -1, null, new ArrayList<>())).createDerivation();
       }
+      
+      if (!found && ex.predDerivations.size() == 0)
+        matchedDeriv.grammarInfo.symbol = "(no_parse)";
+      else
+        matchedDeriv.grammarInfo.symbol = "(no_match)";
+      
       matchedDeriv.grammarInfo.tokens = new ArrayList<>(ex.getTokens());
       allDerivs.add(matchedDeriv);
     }

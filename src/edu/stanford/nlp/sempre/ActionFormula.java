@@ -19,6 +19,7 @@ import fig.basic.LispTree;
 public class ActionFormula extends Formula {
   public enum Mode {
     primitive(":"), // (: remove *)
+    
     sequential(":s"), // (:s (: add red top) (: remove this))
     repeat(":loop"), // (:loop (count (has color green)) (: add red top))
     conditional(":if"), // (:if (count (has color green)) (: add red top))
@@ -26,14 +27,19 @@ public class ActionFormula extends Formula {
     forset(":for"), // (:for (and this (color red)) (:s (: add red top) (: add
                     // yellow top) (: remove)))
     foreach(":foreach"), // (:foreach * (add ((reverse color) this) top))
+    
+    substitute(":sub"),
+    define(":def"),
+    defined("::"), // named formula defined using primitives
 
     // primitives for declaring variables
     // let(":let"), // (:let X *),
     // set(":set"), // (:set X *)
-
+    
     block(":blk"), // start a block of code (like {}) with a new scope
     blockr(":blkr"), // also return a result after finishing the block
     isolate(":isolate"), other(":?");
+    
 
     private final String value;
 

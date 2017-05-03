@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre.interactive;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ public class DefinitionTree {
   @JsonProperty List<List<Object>> body = new ArrayList<>();
   @JsonProperty
   List<List<String>> RHSs = new ArrayList<>();
+  Set<String> argTypes = new HashSet<>();
   
   public DefinitionTree(String symbol, List<String> head, List<Derivation> bodyDeriv, List<Rule> inducedRules) {
     this.head = head;
@@ -27,12 +29,13 @@ public class DefinitionTree {
     for (Derivation d : bodyDeriv) {
       List<Tag> tags = new ArrayList<>();
       tagDerivation(d, tags);
+      
       Collections.sort(tags);
       List<Object> taggedUtt = new ArrayList<>(d.grammarInfo.tokens);
       for (Tag tag : tags) {
         List<String> tagged = Lists.newArrayList(tag.symbol);
         tagged.addAll(d.grammarInfo.tokens.subList(tag.start, tag.end));
-
+        
         LogInfo.logs("DefinitionTree utt: %s tag: %s tags: %s", taggedUtt, tag, tags);
         for (int i = tag.start; i< tag.end; i++) {
           taggedUtt.set(i, null);
@@ -47,10 +50,10 @@ public class DefinitionTree {
       RHSs.add(rule.rhs);
     }
   }
-  
+    
   private void tagDerivation(Derivation deriv, List<Tag> tags) {
     if (deriv.rule == null) {
-      tags.add(new Tag(0, deriv.grammarInfo.tokens.size(), "no_match"));
+      tags.add(new Tag(0, deriv.grammarInfo.tokens.size(), deriv.grammarInfo.symbol));
       return;
     }
     if (deriv.allAnchored()) return;

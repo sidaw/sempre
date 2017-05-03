@@ -573,7 +573,10 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       return false;
     } else {
       for (Derivation child : children) {
-        if (child.allAnchored() == false) return false;
+        if (child.allAnchored() == false) {
+          this.allAnchored = false;
+          return false;
+        }
       }
       return true;
     }

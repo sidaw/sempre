@@ -30,7 +30,7 @@ import fig.basic.LogInfo;
 public class DALExecutorTest {
   DALExecutor executor = new DALExecutor();
 
-  protected static void runFormula(DALExecutor executor, String formula, ContextValue context,
+  public static void runFormula(DALExecutor executor, String formula, ContextValue context,
       Predicate<World> checker) {
     LogInfo.begin_track("formula: %s", formula);
     DALExecutor.opts.worldType = "VoxelWorld";
@@ -272,7 +272,7 @@ public class DALExecutorTest {
     LogInfo.begin_track("testUnsuported");
 
     // def adds red_tower to symbol table
-    runFormula(executor, " (:def red_tower (:loop (number 3) (: add red top)))",
+    runFormula(executor, " (:def red_tower (:loop (number 3) (: add (name red color) (name top dir))))",
         context, x -> true);
     runFormula(executor, "red_tower",
         context, x -> x.allItems.size() == 4 && 
@@ -298,11 +298,11 @@ public class DALExecutorTest {
     LogInfo.begin_track("testUnsuported");
 
     // def adds red_tower to symbol table
-    runFormula(executor, " (:def trunk (:loop (number 5) (:s (: add red here) (call adj top this))))",
+    runFormula(executor, " (defun trunk (:loop (number 5) (:s (: add red here) (call adj top this))))",
         context, x -> true);
-    runFormula(executor, " (:def leaves (:s (: select (or (call adj left this) (call adj right this))) (: add green here)))",
+    runFormula(executor, " (defun leaves (:s (: select (or (call adj left this) (call adj right this))) (: add green here)))",
         context, x -> true);
-    runFormula(executor, " (:def tree (: trunk leaves))",
+    runFormula(executor, " (defun tree (: trunk leaves))",
         context, x -> true);
     
     runFormula(executor, " (:s trunk leaves)",
@@ -311,7 +311,7 @@ public class DALExecutorTest {
         context, x -> x.allItems.size() == 7);
     
     // red tree
-    runFormula(executor, " (:sub tree green red)",
+    runFormula(executor, " (:sub tree col red)",
         context,
         x -> x.allItems.stream().filter(i -> ((Voxel)i).color.equals(Color.fromString("red"))).count() == 2 );
     

@@ -54,6 +54,7 @@ public class DALExecutor extends Executor {
   }
 
   public static Options opts = new Options();
+  SymbolTable symbolTable = SymbolTable.getSymbolTable();
 
   @Override
   public Response execute(Formula formula, ContextValue context) {
@@ -92,6 +93,28 @@ public class DALExecutor extends Executor {
       // all actions takes a fixed set as argument
       invoke(id, world, f.args.subList(1, f.args.size()).stream().map(x -> processSetFormula(x, world)).toArray());
       world.merge();
+    } if (f.mode == ActionFormula.Mode.defined) {
+      // use reflection to call primitive stuff
+      ActionFormula actionFormula = (ActionFormula) symbolTable.expand(f);
+      performActions(actionFormula, world);
+    } if (f.mode == ActionFormula.Mode.define) {
+      // use reflection to call primitive stuff
+      Value method = ((ValueFormula) f.args.get(0)).value;
+      String id = ((NameValue) method).id;
+      Formula body = f.args.get(1);
+      symbolTable.addSymbol(id, body);
+    } if (f.mode == ActionFormula.Mode.substitute) {
+      // use reflection to call primitive stuff
+      ActionFormula func = (ActionFormula)f.args.get(0);
+      if (func.mode == ActionFormula.Mode.defined) {
+        func = (ActionFormula) symbolTable.expand(func);
+      }
+      Formula source = f.args.get(1);
+      Formula target = f.args.get(2);
+      LogInfo.logs("expanded: ", func);
+      ActionFormula subsituted = (ActionFormula)SymbolTable.substitute(func, source, target);
+      LogInfo.logs("after sub: ", subsituted);
+      performActions(subsituted, world);
     } else if (f.mode == ActionFormula.Mode.sequential) {
       for (Formula child : f.args) {
         performActions((ActionFormula) child, world);
@@ -454,6 +477,20 @@ public class DALExecutor extends Executor {
     } else {
       return value; // Preserve the Value (which can be an object)
     }
+  }
+  
+  public static String getType(Formula formula) {
+    if (formula instanceof ValueFormula<?>) {
+      Value value = ((ValueFormula<?>)formula).value;    
+      if (value instanceof NumberValue) {
+        return "number";
+      } else if (value instanceof NameValue) {
+        return ((NameValue) value).description;
+      } else {
+        return null;
+      }
+    }
+    return null;
   }
 
   // Return whether the object |arg| is compatible with |type|.
