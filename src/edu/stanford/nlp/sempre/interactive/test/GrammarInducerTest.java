@@ -100,6 +100,7 @@ public class GrammarInducerTest {
     }
 
     public void def(String head, String def) {
+      Session testSession = new Session("test");
       List<Rule> induced = InteractiveMaster.induceRulesHelper(":def", head, def, parser, params,
           new Session("testsession"), null);
       allRules.addAll(induced);

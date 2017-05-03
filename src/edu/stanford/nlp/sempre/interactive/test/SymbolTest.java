@@ -93,7 +93,7 @@ public class SymbolTest {
     // a rare unsupported operations bug
     String defaultBlocks = "[[1,1,1,\"fake\",[\"S\"]]]";
     ContextValue context = getContext(defaultBlocks);
-    LogInfo.begin_track("testSub");
+    LogInfo.begin_track("testBasicSub");
     runFormula(executor, "(:def tower2 (:loop (number 4) (: add (name red color) (name top dir))))",
         context, x -> true);
     runFormula(executor, "(:sub (:: tower2 0) (number 4) (number 5))",
@@ -103,7 +103,46 @@ public class SymbolTest {
     runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) (name top dir))) (number 4) (number 5))",
         context, x -> x.allItems.size() == 6);
     runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) (name top dir))) red blue)",
-        context, x -> x.allItems.size() == 5);
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).color.equals(Color.fromString("blue"))));
+    runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) (name top dir))) top bot)",
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).height < 0));
+    
+    // check that some variations behave normally
+    runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) (name top dir))) (name red color) blue)",
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).color.equals(Color.fromString("blue"))));
+    runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) top)) (name top dir) bot)",
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).height < 0));
+    LogInfo.end_track();
+  }
+  
+  
+  // currently, do not expand all named functions recursively
+  @Test(groups = { "Interactive" })
+  public void testRecurisveSub() {
+    // a rare unsupported operations bug
+    String defaultBlocks = "[[1,1,1,\"fake\",[\"S\"]]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testRecurisveSub");
+    runFormula(executor, "(:def tower2 (:loop (number 4) (: add (name red color) (name top dir))))",
+        context, x -> true);
+    runFormula(executor, "(:sub (:loop (number 3) (:: tower2 0)) (number 3) (number 5))",
+        context, x -> x.allItems.size() == 21);
+    runFormula(executor, "(:sub (:sub (:loop (number 4) (: add (name red color) top)) red blue) (number 4) (number 5))",
+        context, x -> x.allItems.size() == 6
+        && x.all().stream().anyMatch(i -> ((Voxel)i).color.equals(Color.fromString("blue"))));
+    runFormula(executor, "(:sub (:sub (:: tower2 0) red blue) (number 4) (number 5))",
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).color.equals(Color.fromString("blue"))));
+
+    runFormula(executor, "(:sub (:sub (:sub (:loop (number 4) (: add (name red color) top)) red blue) (number 4) (number 5)) top bot)",
+        context, x -> x.allItems.size() == 6
+        && x.all().stream().anyMatch(i -> ((Voxel)i).color.equals(Color.fromString("blue")))
+        && x.all().stream().anyMatch(i -> ((Voxel)i).height < 0));
+
     LogInfo.end_track();
   }
 }

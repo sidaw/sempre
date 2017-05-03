@@ -112,7 +112,7 @@ public class DALExecutor extends Executor {
       Formula source = f.args.get(1);
       Formula target = f.args.get(2);
       LogInfo.logs("expanded: ", func);
-      ActionFormula subsituted = (ActionFormula)SymbolTable.substitute(func, source, target);
+      ActionFormula subsituted = (ActionFormula)symbolTable.substitute(func, source, target);
       LogInfo.logs("after sub: ", subsituted);
       performActions(subsituted, world);
     } else if (f.mode == ActionFormula.Mode.sequential) {

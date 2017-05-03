@@ -106,7 +106,7 @@ public class SymbolTable {
     }
   }
 
-  public static Formula substitute(Formula func, Formula source, Formula target) {
+  public Formula substitute(Formula func, Formula source, Formula target) {
     return func.map(s -> {
       if (s.equals(source))
         return target;

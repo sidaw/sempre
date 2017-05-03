@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.testng.util.Strings;
+
 import com.google.common.collect.Lists;
 
 import edu.stanford.nlp.sempre.Builder;
@@ -323,7 +325,7 @@ public class InteractiveMaster extends Master {
       inducedRules.addAll(alignedRules);
     }
     
-    if (inducedRules.size() > 0 && session.isWritingGrammar()) {
+    if (!Strings.isNullOrEmpty(InteractiveMaster.opts.intOutputPath) && inducedRules.size() > 0 && session.isWritingGrammar()) {
       DefinitionTree defTree = new DefinitionTree(ruleid, exHead.getTokens(), bodyDerivs, inducedRules);
       PrintWriter out = IOUtils
           .openOutAppendHard(Paths.get(InteractiveMaster.opts.intOutputPath, "deftree.json").toString());

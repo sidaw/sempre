@@ -13,7 +13,7 @@ import edu.stanford.nlp.sempre.interactive.Item;
 //individual stacks
 public class Voxel extends Item {
   public Color color;
-  int row, col, height;
+  public int row, col, height;
   int age;
 
   public Voxel(int row, int col, int height, String color) {

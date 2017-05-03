@@ -70,6 +70,8 @@ public class SubFn extends SemanticFn {
     Derivation func, arg;
     List<Formula> candidates;
     int numGenerated = 0;
+    SymbolTable symbolTable = SymbolTable.getSymbolTable();
+
     public Substitutions(Callable c, Derivation func, Derivation arg) {
       // TODO Auto-generated constructor stub
       this.c = c; this.func = func; this.arg = arg;
@@ -101,8 +103,9 @@ public class SubFn extends SemanticFn {
       if (numGenerated >= candidates.size()) return null;
       
       Formula subee = candidates.get(numGenerated);
+      Formula f = symbolTable.substitute(func.formula, arg.formula, subee);
+      
       numGenerated ++;
-      Formula f = new ActionFormula(Mode.substitute, Lists.newArrayList(func.getFormula(), subee, arg.getFormula()));
       Derivation res = new Derivation.Builder().withCallable(c).formula(f).createDerivation();
       return res;
     }
