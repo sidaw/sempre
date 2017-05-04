@@ -37,7 +37,8 @@ DATA_FOLDER = "community-server/data/"
 LOG_FOLDER = os.path.join(DATA_FOLDER, "log/")
 STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 
-CITATION_FOLDER = "../int-output/citation"
+CITATION_FOLDER = "int-output/citation"
+DEFINITIONS_FILE = "int-output/deftree.json"
 
 # Scoring function parameters
 GRAVITY = 1.1  # higher the gravity, the faster old structs lose score
@@ -116,12 +117,10 @@ def emit_structs():
                     message = {"uid": uid, "id": fname, "score": score, "upvotes": [
                         up for up in upvotes], "struct": struct, "image": image}
 
-                    structs.append(message)
+                    emit("struct", message)
                     count += 1
             except:
                 pass
-
-    emit("structs", structs)
 
 
 def emit_user_structs_count(uid):
@@ -342,12 +341,8 @@ def handle_share(data):
     where UID is the uid of the user who submitted the struct, SCORE is the
     current score of the struct and ID is the unique index (auto-incremented) of
     this particular struct.."""
-
     user = current_user(data['token'])
-    if not user:
-        return
-
-    uid = user['id']
+    uid = user['id'] if user else "_l_" + data['uid']
 
     user_structs_folder = os.path.join(STRUCTS_FOLDER, uid)
     if not is_safe_path(STRUCTS_FOLDER, user_structs_folder):
@@ -478,6 +473,17 @@ def disconnect():
     """Log the fact that a user disconnected."""
     if 'uid' in session:
         log({"uid": session.uid, "type": "disconnect"})
+
+
+@socketio.on('get_definitions')
+def get_definitions(data):
+    """Get the definitions to display them on the client."""
+    definitions = []
+    with open(DEFINITIONS_FILE) as f:
+        for line in f:
+            definitions.append(json.loads(line))
+
+    emit("definitions", {"definitions": definitions})
 
 
 @socketio.on('sign_in')
