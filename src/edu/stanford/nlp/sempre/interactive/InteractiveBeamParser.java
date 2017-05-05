@@ -210,6 +210,16 @@ class InteractiveBeamParserState extends ChartParserState {
     }
 
     this.chartList = this.collectChart();
+    
+    if (mode == Mode.full) {
+      // Compute gradient with respect to the predicted derivations
+      if (this.execute)
+        ensureExecuted();
+      if (computeExpectedCounts) {
+        expectedCounts = new HashMap<>();
+        ParserState.computeExpectedCounts(predDerivations, expectedCounts);
+      }
+    }
   }
 
   private List<Derivation> collectChart() {
