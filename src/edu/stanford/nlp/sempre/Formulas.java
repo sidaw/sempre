@@ -2,7 +2,10 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+
+import edu.stanford.nlp.sempre.interactive.DALExecutor.Options;
 import fig.basic.LispTree;
+import fig.basic.Option;
 
 import java.util.HashSet;
 import java.util.List;
@@ -14,10 +17,23 @@ import java.util.Set;
  * @author Percy Liang
  */
 public abstract class Formulas {
+  
+  public static class Options {
+    @Option(gloss = "treat red:C as (name red C)")
+    public boolean shortNamedValue = false;
+  }
+  public static Options opts = new Options();
+
+  
   public static Formula fromLispTree(LispTree tree) {
     // Try to interpret as ValueFormula
-    if (tree.isLeaf())  // Leaves are name values
+    if (tree.isLeaf())  { // Leaves are name values
+      if (opts.shortNamedValue && tree.value.contains(":")) {
+        String[] nameDesc = tree.value.split(":");
+        return new ValueFormula<NameValue>(new NameValue(nameDesc[0], nameDesc[1]));
+      }
       return new ValueFormula<NameValue>(new NameValue(tree.value, null));
+    }
     Value value = Values.fromLispTreeOrNull(tree);  // General case
     if (value != null)
       return new ValueFormula<Value>(value);

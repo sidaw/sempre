@@ -209,6 +209,8 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('NumberFn.allowedRange', 0, 100),
   o('SimpleLexicon.inPaths', "./#{$path}/csscolors.lexicon"),
 
+  o('Formulas.shortNamedValue', true),
+
   lambda { |e| system 'mkdir -p ./int-output/'; nil},
   lambda { |e| system 'mkdir -p ./int-output/log/'; nil},
   lambda { |e| system 'mkdir -p ./int-output/citation/'; nil},

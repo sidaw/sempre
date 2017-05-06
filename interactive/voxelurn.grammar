@@ -38,7 +38,7 @@
 (rule $Set ($Extreme) (lambda e
 			   (call @veryx (var e))) (anchored 1))
 
-(for @dir (top bot left right front back)
+(for @dir (top:D bot:D left:D right:D front:D back:D)
   (rule $Direction (@dir) @dir (anchored 1))
 )
 (rule $Extreme (very $Direction) (IdentityFn) (anchored 1))
