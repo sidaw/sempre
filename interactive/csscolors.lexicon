@@ -1,148 +1,148 @@
-{"lexeme": "AliceBlue", "formula": "aliceblue", "type": "color"}
-{"lexeme": "AntiqueWhite", "formula": "antiquewhite", "type": "color"}
-{"lexeme": "Aqua", "formula": "aqua", "type": "color"}
-{"lexeme": "Aquamarine", "formula": "aquamarine", "type": "color"}
-{"lexeme": "Azure", "formula": "azure", "type": "color"}
-{"lexeme": "Beige", "formula": "beige", "type": "color"}
-{"lexeme": "Bisque", "formula": "bisque", "type": "color"}
-{"lexeme": "Black", "formula": "black", "type": "color"}
-{"lexeme": "BlanchedAlmond", "formula": "blanchedalmond", "type": "color"}
-{"lexeme": "Blue", "formula": "blue", "type": "color"}
-{"lexeme": "BlueViolet", "formula": "blueviolet", "type": "color"}
-{"lexeme": "Brown", "formula": "brown", "type": "color"}
-{"lexeme": "BurlyWood", "formula": "burlywood", "type": "color"}
-{"lexeme": "CadetBlue", "formula": "cadetblue", "type": "color"}
-{"lexeme": "Chartreuse", "formula": "chartreuse", "type": "color"}
-{"lexeme": "Chocolate", "formula": "chocolate", "type": "color"}
-{"lexeme": "Coral", "formula": "coral", "type": "color"}
-{"lexeme": "CornflowerBlue", "formula": "cornflowerblue", "type": "color"}
-{"lexeme": "Cornsilk", "formula": "cornsilk", "type": "color"}
-{"lexeme": "Crimson", "formula": "crimson", "type": "color"}
-{"lexeme": "Cyan", "formula": "cyan", "type": "color"}
-{"lexeme": "DarkBlue", "formula": "darkblue", "type": "color"}
-{"lexeme": "DarkCyan", "formula": "darkcyan", "type": "color"}
-{"lexeme": "DarkGoldenRod", "formula": "darkgoldenrod", "type": "color"}
-{"lexeme": "DarkGray", "formula": "darkgray", "type": "color"}
-{"lexeme": "DarkGrey", "formula": "darkgrey", "type": "color"}
-{"lexeme": "DarkGreen", "formula": "darkgreen", "type": "color"}
-{"lexeme": "DarkKhaki", "formula": "darkkhaki", "type": "color"}
-{"lexeme": "DarkMagenta", "formula": "darkmagenta", "type": "color"}
-{"lexeme": "DarkOliveGreen", "formula": "darkolivegreen", "type": "color"}
-{"lexeme": "DarkOrange", "formula": "darkorange", "type": "color"}
-{"lexeme": "DarkOrchid", "formula": "darkorchid", "type": "color"}
-{"lexeme": "DarkRed", "formula": "darkred", "type": "color"}
-{"lexeme": "DarkSalmon", "formula": "darksalmon", "type": "color"}
-{"lexeme": "DarkSeaGreen", "formula": "darkseagreen", "type": "color"}
-{"lexeme": "DarkSlateBlue", "formula": "darkslateblue", "type": "color"}
-{"lexeme": "DarkSlateGray", "formula": "darkslategray", "type": "color"}
-{"lexeme": "DarkSlateGrey", "formula": "darkslategrey", "type": "color"}
-{"lexeme": "DarkTurquoise", "formula": "darkturquoise", "type": "color"}
-{"lexeme": "DarkViolet", "formula": "darkviolet", "type": "color"}
-{"lexeme": "DeepPink", "formula": "deeppink", "type": "color"}
-{"lexeme": "DeepSkyBlue", "formula": "deepskyblue", "type": "color"}
-{"lexeme": "DimGray", "formula": "dimgray", "type": "color"}
-{"lexeme": "DimGrey", "formula": "dimgrey", "type": "color"}
-{"lexeme": "DodgerBlue", "formula": "dodgerblue", "type": "color"}
-{"lexeme": "FireBrick", "formula": "firebrick", "type": "color"}
-{"lexeme": "FloralWhite", "formula": "floralwhite", "type": "color"}
-{"lexeme": "ForestGreen", "formula": "forestgreen", "type": "color"}
-{"lexeme": "Fuchsia", "formula": "fuchsia", "type": "color"}
-{"lexeme": "Gainsboro", "formula": "gainsboro", "type": "color"}
-{"lexeme": "GhostWhite", "formula": "ghostwhite", "type": "color"}
-{"lexeme": "Gold", "formula": "gold", "type": "color"}
-{"lexeme": "GoldenRod", "formula": "goldenrod", "type": "color"}
-{"lexeme": "Gray", "formula": "gray", "type": "color"}
-{"lexeme": "Grey", "formula": "grey", "type": "color"}
-{"lexeme": "Green", "formula": "green", "type": "color"}
-{"lexeme": "GreenYellow", "formula": "greenyellow", "type": "color"}
-{"lexeme": "HoneyDew", "formula": "honeydew", "type": "color"}
-{"lexeme": "HotPink", "formula": "hotpink", "type": "color"}
-{"lexeme": "IndianRed", "formula": "indianred", "type": "color"}
-{"lexeme": "Indigo", "formula": "indigo", "type": "color"}
-{"lexeme": "Ivory", "formula": "ivory", "type": "color"}
-{"lexeme": "Khaki", "formula": "khaki", "type": "color"}
-{"lexeme": "Lavender", "formula": "lavender", "type": "color"}
-{"lexeme": "LavenderBlush", "formula": "lavenderblush", "type": "color"}
-{"lexeme": "LawnGreen", "formula": "lawngreen", "type": "color"}
-{"lexeme": "LemonChiffon", "formula": "lemonchiffon", "type": "color"}
-{"lexeme": "LightBlue", "formula": "lightblue", "type": "color"}
-{"lexeme": "LightCoral", "formula": "lightcoral", "type": "color"}
-{"lexeme": "LightCyan", "formula": "lightcyan", "type": "color"}
-{"lexeme": "LightGoldenRodYellow", "formula": "lightgoldenrodyellow", "type": "color"}
-{"lexeme": "LightGray", "formula": "lightgray", "type": "color"}
-{"lexeme": "LightGrey", "formula": "lightgrey", "type": "color"}
-{"lexeme": "LightGreen", "formula": "lightgreen", "type": "color"}
-{"lexeme": "LightPink", "formula": "lightpink", "type": "color"}
-{"lexeme": "LightSalmon", "formula": "lightsalmon", "type": "color"}
-{"lexeme": "LightSeaGreen", "formula": "lightseagreen", "type": "color"}
-{"lexeme": "LightSkyBlue", "formula": "lightskyblue", "type": "color"}
-{"lexeme": "LightSlateGray", "formula": "lightslategray", "type": "color"}
-{"lexeme": "LightSlateGrey", "formula": "lightslategrey", "type": "color"}
-{"lexeme": "LightSteelBlue", "formula": "lightsteelblue", "type": "color"}
-{"lexeme": "LightYellow", "formula": "lightyellow", "type": "color"}
-{"lexeme": "Lime", "formula": "lime", "type": "color"}
-{"lexeme": "LimeGreen", "formula": "limegreen", "type": "color"}
-{"lexeme": "Linen", "formula": "linen", "type": "color"}
-{"lexeme": "Magenta", "formula": "magenta", "type": "color"}
-{"lexeme": "Maroon", "formula": "maroon", "type": "color"}
-{"lexeme": "MediumAquaMarine", "formula": "mediumaquamarine", "type": "color"}
-{"lexeme": "MediumBlue", "formula": "mediumblue", "type": "color"}
-{"lexeme": "MediumOrchid", "formula": "mediumorchid", "type": "color"}
-{"lexeme": "MediumPurple", "formula": "mediumpurple", "type": "color"}
-{"lexeme": "MediumSeaGreen", "formula": "mediumseagreen", "type": "color"}
-{"lexeme": "MediumSlateBlue", "formula": "mediumslateblue", "type": "color"}
-{"lexeme": "MediumSpringGreen", "formula": "mediumspringgreen", "type": "color"}
-{"lexeme": "MediumTurquoise", "formula": "mediumturquoise", "type": "color"}
-{"lexeme": "MediumVioletRed", "formula": "mediumvioletred", "type": "color"}
-{"lexeme": "MidnightBlue", "formula": "midnightblue", "type": "color"}
-{"lexeme": "MintCream", "formula": "mintcream", "type": "color"}
-{"lexeme": "MistyRose", "formula": "mistyrose", "type": "color"}
-{"lexeme": "Moccasin", "formula": "moccasin", "type": "color"}
-{"lexeme": "NavajoWhite", "formula": "navajowhite", "type": "color"}
-{"lexeme": "Navy", "formula": "navy", "type": "color"}
-{"lexeme": "OldLace", "formula": "oldlace", "type": "color"}
-{"lexeme": "Olive", "formula": "olive", "type": "color"}
-{"lexeme": "OliveDrab", "formula": "olivedrab", "type": "color"}
-{"lexeme": "Orange", "formula": "orange", "type": "color"}
-{"lexeme": "OrangeRed", "formula": "orangered", "type": "color"}
-{"lexeme": "Orchid", "formula": "orchid", "type": "color"}
-{"lexeme": "PaleGoldenRod", "formula": "palegoldenrod", "type": "color"}
-{"lexeme": "PaleGreen", "formula": "palegreen", "type": "color"}
-{"lexeme": "PaleTurquoise", "formula": "paleturquoise", "type": "color"}
-{"lexeme": "PaleVioletRed", "formula": "palevioletred", "type": "color"}
-{"lexeme": "PapayaWhip", "formula": "papayawhip", "type": "color"}
-{"lexeme": "PeachPuff", "formula": "peachpuff", "type": "color"}
-{"lexeme": "Peru", "formula": "peru", "type": "color"}
-{"lexeme": "Pink", "formula": "pink", "type": "color"}
-{"lexeme": "Plum", "formula": "plum", "type": "color"}
-{"lexeme": "PowderBlue", "formula": "powderblue", "type": "color"}
-{"lexeme": "Purple", "formula": "purple", "type": "color"}
-{"lexeme": "RebeccaPurple", "formula": "rebeccapurple", "type": "color"}
-{"lexeme": "Red", "formula": "red", "type": "color"}
-{"lexeme": "RosyBrown", "formula": "rosybrown", "type": "color"}
-{"lexeme": "RoyalBlue", "formula": "royalblue", "type": "color"}
-{"lexeme": "SaddleBrown", "formula": "saddlebrown", "type": "color"}
-{"lexeme": "Salmon", "formula": "salmon", "type": "color"}
-{"lexeme": "SandyBrown", "formula": "sandybrown", "type": "color"}
-{"lexeme": "SeaGreen", "formula": "seagreen", "type": "color"}
-{"lexeme": "SeaShell", "formula": "seashell", "type": "color"}
-{"lexeme": "Sienna", "formula": "sienna", "type": "color"}
-{"lexeme": "Silver", "formula": "silver", "type": "color"}
-{"lexeme": "SkyBlue", "formula": "skyblue", "type": "color"}
-{"lexeme": "SlateBlue", "formula": "slateblue", "type": "color"}
-{"lexeme": "SlateGray", "formula": "slategray", "type": "color"}
-{"lexeme": "SlateGrey", "formula": "slategrey", "type": "color"}
-{"lexeme": "Snow", "formula": "snow", "type": "color"}
-{"lexeme": "SpringGreen", "formula": "springgreen", "type": "color"}
-{"lexeme": "SteelBlue", "formula": "steelblue", "type": "color"}
-{"lexeme": "Tan", "formula": "tan", "type": "color"}
-{"lexeme": "Teal", "formula": "teal", "type": "color"}
-{"lexeme": "Thistle", "formula": "thistle", "type": "color"}
-{"lexeme": "Tomato", "formula": "tomato", "type": "color"}
-{"lexeme": "Turquoise", "formula": "turquoise", "type": "color"}
-{"lexeme": "Violet", "formula": "violet", "type": "color"}
-{"lexeme": "Wheat", "formula": "wheat", "type": "color"}
-{"lexeme": "White", "formula": "white", "type": "color"}
-{"lexeme": "WhiteSmoke", "formula": "whitesmoke", "type": "color"}
-{"lexeme": "Yellow", "formula": "yellow", "type": "color"}
-{"lexeme": "YellowGreen", "formula": "yellowgreen", "type": "color"}
+{"lexeme": "AliceBlue", "formula": "(name aliceblue C)", "type": "C"}
+{"lexeme": "AntiqueWhite", "formula": "(name antiquewhite C)", "type": "C"}
+{"lexeme": "Aqua", "formula": "(name aqua C)", "type": "C"}
+{"lexeme": "Aquamarine", "formula": "(name aquamarine C)", "type": "C"}
+{"lexeme": "Azure", "formula": "(name azure C)", "type": "C"}
+{"lexeme": "Beige", "formula": "(name beige C)", "type": "C"}
+{"lexeme": "Bisque", "formula": "(name bisque C)", "type": "C"}
+{"lexeme": "Black", "formula": "(name black C)", "type": "C"}
+{"lexeme": "BlanchedAlmond", "formula": "(name blanchedalmond C)", "type": "C"}
+{"lexeme": "Blue", "formula": "(name blue C)", "type": "C"}
+{"lexeme": "BlueViolet", "formula": "(name blueviolet C)", "type": "C"}
+{"lexeme": "Brown", "formula": "(name brown C)", "type": "C"}
+{"lexeme": "BurlyWood", "formula": "(name burlywood C)", "type": "C"}
+{"lexeme": "CadetBlue", "formula": "(name cadetblue C)", "type": "C"}
+{"lexeme": "Chartreuse", "formula": "(name chartreuse C)", "type": "C"}
+{"lexeme": "Chocolate", "formula": "(name chocolate C)", "type": "C"}
+{"lexeme": "Coral", "formula": "(name coral C)", "type": "C"}
+{"lexeme": "CornflowerBlue", "formula": "(name cornflowerblue C)", "type": "C"}
+{"lexeme": "Cornsilk", "formula": "(name cornsilk C)", "type": "C"}
+{"lexeme": "Crimson", "formula": "(name crimson C)", "type": "C"}
+{"lexeme": "Cyan", "formula": "(name cyan C)", "type": "C"}
+{"lexeme": "DarkBlue", "formula": "(name darkblue C)", "type": "C"}
+{"lexeme": "DarkCyan", "formula": "(name darkcyan C)", "type": "C"}
+{"lexeme": "DarkGoldenRod", "formula": "(name darkgoldenrod C)", "type": "C"}
+{"lexeme": "DarkGray", "formula": "(name darkgray C)", "type": "C"}
+{"lexeme": "DarkGrey", "formula": "(name darkgrey C)", "type": "C"}
+{"lexeme": "DarkGreen", "formula": "(name darkgreen C)", "type": "C"}
+{"lexeme": "DarkKhaki", "formula": "(name darkkhaki C)", "type": "C"}
+{"lexeme": "DarkMagenta", "formula": "(name darkmagenta C)", "type": "C"}
+{"lexeme": "DarkOliveGreen", "formula": "(name darkolivegreen C)", "type": "C"}
+{"lexeme": "DarkOrange", "formula": "(name darkorange C)", "type": "C"}
+{"lexeme": "DarkOrchid", "formula": "(name darkorchid C)", "type": "C"}
+{"lexeme": "DarkRed", "formula": "(name darkred C)", "type": "C"}
+{"lexeme": "DarkSalmon", "formula": "(name darksalmon C)", "type": "C"}
+{"lexeme": "DarkSeaGreen", "formula": "(name darkseagreen C)", "type": "C"}
+{"lexeme": "DarkSlateBlue", "formula": "(name darkslateblue C)", "type": "C"}
+{"lexeme": "DarkSlateGray", "formula": "(name darkslategray C)", "type": "C"}
+{"lexeme": "DarkSlateGrey", "formula": "(name darkslategrey C)", "type": "C"}
+{"lexeme": "DarkTurquoise", "formula": "(name darkturquoise C)", "type": "C"}
+{"lexeme": "DarkViolet", "formula": "(name darkviolet C)", "type": "C"}
+{"lexeme": "DeepPink", "formula": "(name deeppink C)", "type": "C"}
+{"lexeme": "DeepSkyBlue", "formula": "(name deepskyblue C)", "type": "C"}
+{"lexeme": "DimGray", "formula": "(name dimgray C)", "type": "C"}
+{"lexeme": "DimGrey", "formula": "(name dimgrey C)", "type": "C"}
+{"lexeme": "DodgerBlue", "formula": "(name dodgerblue C)", "type": "C"}
+{"lexeme": "FireBrick", "formula": "(name firebrick C)", "type": "C"}
+{"lexeme": "FloralWhite", "formula": "(name floralwhite C)", "type": "C"}
+{"lexeme": "ForestGreen", "formula": "(name forestgreen C)", "type": "C"}
+{"lexeme": "Fuchsia", "formula": "(name fuchsia C)", "type": "C"}
+{"lexeme": "Gainsboro", "formula": "(name gainsboro C)", "type": "C"}
+{"lexeme": "GhostWhite", "formula": "(name ghostwhite C)", "type": "C"}
+{"lexeme": "Gold", "formula": "(name gold C)", "type": "C"}
+{"lexeme": "GoldenRod", "formula": "(name goldenrod C)", "type": "C"}
+{"lexeme": "Gray", "formula": "(name gray C)", "type": "C"}
+{"lexeme": "Grey", "formula": "(name grey C)", "type": "C"}
+{"lexeme": "Green", "formula": "(name green C)", "type": "C"}
+{"lexeme": "GreenYellow", "formula": "(name greenyellow C)", "type": "C"}
+{"lexeme": "HoneyDew", "formula": "(name honeydew C)", "type": "C"}
+{"lexeme": "HotPink", "formula": "(name hotpink C)", "type": "C"}
+{"lexeme": "IndianRed", "formula": "(name indianred C)", "type": "C"}
+{"lexeme": "Indigo", "formula": "(name indigo C)", "type": "C"}
+{"lexeme": "Ivory", "formula": "(name ivory C)", "type": "C"}
+{"lexeme": "Khaki", "formula": "(name khaki C)", "type": "C"}
+{"lexeme": "Lavender", "formula": "(name lavender C)", "type": "C"}
+{"lexeme": "LavenderBlush", "formula": "(name lavenderblush C)", "type": "C"}
+{"lexeme": "LawnGreen", "formula": "(name lawngreen C)", "type": "C"}
+{"lexeme": "LemonChiffon", "formula": "(name lemonchiffon C)", "type": "C"}
+{"lexeme": "LightBlue", "formula": "(name lightblue C)", "type": "C"}
+{"lexeme": "LightCoral", "formula": "(name lightcoral C)", "type": "C"}
+{"lexeme": "LightCyan", "formula": "(name lightcyan C)", "type": "C"}
+{"lexeme": "LightGoldenRodYellow", "formula": "(name lightgoldenrodyellow C)", "type": "C"}
+{"lexeme": "LightGray", "formula": "(name lightgray C)", "type": "C"}
+{"lexeme": "LightGrey", "formula": "(name lightgrey C)", "type": "C"}
+{"lexeme": "LightGreen", "formula": "(name lightgreen C)", "type": "C"}
+{"lexeme": "LightPink", "formula": "(name lightpink C)", "type": "C"}
+{"lexeme": "LightSalmon", "formula": "(name lightsalmon C)", "type": "C"}
+{"lexeme": "LightSeaGreen", "formula": "(name lightseagreen C)", "type": "C"}
+{"lexeme": "LightSkyBlue", "formula": "(name lightskyblue C)", "type": "C"}
+{"lexeme": "LightSlateGray", "formula": "(name lightslategray C)", "type": "C"}
+{"lexeme": "LightSlateGrey", "formula": "(name lightslategrey C)", "type": "C"}
+{"lexeme": "LightSteelBlue", "formula": "(name lightsteelblue C)", "type": "C"}
+{"lexeme": "LightYellow", "formula": "(name lightyellow C)", "type": "C"}
+{"lexeme": "Lime", "formula": "(name lime C)", "type": "C"}
+{"lexeme": "LimeGreen", "formula": "(name limegreen C)", "type": "C"}
+{"lexeme": "Linen", "formula": "(name linen C)", "type": "C"}
+{"lexeme": "Magenta", "formula": "(name magenta C)", "type": "C"}
+{"lexeme": "Maroon", "formula": "(name maroon C)", "type": "C"}
+{"lexeme": "MediumAquaMarine", "formula": "(name mediumaquamarine C)", "type": "C"}
+{"lexeme": "MediumBlue", "formula": "(name mediumblue C)", "type": "C"}
+{"lexeme": "MediumOrchid", "formula": "(name mediumorchid C)", "type": "C"}
+{"lexeme": "MediumPurple", "formula": "(name mediumpurple C)", "type": "C"}
+{"lexeme": "MediumSeaGreen", "formula": "(name mediumseagreen C)", "type": "C"}
+{"lexeme": "MediumSlateBlue", "formula": "(name mediumslateblue C)", "type": "C"}
+{"lexeme": "MediumSpringGreen", "formula": "(name mediumspringgreen C)", "type": "C"}
+{"lexeme": "MediumTurquoise", "formula": "(name mediumturquoise C)", "type": "C"}
+{"lexeme": "MediumVioletRed", "formula": "(name mediumvioletred C)", "type": "C"}
+{"lexeme": "MidnightBlue", "formula": "(name midnightblue C)", "type": "C"}
+{"lexeme": "MintCream", "formula": "(name mintcream C)", "type": "C"}
+{"lexeme": "MistyRose", "formula": "(name mistyrose C)", "type": "C"}
+{"lexeme": "Moccasin", "formula": "(name moccasin C)", "type": "C"}
+{"lexeme": "NavajoWhite", "formula": "(name navajowhite C)", "type": "C"}
+{"lexeme": "Navy", "formula": "(name navy C)", "type": "C"}
+{"lexeme": "OldLace", "formula": "(name oldlace C)", "type": "C"}
+{"lexeme": "Olive", "formula": "(name olive C)", "type": "C"}
+{"lexeme": "OliveDrab", "formula": "(name olivedrab C)", "type": "C"}
+{"lexeme": "Orange", "formula": "(name orange C)", "type": "C"}
+{"lexeme": "OrangeRed", "formula": "(name orangered C)", "type": "C"}
+{"lexeme": "Orchid", "formula": "(name orchid C)", "type": "C"}
+{"lexeme": "PaleGoldenRod", "formula": "(name palegoldenrod C)", "type": "C"}
+{"lexeme": "PaleGreen", "formula": "(name palegreen C)", "type": "C"}
+{"lexeme": "PaleTurquoise", "formula": "(name paleturquoise C)", "type": "C"}
+{"lexeme": "PaleVioletRed", "formula": "(name palevioletred C)", "type": "C"}
+{"lexeme": "PapayaWhip", "formula": "(name papayawhip C)", "type": "C"}
+{"lexeme": "PeachPuff", "formula": "(name peachpuff C)", "type": "C"}
+{"lexeme": "Peru", "formula": "(name peru C)", "type": "C"}
+{"lexeme": "Pink", "formula": "(name pink C)", "type": "C"}
+{"lexeme": "Plum", "formula": "(name plum C)", "type": "C"}
+{"lexeme": "PowderBlue", "formula": "(name powderblue C)", "type": "C"}
+{"lexeme": "Purple", "formula": "(name purple C)", "type": "C"}
+{"lexeme": "RebeccaPurple", "formula": "(name rebeccapurple C)", "type": "C"}
+{"lexeme": "Red", "formula": "(name red C)", "type": "C"}
+{"lexeme": "RosyBrown", "formula": "(name rosybrown C)", "type": "C"}
+{"lexeme": "RoyalBlue", "formula": "(name royalblue C)", "type": "C"}
+{"lexeme": "SaddleBrown", "formula": "(name saddlebrown C)", "type": "C"}
+{"lexeme": "Salmon", "formula": "(name salmon C)", "type": "C"}
+{"lexeme": "SandyBrown", "formula": "(name sandybrown C)", "type": "C"}
+{"lexeme": "SeaGreen", "formula": "(name seagreen C)", "type": "C"}
+{"lexeme": "SeaShell", "formula": "(name seashell C)", "type": "C"}
+{"lexeme": "Sienna", "formula": "(name sienna C)", "type": "C"}
+{"lexeme": "Silver", "formula": "(name silver C)", "type": "C"}
+{"lexeme": "SkyBlue", "formula": "(name skyblue C)", "type": "C"}
+{"lexeme": "SlateBlue", "formula": "(name slateblue C)", "type": "C"}
+{"lexeme": "SlateGray", "formula": "(name slategray C)", "type": "C"}
+{"lexeme": "SlateGrey", "formula": "(name slategrey C)", "type": "C"}
+{"lexeme": "Snow", "formula": "(name snow C)", "type": "C"}
+{"lexeme": "SpringGreen", "formula": "(name springgreen C)", "type": "C"}
+{"lexeme": "SteelBlue", "formula": "(name steelblue C)", "type": "C"}
+{"lexeme": "Tan", "formula": "(name tan C)", "type": "C"}
+{"lexeme": "Teal", "formula": "(name teal C)", "type": "C"}
+{"lexeme": "Thistle", "formula": "(name thistle C)", "type": "C"}
+{"lexeme": "Tomato", "formula": "(name tomato C)", "type": "C"}
+{"lexeme": "Turquoise", "formula": "(name turquoise C)", "type": "C"}
+{"lexeme": "Violet", "formula": "(name violet C)", "type": "C"}
+{"lexeme": "Wheat", "formula": "(name wheat C)", "type": "C"}
+{"lexeme": "White", "formula": "(name white C)", "type": "C"}
+{"lexeme": "WhiteSmoke", "formula": "(name whitesmoke C)", "type": "C"}
+{"lexeme": "Yellow", "formula": "(name yellow C)", "type": "C"}
+{"lexeme": "YellowGreen", "formula": "(name yellowgreen C)", "type": "C"}

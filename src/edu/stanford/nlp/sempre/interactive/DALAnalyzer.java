@@ -1,6 +1,9 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.Arrays;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
 
 import edu.stanford.nlp.sempre.LanguageAnalyzer;
 import edu.stanford.nlp.sempre.LanguageInfo;
@@ -22,6 +25,8 @@ public class DALAnalyzer extends LanguageAnalyzer {
     }
     return buf.toString();
   }
+  
+  static final Set<String> reserved = Sets.newHashSet("[", "]", ")", "(", ";");
 
   private static final String[] numbers = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
       "nine", "ten" };
@@ -88,8 +93,7 @@ public class DALAnalyzer extends LanguageAnalyzer {
 
         languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? token.toLowerCase() : token);
         languageInfo.lemmaTokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? lemma.toLowerCase() : lemma);
-
-        // Is it a written out number?
+        
         int x = Arrays.asList(numbers).indexOf(token);
         if (x != -1) {
           languageInfo.posTags.add("CD");

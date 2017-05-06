@@ -38,8 +38,8 @@
 (rule $Set ($Extreme) (lambda e
 			   (call @veryx (var e))) (anchored 1))
 
-(for @dir (top:D bot:D left:D right:D front:D back:D)
-  (rule $Direction (@dir) @dir (anchored 1))
+(for @dir (top bot left right front back)
+  (rule $Direction (@dir) (ConstantFn (name @dir D)) (anchored 1))
 )
 (rule $Extreme (very $Direction) (IdentityFn) (anchored 1))
 
@@ -53,22 +53,6 @@
 # set the range via NumberFn options
 
 (rule $Number ($TOKEN) (NumberFn) (anchored 1))
-(rule $Color ($TOKEN) (SimpleLexiconFn (type color)) (anchored 1))
+(rule $Color ($TOKEN) (SimpleLexiconFn (type C)) (anchored 1))
 
-####### domain specific floating rules
-# red means has color red
-# (rule $Sets ($Color) (lambda c (color (var c))))
-
-# various actions can be performed
-# (rule $Action ($Color) (lambda c (: @add (var c) here)))
-# (rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))))
-# (rule $Action ($Direction) (lambda d (: @move (var d))))
-
-# (rule $Set ($Direction $Sets) (lambda d (lambda s
-#			   (call adj (var d) (var s)))))
-# (rule $Set ($Extreme $Sets) (lambda e (lambda s
-#			   (call @veryx (var e) (var s)))))
-# (rule $Set ($Direction) (lambda d
-#			   (call adj (var d))))
-# (rule $Set ($Extreme) (lambda e
-#			   (call @veryx (var e))))
+(rule $Action (plate) (ConstantFn (:isolate (:loop (number 3) (:s (:loop (number 4) (:blk (: add red:C top:D))) (: select (call adj left:D)))))) (anchored 1))
