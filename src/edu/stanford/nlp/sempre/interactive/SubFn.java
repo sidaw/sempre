@@ -103,7 +103,7 @@ public class SubFn extends SemanticFn {
       if (numGenerated >= candidates.size()) return null;
       
       Formula subee = candidates.get(numGenerated);
-      Formula f = symbolTable.substitute(func.formula, arg.formula, subee);
+      Formula f = symbolTable.substitute(func.formula, subee, arg.formula);
       
       numGenerated ++;
       Derivation res = new Derivation.Builder().withCallable(c).formula(f).createDerivation();
