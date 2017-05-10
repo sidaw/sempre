@@ -54,7 +54,7 @@ public class DALExecutor extends Executor {
   }
 
   public static Options opts = new Options();
-  SymbolTable symbolTable = SymbolTable.getSymbolTable();
+  SymbolTable symbolTable = SymbolTable.singleton();
 
   @Override
   public Response execute(Formula formula, ContextValue context) {
@@ -103,6 +103,8 @@ public class DALExecutor extends Executor {
       String id = ((NameValue) method).id;
       Formula body = f.args.get(1);
       symbolTable.addSymbol(id, body);
+    } if (f.mode == ActionFormula.Mode.label) {
+      performActions((ActionFormula)f.args.get(1), world);
     } if (f.mode == ActionFormula.Mode.substitute) {
       // use reflection to call primitive stuff
       ActionFormula func = (ActionFormula)f.args.get(0);
@@ -488,6 +490,13 @@ public class DALExecutor extends Executor {
         return ((NameValue) value).description;
       } else {
         return null;
+      }
+    } else if (formula instanceof ActionFormula) {
+      ActionFormula actionFormula = (ActionFormula) formula;
+      if (actionFormula.mode == ActionFormula.Mode.defined) {
+        return getType(actionFormula.args.get(0));
+      } else if (actionFormula.mode == ActionFormula.Mode.label) {
+        return getType(actionFormula.args.get(0));
       }
     }
     return null;

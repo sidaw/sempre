@@ -77,7 +77,7 @@ public class SymbolTest {
     String defaultBlocks = "[[1,1,1,\"fake\",[\"S\"]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testDefine");
-    SymbolTable.getSymbolTable().addSymbol("tower", F("(:loop (number 3) (: add (name red color) (name top dir)))"));
+    SymbolTable.singleton().addSymbol("tower", F("(:loop (number 3) (: add (name red color) (name top dir)))"));
     runFormula(executor, "(:: tower)",
         context, x -> x.allItems.size() == 4);
 

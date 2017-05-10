@@ -90,12 +90,14 @@
 (rule $Expr ($FreeToken $Expr) (interactive.UtilsFn tokenLeft))
 (rule $FreeToken ($TOKEN) (FilterTokenFn nottoken [ ] "(" ")" ; "'"))
 
-# (rule $Expr ($Action) (interactive.UtilsFn isPrimitive))
-# (rule $Action ($PHRASE) (interactive.LookupFn lookup))
+(rule $Expr ($Action) (interactive.UtilsFn isPrimitive))
+(rule $Action ($PHRASE) (interactive.UtilsFn lookup))
 
 (rule $Expr ($Number) (IdentityFn))
 (rule $Expr ($Direction) (IdentityFn))
 (rule $Expr ($Color) (IdentityFn))
+#(rule $Expr ($Set) (IdentityFn))
+#(rule $Expr ($ValueSet) (IdentityFn))
 
 ## forced chunking
 (rule $Expr ( [ $Expr ] ) (IdentityFn))

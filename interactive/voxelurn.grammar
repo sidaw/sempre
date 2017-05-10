@@ -54,5 +54,3 @@
 
 (rule $Number ($TOKEN) (NumberFn) (anchored 1))
 (rule $Color ($TOKEN) (SimpleLexiconFn (type C)) (anchored 1))
-
-(rule $Action (plate) (ConstantFn (:isolate (:loop (number 3) (:s (:loop (number 4) (:blk (: add red:C top:D))) (: select (call adj left:D)))))) (anchored 1))

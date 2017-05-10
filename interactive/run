@@ -208,6 +208,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
 
   o('NumberFn.allowedRange', 0, 100),
   o('SimpleLexicon.inPaths', "./#{$path}/csscolors.lexicon"),
+  o('SymbolTable.inPaths', "./#{$path}/definitions.lisp"),
 
   o('Formulas.shortNamedValue', true),
 
