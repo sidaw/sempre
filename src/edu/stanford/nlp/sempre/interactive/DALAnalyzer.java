@@ -57,6 +57,9 @@ public class DALAnalyzer extends LanguageAnalyzer {
       else if (c == '>' || c == '<')
         separate = !(i + 1 < utterance.length())
             || ((utterance.charAt(i + 1) != '=' && utterance.charAt(i + 1) != '='));
+      else if (c == '(' || c == ')'){
+    	  separate = true;//tokenize the parentheses later
+      }
       else
         separate = (",?'\"[];{}+-".indexOf(c) != -1);
 
@@ -81,11 +84,36 @@ public class DALAnalyzer extends LanguageAnalyzer {
     utterance = buf.toString().trim();
     if (!utterance.equals("")) {
       String[] tokens = utterance.split("\\s+");
+      int parenCount=0;//+1 if (, -1 if )
+      String parenString="";
       for (String token : tokens) {
         String lemma = token;
         if (token.endsWith("s") && token.length() > 1)
           lemma = token.substring(0, token.length() - 1);
-
+        if(token.equals('(')){
+        	parenCount++;
+        }
+        else if (token.equals(')')){
+        	if(parenCount==1){
+        		token=parenString.substring(0, parenString.length()-1);//take out ending space
+        		token+=')';
+        		parenString="";
+        	}
+        	parenCount--;
+        }
+        if (parenCount!=0){
+        	if (token.equals('('))
+        		parenString+=token;
+        	else if (token.equals(')')){
+        		parenString.substring(0,parenString.length()-1);
+        		parenString+=token;
+        	}
+        	else{
+        		parenString=parenString+token+' ';
+        	}
+        }
+        
+        if(parenCount==0){
         languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? token.toLowerCase() : token);
         languageInfo.lemmaTokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? lemma.toLowerCase() : lemma);
 
@@ -114,7 +142,13 @@ public class DALAnalyzer extends LanguageAnalyzer {
           languageInfo.nerTags.add("UNK");
           languageInfo.nerValues.add("UNK");
         }
+        }
       }
+      if (parenCount!=0){
+    	  languageInfo.nerTags.add("SEXP");
+    	  throw new NumberFormatException();
+      }
+      
     }
     return languageInfo;
   }
