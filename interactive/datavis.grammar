@@ -1,0 +1,10 @@
+# domain specific grammar for data visualization
+(include subdal.grammar)
+
+(rule $Action (plot $Data $Data)
+  (lambda x (lambda y (call plt.plot (var x) (var y) (number 10) (string --) (list (name color) (string yellow))))))
+
+(rule $Data (x) (ConstantFn x))
+(rule $Data (y) (ConstantFn y))
+
+(rule $Expr ($TOKEN) (NumberFn) (anchored 1))

@@ -218,6 +218,70 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
 nil) })
 ############################################################
 
+############################################################
+# {2016-07-02} [sidaw]: interactive semantic parsing
+addMode('datavis', 'interactive semantic parsing for data visualization', lambda { |e| l(
+  #rlwrap,
+  header('core,interactive'),
+  'edu.stanford.nlp.sempre.Main',
+  #figOpts,
+  o('server'),
+  o('masterType', 'edu.stanford.nlp.sempre.interactive.InteractiveMaster'),
+  o('Executor', 'interactive.TranscompileExecutor'),
+  o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
+  selo(0, 'Grammar.inPaths', "./#{$path}/datavis.grammar"),
+
+  o('Params.initWeightsRandomly', false),
+  o('Grammar.binarizeRules', false),
+  o('Grammar.useApplyFn', 'interactive.ApplyFn'),
+
+  o('LanguageAnalyzer.lowerCaseTokens', true),
+
+  o('Parser.pruneErrorValues', true),
+  o('Parser', 'interactive.InteractiveBeamParser'),
+  o('Parser.callSetEvaluation', false),
+  o('Parser.coarsePrune', true),
+
+  o('Parser.beamSize', 50),
+  o('InteractiveBeamParser.maxNewTreesPerSpan', 5001),
+  o('ParserState.customExpectedCounts', 'None'),
+
+  selo(0, 'InteractiveBeamParser.floatStrategy', 'Never', 'NoParse', 'Always'),
+  o('InteractiveBeamParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
+
+  o('Derivation.derivComparator', 'AnchorPriorityScoreComparator'),
+  o('Params.l1Reg', 'nonlazy'),
+  o('Params.l1RegCoeff', 0.0001),
+
+  o('Params.initStepSize', 0.1),
+  o('Params.adaptiveStepSize', true),
+  #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
+
+  o('InteractiveMaster.intOutputPath', './datavis-out/'),
+  o('InteractiveMaster.onlyInteractive', true),
+
+  o('InteractiveMaster.useAligner', false),
+  o('InteractiveMaster.maxSequence', 20),
+  o('InteractiveMaster.maxChars', 200),
+
+  o('DefinitionAligner.strategies', 'ExactExclusion'),
+
+  o('InteractiveServer.numThreads', 16),
+  o('InteractiveServer.maxCandidates', 50),
+  o('InteractiveServer.queryLogPath', './datavis-out/query.log'),
+  o('InteractiveServer.responseLogPath', './datavis-out/response.log'),
+  o('InteractiveServer.port', 8410),
+
+  o('Derivation.showTypes', false),
+  o('Derivation.showValues', false),
+  o('Derivation.showRules', false),
+  o('Derivation.anchoredBonus', 1.0),
+
+  lambda { |e| system 'mkdir -p ./datavis-out/'; nil},
+  lambda { |e| system 'mkdir -p ./datavis-out/log/'; nil},
+nil) })
+############################################################
+
 if ARGV.size == 0
   puts "#{$0} @mode=<mode> [options]"
   puts

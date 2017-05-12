@@ -54,3 +54,10 @@
 
 (rule $Number ($TOKEN) (NumberFn) (anchored 1))
 (rule $Color ($TOKEN) (SimpleLexiconFn (type C)) (anchored 1))
+
+
+(rule $Expr ($Number) (IdentityFn))
+(rule $Expr ($Direction) (IdentityFn))
+(rule $Expr ($Color) (IdentityFn))
+#(rule $Expr ($Set) (IdentityFn))
+#(rule $Expr ($ValueSet) (IdentityFn))
