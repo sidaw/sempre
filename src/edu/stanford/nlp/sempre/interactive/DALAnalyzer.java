@@ -54,6 +54,8 @@ public class DALAnalyzer extends LanguageAnalyzer {
         separate = boundaryBefore || boundaryAfter;
       else if (c == '=') // separate all >, =, < except >=, <=
         separate = !(i - 1 >= 0) || ((utterance.charAt(i - 1) != '>' && utterance.charAt(i - 1) != '<'));
+      else if (c == '('||c == ')')
+    	separate=true;
       else if (c == '>' || c == '<')
         separate = !(i + 1 < utterance.length())
             || ((utterance.charAt(i + 1) != '=' && utterance.charAt(i + 1) != '='));
@@ -73,7 +75,8 @@ public class DALAnalyzer extends LanguageAnalyzer {
       } else if (c == '=') {
         buf.append(c);
         buf.append(' ');
-      } else
+      }
+      else
         buf.append(c);
       if (separate)
         buf.append(' ');
@@ -81,41 +84,86 @@ public class DALAnalyzer extends LanguageAnalyzer {
     utterance = buf.toString().trim();
     if (!utterance.equals("")) {
       String[] tokens = utterance.split("\\s+");
-      for (String token : tokens) {
-        String lemma = token;
-        if (token.endsWith("s") && token.length() > 1)
-          lemma = token.substring(0, token.length() - 1);
-
-        languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? token.toLowerCase() : token);
-        languageInfo.lemmaTokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? lemma.toLowerCase() : lemma);
-
-        // Is it a written out number?
-        int x = Arrays.asList(numbers).indexOf(token);
-        if (x != -1) {
-          languageInfo.posTags.add("CD");
-          languageInfo.nerTags.add("NUMBER");
-          languageInfo.nerValues.add(x + "");
-          continue;
-        }
-
-        try {
-          Double.parseDouble(token);
-          languageInfo.posTags.add("CD");
-          languageInfo.nerTags.add("NUMBER");
-          languageInfo.nerValues.add(token);
-        } catch (NumberFormatException e) {
-          // Guess that capitalized nouns are proper
-          if (Character.isUpperCase(token.charAt(0)))
-            languageInfo.posTags.add("NNP");
-          else if (token.equals("'") || token.equals("\"") || token.equals("''") || token.equals("``"))
-            languageInfo.posTags.add("''");
-          else
+      int parenCount=0;//+1 for ( -1 for )
+      String tempToken="";
+      boolean parenBool=false;
+      for (String token : tokens){
+    	parenBool=false;
+    	String lemma = token;
+    	if (token.endsWith("s") && token.length() > 1)
+    	  lemma = token.substring(0, token.length() - 1);
+    	if(token.equals("(")){
+    	  parenCount++;
+    	  tempToken+="(";
+    	  parenBool=true;
+    	}
+    	if (token.equals(")")){
+    	  if (parenCount == 1){
+    		tempToken=tempToken.substring(0,tempToken.length()-1);
+    		tempToken+=")";
+    	  }
+    	  else{
+    	  tempToken+=")";
+    	  tempToken+=" ";
+    	  }
+    	  parenBool=true;
+    	  parenCount--;
+    	}
+    	if (parenCount==0){
+    	  if (parenBool){
+    	    languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? tempToken.toLowerCase() : tempToken);
+    	    languageInfo.lemmaTokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? tempToken.toLowerCase() : tempToken);
+    	    languageInfo.nerTags.add("UNK");
+            languageInfo.nerValues.add("UNK");
             languageInfo.posTags.add("UNK");
-          languageInfo.nerTags.add("UNK");
-          languageInfo.nerValues.add("UNK");
-        }
+    	    tempToken="";
+    	  }
+    	  else{
+    		languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? token.toLowerCase() : token);
+    		languageInfo.lemmaTokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? lemma.toLowerCase() : lemma);
+    		int x = Arrays.asList(numbers).indexOf(token);
+            if (x != -1) {
+              languageInfo.posTags.add("CD");
+              languageInfo.nerTags.add("NUMBER");
+              languageInfo.nerValues.add(x + "");
+              continue;
+            }
+            try {
+                Double.parseDouble(token);
+                languageInfo.posTags.add("CD");
+                languageInfo.nerTags.add("NUMBER");
+                languageInfo.nerValues.add(token);
+              } catch (NumberFormatException e) {
+                // Guess that capitalized nouns are proper
+                if (Character.isUpperCase(token.charAt(0)))
+                  languageInfo.posTags.add("NNP");
+                else if (token.equals("'") || token.equals("\"") || token.equals("''") || token.equals("``"))
+                  languageInfo.posTags.add("''");
+                else
+                  languageInfo.posTags.add("UNK");
+                languageInfo.nerTags.add("UNK");
+                languageInfo.nerValues.add("UNK");
+              }
+    	  }
+    	}
+    	if (parenCount > 0 && !parenBool){
+    	  tempToken+=token;
+    	  tempToken+=" ";
+    	}
+    	if (parenCount < 0){
+    	  languageInfo.nerTags.add("SEXP");
+    	  throw new NumberFormatException();
+    	}
+    	  
+   
       }
+      if (parenCount!=0){
+        languageInfo.nerTags.add("SEXP");
+        throw new NumberFormatException();
+      }
+      
     }
     return languageInfo;
   }
 }
+
