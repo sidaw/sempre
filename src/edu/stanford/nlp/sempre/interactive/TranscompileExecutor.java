@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre.interactive;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.CallFormula;
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.ErrorValue;
@@ -70,6 +71,13 @@ public class TranscompileExecutor extends Executor {
       String id = ((NameValue) method).id;
       List<String> argList = callFormula.args.stream().map(x -> convert(x)).collect(Collectors.toList());
       return String.format("%s(%s)", id, String.join(", ", argList));
+    }
+    
+    if (formula instanceof ActionFormula) {
+      ActionFormula actionFormula = (ActionFormula) formula;
+      String key = ((StringValue)((ValueFormula)actionFormula.args.get(0)).value).value;
+      String value = ((NameValue)((ValueFormula)actionFormula.args.get(1)).value).id;
+      return String.format("%s=\"%s\"", key, value);
     }
     
     if (formula instanceof ValueFormula) {
