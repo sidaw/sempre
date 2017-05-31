@@ -50,21 +50,21 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   private int[] numAnchors;     // Number of times each token was anchored
   
   /**
-  * Information for grammar induction.
+  * Information for the interactive package, especially for grammar induction.
   * For each descendant derivation of the body, this class tracks where and what in the head it matches
   * GrammarInfo.start, GrammarInfo.end refer to matching positions in the head, as opposed to the body
   * @author sidaw
   **/
-  public class GrammarInfo {
+  public class InteractiveInfo {
     public boolean anchored = false;
     public boolean matched = false;
     public int start = -1, end = -1;
     public Formula formula;
     public List<Derivation> matches = new ArrayList<>();
     public List<String> tokens;
-    public String symbol; // symbol for an induced rule
+    public String symbol; 
   }
-  public GrammarInfo grammarInfo = new GrammarInfo();
+  public InteractiveInfo grammarInfo = new InteractiveInfo();
 
 
   // If this derivation is composed of other derivations

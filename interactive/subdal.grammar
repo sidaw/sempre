@@ -1,6 +1,7 @@
 # Grammar for Dependency-based Action Language (DAL)
 # which is based on lambda DCS, and designed to interpolate
 # well with NL
+# semantic types: C, D, A, S, N,
 
 (def @select select)
 (def @update update)
@@ -82,10 +83,15 @@
 # Generic combination rules
 #############################
 ## argument passing
-(rule $Expr ($Expr $Expr) (SubFn right))  # substitution by type of the right partial
-(rule $Expr ($Expr $Expr) (SubFn left))
-(rule $Expr ($Expr $TOKEN) (DescribeFn right) ) # eat a parameter descriptor
-(rule $Expr ($TOKEN $Expr) (DescribeFn left) )
+(rule $Action ($Action $Expr) (interactive.SubFn right))  # substitution by type of the right partial
+(rule $Action ($Expr $Action) (interactive.SubFn left))
+
+(rule $Expr ($Expr $FreeToken) (interactive.UtilsFn tokenRight)) # eat a parameter descriptor
+(rule $Expr ($FreeToken $Expr) (interactive.UtilsFn tokenLeft))
+(rule $FreeToken ($TOKEN) (FilterTokenFn nottoken [ ] "(" ")" ; "'"))
+
+(rule $Expr ($Action) (interactive.UtilsFn isPrimitive))
+(rule $Action ($PHRASE) (interactive.UtilsFn lookup))
 
 ## forced chunking
 (rule $Expr ( [ $Expr ] ) (IdentityFn))
@@ -93,7 +99,11 @@
 # (rule $Expr ($Expr [ $Expr / $Expr ] ) (SubFn right) ) # more precise call by analogy
 
 # key problems
-* compile time vs run time resolution
-* without substitution formula, what can you do with regular methods?
-* handle both within a symbol table implementation, which manipulates formulas
-* whats the point of declaration time abstraction?
+#* compile time vs run time resolution
+#* without substitution formula, what can you do with regular methods?
+#* handle both within a symbol table implementation, which manipulates formulas
+#* whats the point of declaration time abstraction?
+#* should also be able to handle functions with precisely defined arguments
+#   * perhaps via types on variable formulas
+# TODOs: handle other primitives with proper types, write some test cases
+# test on other symbols and a recursive symbol thing.

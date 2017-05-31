@@ -34,6 +34,8 @@ public class SymbolTest {
 
   public static void runFormula(DALExecutor executor, String formula, ContextValue context,
       Predicate<World> checker) {
+    Formulas.opts.shortNamedValue = true;
+    
     LogInfo.begin_track("formula: %s", formula);
     DALExecutor.opts.worldType = "VoxelWorld";
     Executor.Response response = executor.execute(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)),
@@ -75,7 +77,7 @@ public class SymbolTest {
     String defaultBlocks = "[[1,1,1,\"fake\",[\"S\"]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testDefine");
-    SymbolTable.getSymbolTable().addSymbol("tower", F("(:loop (number 3) (: add (name red color) (name top dir)))"));
+    SymbolTable.singleton().addSymbol("tower", F("(:loop (number 3) (: add (name red color) (name top dir)))"));
     runFormula(executor, "(:: tower)",
         context, x -> x.allItems.size() == 4);
 
@@ -114,6 +116,38 @@ public class SymbolTest {
         context, x -> x.allItems.size() == 5
         && x.all().stream().anyMatch(i -> ((Voxel)i).color.equals(Color.fromString("blue"))));
     runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) top)) (name top dir) bot)",
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).height < 0));
+    LogInfo.end_track();
+  }
+  
+  
+  @Test(groups = { "Interactive" })
+  public void testShortForm() {
+    // a rare unsupported operations bug
+    String defaultBlocks = "[[1,1,1,\"fake\",[\"S\"]]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testBasicSub");
+    runFormula(executor, "(:def tower2 (:loop (number 4) (: add red:C top:D)))",
+        context, x -> true);
+    runFormula(executor, "(:sub (:: tower2 0) (number 4) (number 5))",
+        context, x -> x.allItems.size() == 6);
+    runFormula(executor, "(:sub (:: tower2 0) red blue)",
+        context, x -> x.allItems.size() == 5);
+    runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) (name top dir))) (number 4) (number 5))",
+        context, x -> x.allItems.size() == 6);
+    runFormula(executor, "(:sub (:loop (number 4) (: add red:C (name top dir))) red:C blue:C)",
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).color.equals(Color.fromString("blue"))));
+    runFormula(executor, "(:sub (:loop (number 4) (: add red:C top:D)) top bot)",
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).height < 0));
+    
+    // check that some variations behave normally
+    runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) (name top dir))) red:C blue)",
+        context, x -> x.allItems.size() == 5
+        && x.all().stream().anyMatch(i -> ((Voxel)i).color.equals(Color.fromString("blue"))));
+    runFormula(executor, "(:sub (:loop (number 4) (: add (name red color) top:D)) (name top D) bot)",
         context, x -> x.allItems.size() == 5
         && x.all().stream().anyMatch(i -> ((Voxel)i).height < 0));
     LogInfo.end_track();

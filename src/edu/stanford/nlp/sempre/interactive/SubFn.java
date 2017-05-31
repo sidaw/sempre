@@ -70,32 +70,12 @@ public class SubFn extends SemanticFn {
     Derivation func, arg;
     List<Formula> candidates;
     int numGenerated = 0;
-    SymbolTable symbolTable = SymbolTable.getSymbolTable();
+    SymbolTable symbolTable = SymbolTable.singleton();
 
     public Substitutions(Callable c, Derivation func, Derivation arg) {
       // TODO Auto-generated constructor stub
       this.c = c; this.func = func; this.arg = arg;
-      candidates = getCandidates(func.formula, arg.formula);
-    }
-    
-    private List<Formula> suble(Formula f) {
-      String type = DALExecutor.getType(f);
-      if (type == null)
-        return new ArrayList<>();
-      return Lists.newArrayList(f);
-    }
-    
-    private Set<Formula> getArgs(Formula func) {
-      // primitive substitution
-      return (func.mapToList(f -> suble(f), false)).stream().collect(Collectors.toSet());
-    }
-    
-    // the list of all formulas that can be substituted in a given formula
-    private List<Formula> getCandidates(Formula funcFormula, Formula argFormula) {
-      return getArgs(funcFormula).stream().filter(f -> 
-        DALExecutor.getType(f).equals(DALExecutor.getType(argFormula))
-      ).collect(Collectors.toList());
-      // best if we can sort according to score here
+      candidates = SymbolTable.getCandidates(func.formula, arg.formula);
     }
 
     @Override
@@ -103,10 +83,10 @@ public class SubFn extends SemanticFn {
       if (numGenerated >= candidates.size()) return null;
       
       Formula subee = candidates.get(numGenerated);
-      Formula f = symbolTable.substitute(func.formula, arg.formula, subee);
+      Formula f = symbolTable.substitute(func.formula, subee, arg.formula);
       
       numGenerated ++;
-      Derivation res = new Derivation.Builder().withCallable(c).formula(f).createDerivation();
+      Derivation res = new Derivation.Builder().withCallable(c).formula(f).type(func.type).createDerivation();
       return res;
     }
   };

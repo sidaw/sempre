@@ -1,0 +1,41 @@
+# domain specific grammar for data visualization
+# (include subdal.grammar)
+
+#############################
+# Generic combination rules
+#############################
+## argument passing
+(rule $ROOT ($Action) (IdentityFn))  # substitution by type of the right partial
+
+(rule $Action ($Action $Expr) (interactive.SubFn right))  # substitution by type of the right partial
+(rule $Action ($Expr $Action) (interactive.SubFn left))
+
+(rule $Expr ($Expr $FreeToken) (interactive.UtilsFn tokenRight)) # eat a parameter descriptor
+(rule $Expr ($FreeToken $Expr) (interactive.UtilsFn tokenLeft))
+(rule $FreeToken ($TOKEN) (FilterTokenFn nottoken [ ] "(" ")" ; "'"))
+
+# (rule $Expr ($Action) (interactive.UtilsFn isPrimitive))
+# (rule $Action ($PHRASE) (interactive.UtilsFn lookup))
+
+## forced chunking
+(rule $Expr ( [ $Expr ] ) (IdentityFn))
+
+# provide color (red|green|blue) and marker type, and linewdith
+# plot red with + markers
+(rule $Action (plt)
+   (ConstantFn (call plt.plot (name x array) (name y array)
+   (:s (string color) (name blue C)) (:s (string markerfacecolor) (name green C)) (:s (string marker) (name . M)))))
+#(rule $Action (plt)
+#   (ConstantFn (list (name a) (name b)) top))
+# plt.plot(x,y, color='blue', marker='.')
+
+
+(rule $Expr (red) (ConstantFn (name red C)))
+(rule $Expr (green) (ConstantFn (name green C)))
+(rule $Expr (blue) (ConstantFn (name blue C)))
+
+(rule $Expr (.) (ConstantFn (name . M)))
+(rule $Expr (^) (ConstantFn (name ^ M)))
+(rule $Expr (*) (ConstantFn (name * M)))
+
+(rule $Number ($TOKEN) (NumberFn) (anchored 1))

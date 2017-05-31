@@ -6,22 +6,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Given a token at a particular position, keep it is from a select set.
+ * Given a token at a particular position, keep it if from a select set (or not).
  *
- * @author ppasupat
+ * @author ppasupat sidaw
  */
 public class FilterTokenFn extends SemanticFn {
   List<String> acceptableTokens = new ArrayList<>();
   String mode;
+  boolean invert = false;
 
   public void init(LispTree tree) {
     super.init(tree);
     mode = tree.child(1).value;
-    if (!mode.equals("token") && !mode.equals("lemma"))
+    if (!mode.equals("token") && !mode.equals("lemma") && !mode.equals("nottoken") && !mode.equals("notlemma"))
       throw new RuntimeException("Illegal description for FilterTokenFn: " + mode);
     for (int j = 2; j < tree.children.size(); j++) {
       acceptableTokens.add(tree.child(j).value);
     }
+    if (mode.startsWith("not")) invert = true;
   }
 
   public DerivationStream call(final Example ex, final Callable c) {
@@ -43,10 +45,13 @@ public class FilterTokenFn extends SemanticFn {
   private boolean isValid(Example ex, Callable c) {
     if (c.getEnd() - c.getStart() != 1) return false;
     String token;
-    if ("token".equals(mode))
+    if (mode.contains("token"))
       token = ex.token(c.getStart());
     else
       token = ex.lemmaToken(c.getStart());
-    return acceptableTokens.contains(token);
+    if (!invert)
+      return acceptableTokens.contains(token);
+    else
+      return !acceptableTokens.contains(token);
   }
 }

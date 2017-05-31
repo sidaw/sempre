@@ -31,6 +31,7 @@ public class ActionFormula extends Formula {
     substitute(":sub"),
     define(":def"),
     defined("::"), // named formula defined using primitives
+    label(":label"),
 
     // primitives for declaring variables
     // let(":let"), // (:let X *),
