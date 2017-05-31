@@ -1,0 +1,154 @@
+#!/usr/bin/ruby
+
+# This is the main entry point for running SHRDLURN.  See
+# fig/lib/execrunner.rb for more documentation for how commands are generated.
+# There are a bunch of modes that this script can be invoked with, which
+# loosely correspond to the modules.
+
+$: << 'fig/lib'
+require 'execrunner'
+$path = 'plot'
+$output = 'plot/output'
+$modes = []
+def addMode(name, description, func)
+  $modes << [name, description, func]
+end
+
+def codalab(dependencies=nil)
+  # Set @cl=1 to run job on CodaLab
+  dependencies ||= l(':fig', ':lib', ':module-classes.txt', ':libsempre')
+  l(
+    letDefault(:cl, 0),
+    sel(:cl,
+      l(),
+      l('cl', 'run', dependencies, '---', 'LC_ALL=C.UTF-8'),
+    nil),
+  nil)
+end
+
+def header(modules='core', codalabDependencies=nil)
+  l(
+    codalab(codalabDependencies),
+    # Queuing system
+    letDefault(:q, 0), sel(:q, l(), l('fig/bin/q', '-shareWorkingPath', o('mem', '5g'), o('memGrace', 10), '-add', '---')),
+    # Create execution directory
+    letDefault(:pooldir, 1),
+    sel(:pooldir, l(), 'fig/bin/qcreate'),
+    # Run the Java command...
+    'java',
+    '-ea',
+    '-Dmodules='+modules,
+    # Memory size
+    letDefault(:memsize, 'default'),
+    sel(:memsize, {
+      'tiny' => l('-Xms2G', '-Xmx4G'),
+      'low' => l('-Xms5G', '-Xmx7G'),
+      'default' => l('-Xms8G', '-Xmx10G'),
+      'medium' => l('-Xms12G', '-Xmx14G'),
+      'high' => l('-Xms20G', '-Xmx24G'),
+      'higher' => l('-Xms40G', '-Xmx50G'),
+      'impressive' => l('-Xms75G', '-Xmx90G'),
+    }),
+    # Classpath
+    '-cp', 'libsempre/*:lib/*',
+    # Profiling
+    letDefault(:prof, 0), sel(:prof, l(), '-Xrunhprof:cpu=samples,depth=100,file=_OUTPATH_/java.hprof.txt'),
+    # Debugging
+    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
+  nil)
+end
+
+def figOpts; l(selo(:pooldir, 'execDir', 'exec', '_OUTPATH_'), o('overwriteExecDir'), o('addToView', 0)) end
+
+addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
+  l(
+    'java', '-ea', '-Xmx12g', '-cp', 'libsempre/*:lib/*',
+    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
+    'org.testng.TestNG',
+    lambda { |e|
+      if e[:class]
+        l('-testclass', 'edu.stanford.nlp.sempre.interactive.test.' + e[:class])
+      else
+        "./#{$path}/testng.xml"
+      end
+    },
+  nil)
+})
+
+############################################################
+# {2016-07-02} [sidaw]: interactive semantic parsing
+addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
+  #rlwrap,
+  header('core,interactive'),
+  'edu.stanford.nlp.sempre.Main',
+  #figOpts,
+  o('server'),
+  o('masterType', 'edu.stanford.nlp.sempre.interactive.InteractiveMaster'),
+  o('Executor', 'interactive.JsonExecutor'),
+  o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
+  selo(0, 'Grammar.inPaths', "./#{$path}/sub.grammar"),
+
+  o('Params.initWeightsRandomly', false),
+  o('Grammar.binarizeRules', false),
+  o('Grammar.useApplyFn', 'interactive.ApplyFn'),
+
+  o('LanguageAnalyzer.lowerCaseTokens', true),
+
+  o('Parser.pruneErrorValues', true),
+  o('Parser', 'interactive.InteractiveBeamParser'),
+  o('Parser.callSetEvaluation', false),
+  o('Parser.coarsePrune', true),
+
+  o('Parser.beamSize', 50),
+  o('InteractiveBeamParser.maxNewTreesPerSpan', 5001),
+  o('ParserState.customExpectedCounts', 'None'),
+
+  o('Params.l1Reg', 'nonlazy'),
+  o('Params.l1RegCoeff', 0.0001),
+
+  o('Params.initStepSize', 0.1),
+  o('Params.adaptiveStepSize', true),
+  #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
+
+  o('InteractiveMaster.intOutputPath', './datavis-out/'),
+  o('InteractiveMaster.onlyInteractive', true),
+
+  o('InteractiveMaster.useAligner', false),
+  o('InteractiveMaster.maxSequence', 20),
+  o('InteractiveMaster.maxChars', 200),
+
+  o('DefinitionAligner.strategies', 'ExactExclusion'),
+
+  o('InteractiveServer.numThreads', 16),
+  o('InteractiveServer.maxCandidates', 50),
+  o('InteractiveServer.queryLogPath', './datavis-out/query.log'),
+  o('InteractiveServer.responseLogPath', './datavis-out/response.log'),
+  o('InteractiveServer.port', 8410),
+
+  o('Derivation.showTypes', false),
+  o('Derivation.showValues', false),
+  o('Derivation.showRules', false),
+  o('Derivation.anchoredBonus', 1.0),
+
+  o('Templates.inPaths', "./#{$path}/templates/scatter.json", "./#{$path}/templates/colored-scatter.json", "./#{$path}/templates/bubble.json"),
+
+  lambda { |e| system 'mkdir -p ./datavis-out/'; nil},
+  lambda { |e| system 'mkdir -p ./datavis-out/log/'; nil},
+nil) })
+############################################################
+
+if ARGV.size == 0
+  puts "#{$0} @mode=<mode> [options]"
+  puts
+  puts 'This is the main entry point for all interactive related modes.'
+  puts "Modes:"
+  $modes.each { |name,description,func|
+    puts "  #{name}: #{description}"
+  }
+end
+
+modesMap = {}
+$modes.each { |name,description,func|
+  modesMap[name] = func
+}
+run!(sel(:mode, modesMap))
