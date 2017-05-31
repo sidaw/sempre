@@ -196,7 +196,12 @@ public class InteractiveServer {
             item.put("score", deriv.getScore());
             item.put("prob", deriv.getProb());
             item.put("anchored", deriv.allAnchored); // used only anchored rules
-            item.put("formula", deriv.formula.toLispTree().toString());
+            
+            if (deriv.formula instanceof JsonFormula)
+              item.put("formula", ((JsonFormula) deriv.formula).json);
+            else
+              item.put("formula", deriv.formula.toString());
+        
             items.add(item);
           }
         }

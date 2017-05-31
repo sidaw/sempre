@@ -32,10 +32,9 @@ public class UtilsFn extends SemanticFn {
 
   public static Options opts = new Options();
   Formula arg1, arg2;
-  enum Mode {isPrimitive, tokenLeft, tokenRight, lookup};
+  enum Mode {isPrimitive, tokenLeft, tokenRight, lookup, template};
   Mode mode;
   DerivationStream stream;
-  SymbolTable symbolTable;
   
   public static final SemType primitiveType = new AtomicSemType("primitive");
   
@@ -43,7 +42,6 @@ public class UtilsFn extends SemanticFn {
   public void init(LispTree tree) {
     super.init(tree);
     mode = Mode.valueOf(tree.child(1).toString());
-    symbolTable = SymbolTable.singleton();
   }
 
   @Override
@@ -55,7 +53,9 @@ public class UtilsFn extends SemanticFn {
     } else if (mode == Mode.tokenLeft) {
       return new EatTokenStream(c, c.child(1), c.child(0));
     } else if (mode == Mode.lookup) {
-      return new LookupStream(c, symbolTable.getEntries(c.childStringValue(0)));
+      return new LookupStream(c);
+    } else if (mode == Mode.template) {
+      return new TemplateStream(c);
     }
     return null;
   }
@@ -101,9 +101,9 @@ public class UtilsFn extends SemanticFn {
     Callable callable;
     int currIndex = 0;
 
-    public LookupStream(Callable c, List<SymbolTable.Entry> entries) {
+    public LookupStream(Callable c) {
       callable = c;
-      this.entries = entries;
+      this.entries = SymbolTable.singleton().getEntries(c.childStringValue(0));
     }
     
     @Override
@@ -117,4 +117,26 @@ public class UtilsFn extends SemanticFn {
           .createDerivation();
     }
   }
+  
+  static class TemplateStream extends MultipleDerivationStream {
+    List<JsonFormula> templates;
+    Callable callable;
+    int currIndex = 0;
+
+    public TemplateStream(Callable c) {
+      callable = c;
+      this.templates = Templates.singleton().templates;
+    }
+    
+    @Override
+    public Derivation createDerivation() {
+      if (currIndex == templates.size()) return null;
+      JsonFormula formula = templates.get(currIndex++);
+      return new Derivation.Builder()
+          .withCallable(callable)
+          .formula(formula)
+          .createDerivation();
+    }
+  }
+
 }
