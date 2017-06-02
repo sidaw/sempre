@@ -26,6 +26,10 @@ public class Templates {
   static Templates singleton;
   public List<JsonFormula> templates;
 
+  public List<JsonFormula> getTemplates() {
+    return templates;
+  }
+
   // singleton symbol table
   public static Templates singleton() {
     if (singleton == null) {

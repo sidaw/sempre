@@ -21,7 +21,7 @@ import fig.basic.LispTree;
 import fig.basic.Option;
 
 /**
- * collection of misc. semantic functions used in the algebra of DAL
+ * collection of misc. semantic functions
  * @author sidaw
  */
 public class UtilsFn extends SemanticFn {
@@ -32,7 +32,7 @@ public class UtilsFn extends SemanticFn {
 
   public static Options opts = new Options();
   Formula arg1, arg2;
-  enum Mode {isPrimitive, tokenLeft, tokenRight, lookup, template};
+  enum Mode {isPrimitive, tokenLeft, tokenRight, lookup, template, schema};
   Mode mode;
   DerivationStream stream;
   
@@ -138,5 +138,4 @@ public class UtilsFn extends SemanticFn {
           .createDerivation();
     }
   }
-
 }
