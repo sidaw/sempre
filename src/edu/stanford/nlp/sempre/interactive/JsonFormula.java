@@ -111,15 +111,8 @@ public class JsonFormula extends Formula {
   }
 
   @Override
-  public boolean equals(Object o) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
   public int computeHashCode() {
-    // TODO Auto-generated method stub
-    return 0;
+    return hashCode();
   }
 
   @Override
@@ -138,5 +131,27 @@ public class JsonFormula extends Formula {
   public List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse) {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public int hashCode() {
+    return ((root == null) ? 0 : root.hashCode());
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    JsonFormula other = (JsonFormula) obj;
+    if (root == null) {
+      if (other.root != null)
+        return false;
+    } else if (!root.toString().equals(other.root.toString()))
+      return false;
+    return true;
   }
 }
