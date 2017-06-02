@@ -130,7 +130,9 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Derivation.showRules', false),
   o('Derivation.anchoredBonus', 1.0),
 
-  o('Templates.inPaths', "./#{$path}/templates/scatter.json", "./#{$path}/templates/colored-scatter.json", "./#{$path}/templates/bubble.json"),
+  o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/colored-scatter.json"),
+
+  #o('Templates.inPaths', "./#{$path}/templates/scatter.json", "./#{$path}/templates/colored-scatter.json", "./#{$path}/templates/bubble.json"),
 
   lambda { |e| system 'mkdir -p ./datavis-out/'; nil},
   lambda { |e| system 'mkdir -p ./datavis-out/log/'; nil},

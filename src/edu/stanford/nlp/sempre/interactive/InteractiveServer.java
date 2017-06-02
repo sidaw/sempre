@@ -198,7 +198,7 @@ public class InteractiveServer {
             item.put("anchored", deriv.allAnchored); // used only anchored rules
             
             if (deriv.formula instanceof JsonFormula)
-              item.put("formula", ((JsonFormula) deriv.formula).json);
+              item.put("formula", ((JsonFormula) deriv.formula).root);
             else
               item.put("formula", deriv.formula.toString());
         
