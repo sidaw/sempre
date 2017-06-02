@@ -255,9 +255,10 @@ public class InteractiveMaster extends Master {
       if (tree.children.size() == 1) {
         LogInfo.logs("%s", session.context);
       } else {
-        session.context = ContextValue
-            .fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
-                tree.children.get(1).toString()));
+        session.context = new JsonContextValue(tree.children.get(1).toString()); 
+//            ContextValue
+//            .fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
+//                tree.children.get(1).toString()));
         response.stats.put("context_length", tree.children.get(1).toString().length());
       }
     } else {

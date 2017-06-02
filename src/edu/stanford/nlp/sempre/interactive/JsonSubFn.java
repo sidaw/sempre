@@ -1,29 +1,17 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
-
-import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.DerivationStream;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Formula;
-import edu.stanford.nlp.sempre.Formulas;
-import edu.stanford.nlp.sempre.LambdaFormula;
+import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.MultipleDerivationStream;
-import edu.stanford.nlp.sempre.NameValue;
+import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
 import edu.stanford.nlp.sempre.SemanticFn;
-import edu.stanford.nlp.sempre.SingleDerivationStream;
-import edu.stanford.nlp.sempre.Value;
-import edu.stanford.nlp.sempre.ValueFormula;
-import edu.stanford.nlp.sempre.ActionFormula.Mode;
-import edu.stanford.nlp.sempre.interactive.DALExecutor.SpecialSets;
+import edu.stanford.nlp.sempre.StringValue;
 import fig.basic.LispTree;
-import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
@@ -39,15 +27,17 @@ public class JsonSubFn extends SemanticFn {
 
   public static Options opts = new Options();
   Formula arg1, arg2;
-  enum Direction {left, right};
-  Direction direction;
+  enum Direction {left, right, context};
+  Direction mode;
   @Override
   public void init(LispTree tree) {
     super.init(tree);
     if (tree.child(1).toString().equals("left")) {
-      direction = Direction.left;
+      mode = Direction.left;
+    } if (tree.child(1).toString().equals("right")) {
+      mode = Direction.right;
     } else {
-      direction = Direction.right;
+      mode = Direction.context;
     }
   }
 
@@ -57,11 +47,18 @@ public class JsonSubFn extends SemanticFn {
     Derivation func;
     Derivation arg;
 
-    if (direction == Direction.right) {
+    if (mode == Direction.right) {
       func = c.child(0); arg = c.child(1);
     }
-    else {
+    else if (mode == Direction.left) {
       func = c.child(1); arg = c.child(0);
+    } else {
+      arg = c.child(0);
+      JsonFormula f = new JsonFormula( Json.writeValueAsStringHard(((JsonContextValue)ex.context).json) );
+      func = new Derivation.Builder()
+      .withCallable(c)
+      .formula(f)
+      .createDerivation();
     }
     return new Substitutions(c, func, arg);
   }

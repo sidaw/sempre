@@ -45,15 +45,16 @@ public class JsonFormula extends Formula {
     
     List<String> path = new ArrayList<>();
     recurseSubstitute(path, root, javaObj, candidates);
-    LogInfo.logs("got candidates %s for %s", candidates, javaObj);
+    //LogInfo.logs("got candidates %s for %s", candidates, javaObj);
     return candidates;
   }
  
   // should use schema
   private boolean check(List<String> path, Object candidate) {
-    LogInfo.logs("checking %s (%s) at %s", candidate, candidate.getClass(), path);
+    // LogInfo.logs("checking %s (%s) at %s", candidate, candidate.getClass(), path);
     if (path.get(path.size()-1).equals("mark")) {
-      ArrayList<String> marks = Lists.newArrayList("area",
+      ArrayList<String> marks = Lists.newArrayList(
+          "area",
           "bar",
           "box-plot",
           "circle",
@@ -68,7 +69,6 @@ public class JsonFormula extends Formula {
       if (marks.contains(candidate)) return true;
     }
     if (path.get(path.size()-1).equals("height") || path.get(path.size()-1).equals("width")) {
-      
       if (candidate instanceof Double) return true;
     }
     return false;
@@ -101,6 +101,7 @@ public class JsonFormula extends Formula {
   }
 
   public JsonFormula(String str) {
+    LogInfo.logs("JsonFormula.new %s", str);
     root = Json.readMapHard(str);
   }
 
