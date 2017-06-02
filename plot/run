@@ -83,7 +83,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   'edu.stanford.nlp.sempre.Main',
   #figOpts,
   o('server'),
-  o('masterType', 'edu.stanford.nlp.sempre.interactive.InteractiveMaster'),
+  o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
   o('Executor', 'interactive.JsonExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
   selo(0, 'Grammar.inPaths', "./#{$path}/sub.grammar"),
@@ -123,7 +123,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('InteractiveServer.maxCandidates', 50),
   o('InteractiveServer.queryLogPath', './datavis-out/query.log'),
   o('InteractiveServer.responseLogPath', './datavis-out/response.log'),
-  o('InteractiveServer.port', 8410),
+  o('InteractiveServer.port', 8405),
 
   o('Derivation.showTypes', false),
   o('Derivation.showValues', false),

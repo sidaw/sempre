@@ -45,15 +45,16 @@ public class JsonFormula extends Formula {
     
     List<String> path = new ArrayList<>();
     recurseSubstitute(path, root, javaObj, candidates);
-    LogInfo.logs("got candidates %s for %s", candidates, javaObj);
+    //LogInfo.logs("got candidates %s for %s", candidates, javaObj);
     return candidates;
   }
  
   // should use schema
   private boolean check(List<String> path, Object candidate) {
-    LogInfo.logs("checking %s (%s) at %s", candidate, candidate.getClass(), path);
+    // LogInfo.logs("checking %s (%s) at %s", candidate, candidate.getClass(), path);
     if (path.get(path.size()-1).equals("mark")) {
-      ArrayList<String> marks = Lists.newArrayList("area",
+      ArrayList<String> marks = Lists.newArrayList(
+          "area",
           "bar",
           "box-plot",
           "circle",
@@ -68,7 +69,6 @@ public class JsonFormula extends Formula {
       if (marks.contains(candidate)) return true;
     }
     if (path.get(path.size()-1).equals("height") || path.get(path.size()-1).equals("width")) {
-      
       if (candidate instanceof Double) return true;
     }
     return false;
@@ -101,6 +101,7 @@ public class JsonFormula extends Formula {
   }
 
   public JsonFormula(String str) {
+    LogInfo.logs("JsonFormula.new %s", str);
     root = Json.readMapHard(str);
   }
 
@@ -110,15 +111,8 @@ public class JsonFormula extends Formula {
   }
 
   @Override
-  public boolean equals(Object o) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
   public int computeHashCode() {
-    // TODO Auto-generated method stub
-    return 0;
+    return hashCode();
   }
 
   @Override
@@ -137,5 +131,27 @@ public class JsonFormula extends Formula {
   public List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse) {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public int hashCode() {
+    return ((root == null) ? 0 : root.hashCode());
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    JsonFormula other = (JsonFormula) obj;
+    if (root == null) {
+      if (other.root != null)
+        return false;
+    } else if (!root.toString().equals(other.root.toString()))
+      return false;
+    return true;
   }
 }

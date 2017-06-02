@@ -1,5 +1,4 @@
 (rule $ROOT ($Action) (IdentityFn))
-
 #############################
 # Generic combination rules
 #############################
@@ -12,7 +11,9 @@
 (rule $Expr ($FreeToken $Expr) (interactive.UtilsFn tokenLeft))
 (rule $FreeToken ($TOKEN) (FilterTokenFn nottoken [ ] "(" ")" ; "'"))
 
-(rule $Action ($TOKEN) (interactive.UtilsFn template))
+(rule $Action ($Expr) (interactive.JsonSubFn context))
+(rule $Action (new) (interactive.UtilsFn template))
+
 (rule $Expr ($TOKEN) (IdentityFn))
 (rule $Expr ($TOKEN) (NumberFn))
 

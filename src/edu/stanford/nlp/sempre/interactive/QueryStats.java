@@ -16,7 +16,10 @@ public class QueryStats {
 
   public QueryStats(Master.Response response, String command) {
     this.response = response;
-    put("type", command.substring(1));
+    if (command.startsWith(":"))
+      put("type", command.substring(1));
+    else
+      put("type", command);
   }
 
   public void put(String k, Object v) {
