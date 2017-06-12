@@ -12,7 +12,7 @@ import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
- * JsonQueries
+ * Handle queries in json as opposed to lisp tree
  */
 public class JsonMaster extends Master {
   public static class Options {
@@ -109,6 +109,4 @@ public class JsonMaster extends Master {
     ex.preprocess();
     return ex;
   }
- 
-
 }

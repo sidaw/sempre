@@ -54,8 +54,6 @@ public class UtilsFn extends SemanticFn {
       return new EatTokenStream(c, c.child(1), c.child(0));
     } else if (mode == Mode.lookup) {
       return new LookupStream(c);
-    } else if (mode == Mode.template) {
-      return new TemplateStream(c);
     }
     return null;
   }
@@ -114,27 +112,6 @@ public class UtilsFn extends SemanticFn {
           .withCallable(callable)
           .formula(entry.formula)
           .type(primitiveType)
-          .createDerivation();
-    }
-  }
-  
-  static class TemplateStream extends MultipleDerivationStream {
-    List<JsonFormula> templates;
-    Callable callable;
-    int currIndex = 0;
-
-    public TemplateStream(Callable c) {
-      callable = c;
-      this.templates = Templates.singleton().templates;
-    }
-    
-    @Override
-    public Derivation createDerivation() {
-      if (currIndex == templates.size()) return null;
-      JsonFormula formula = templates.get(currIndex++);
-      return new Derivation.Builder()
-          .withCallable(callable)
-          .formula(formula)
           .createDerivation();
     }
   }

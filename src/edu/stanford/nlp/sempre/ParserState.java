@@ -140,7 +140,8 @@ public abstract class ParserState {
       List<Derivation> derivsByFormula = new ArrayList<>();
       for (Derivation d : derivations) {
         boolean contains  = uniqueFormulas.contains(d.formula);
-        LogInfo.logs("ParserState.mapToFormula contains:%s (%s) %s in %s", contains, cellDescription, d.formula, uniqueFormulas);
+        if (Parser.opts.verbose > 2)
+          LogInfo.logs("ParserState.mapToFormula contains:%s (%s) %s in %s", contains, cellDescription, d.formula, uniqueFormulas);
         if (!contains) {
           derivsByFormula.add(d);
           uniqueFormulas.add(d.formula);
