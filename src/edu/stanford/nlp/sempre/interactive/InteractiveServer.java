@@ -189,24 +189,22 @@ public class InteractiveServer {
               item.put("value", ((StringValue) value).value);
             else if (value instanceof ErrorValue)
               item.put("value", ((ErrorValue) value).sortString());
+            else if (value instanceof JsonValue)
+              item.put("value", ((JsonValue) value).json);
             else if (value != null)
               item.put("value", value.sortString());
             else
-              item.put("value", "[[]]");
+              item.put("value", null);
             item.put("score", deriv.getScore());
             item.put("prob", deriv.getProb());
             item.put("anchored", deriv.allAnchored); // used only anchored rules
             
-            if (deriv.formula instanceof JsonFormula)
-              item.put("formula", ((JsonFormula) deriv.formula).root);
-            else
-              item.put("formula", deriv.formula.toString());
+            item.put("formula", deriv.formula.toString());
         
             items.add(item);
           }
         }
       }
-
       return json;
     }
 

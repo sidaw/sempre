@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.stanford.nlp.sempre.Formula;
 import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -24,9 +25,9 @@ public class Templates {
   
   @JsonProperty
   static Templates singleton;
-  public List<JsonFormula> templates;
+  public List<Object> templates;
 
-  public List<JsonFormula> getTemplates() {
+  public List<Object> getTemplates() {
     return templates;
   }
 
@@ -50,8 +51,7 @@ public class Templates {
     String text;
     try {
       text = String.join("", IOUtils.readLines(path));
-      JsonFormula formula = new JsonFormula(text);
-      templates.add(formula);
+      templates.add(text);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

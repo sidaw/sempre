@@ -86,7 +86,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
   o('Executor', 'interactive.JsonExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
-  selo(0, 'Grammar.inPaths', "./#{$path}/sub.grammar"),
+  selo(0, 'Grammar.inPaths', "./#{$path}/plot.grammar"),
 
   o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
@@ -95,9 +95,11 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('LanguageAnalyzer.lowerCaseTokens', true),
 
   o('Parser.pruneErrorValues', true),
-  o('Parser', 'interactive.InteractiveBeamParser'),
+  o('Parser', 'FloatingParser'),
+  o('FloatingParser.defaultIsFloating', false),
+  o('FloatingParser.useAnchorsOnce', true),
   o('Parser.callSetEvaluation', false),
-  o('Parser.coarsePrune', true),
+  o('Parser.coarsePrune', false),
 
   o('Parser.beamSize', 50),
   o('InteractiveBeamParser.maxNewTreesPerSpan', 5001),
@@ -130,7 +132,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Derivation.showRules', false),
   o('Derivation.anchoredBonus', 1.0),
 
-  o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/colored-scatter.json"),
+  o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/templated.json"),
 
   #o('Templates.inPaths', "./#{$path}/templates/scatter.json", "./#{$path}/templates/colored-scatter.json", "./#{$path}/templates/bubble.json"),
 
