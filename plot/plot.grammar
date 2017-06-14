@@ -9,4 +9,6 @@
 (rule $Path ($PathPattern) (interactive.JsonFn expand))
 
 (rule $Action ($Path $Value) (lambda p (lambda v (: set (var p) (var v)))) (floating 1))
-(rule $Action (new $Value) (lambda v (: new (var v))))
+(rule $Action ($FileName) (lambda v (: new (var v))))
+
+(rule $FileName (new) (interactive.JsonFn template))

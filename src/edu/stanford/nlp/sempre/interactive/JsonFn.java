@@ -1,7 +1,10 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,8 +16,10 @@ import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.DerivationStream;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Formula;
+import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.IdentityFn;
 import edu.stanford.nlp.sempre.MultipleDerivationStream;
+import edu.stanford.nlp.sempre.NameValue;
 import edu.stanford.nlp.sempre.SemType;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.StringValue;
@@ -59,19 +64,20 @@ public class JsonFn extends SemanticFn {
   }
 
   static class TemplateStream extends MultipleDerivationStream {
-    List<Object> templates;
     Callable callable;
     int currIndex = 0;
+    private Iterator<Entry<String, String>> templatesIterator;
 
     public TemplateStream(Callable c) {
       callable = c;
-      this.templates = Templates.singleton().templates;
+      this.templatesIterator = Templates.singleton().templatesMap.entrySet().iterator();
     }
 
     @Override
     public Derivation createDerivation() {
-      if (currIndex == templates.size()) return null;
-      Formula formula = null;
+      if (!templatesIterator.hasNext()) return null;
+      
+      Formula formula = new ValueFormula<>(new StringValue(templatesIterator.next().getKey()));
       // change to using just the name of the template
       return new Derivation.Builder()
           .withCallable(callable)
@@ -117,10 +123,11 @@ public class JsonFn extends SemanticFn {
     List<String> encodings = Lists.newArrayList(
         "x", "y", "column", "row", "size", "color", "shape", "detail", "text"
         );
-    Stream<String> allPaths = allowed.stream()
-        .flatMap(s -> encodings.stream().map(t -> s.replace("*", t)));
-
-    return allPaths.filter(s -> {
+    List<String> allPaths = allowed.stream()
+        .flatMap(s -> encodings.stream().map(t -> s.replace("*", t))).collect(Collectors.toList());
+    allPaths.addAll(Templates.singleton().uniquePaths);
+    
+    return allPaths.stream().filter(s -> {
       return Arrays.asList(pattern.split(" ")).stream().allMatch(t -> Arrays.asList(s.split("\\.")).contains(t));
     }).collect(Collectors.toList());
   }

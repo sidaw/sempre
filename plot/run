@@ -112,15 +112,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Params.adaptiveStepSize', true),
   #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
 
-  o('InteractiveMaster.intOutputPath', './datavis-out/'),
-  o('InteractiveMaster.onlyInteractive', true),
-
-  o('InteractiveMaster.useAligner', false),
-  o('InteractiveMaster.maxSequence', 20),
-  o('InteractiveMaster.maxChars', 200),
-
-  o('DefinitionAligner.strategies', 'ExactExclusion'),
-
+  o('JsonMaster.intOutputPath', './datavis-out/'),
   o('InteractiveServer.numThreads', 16),
   o('InteractiveServer.maxCandidates', 50),
   o('InteractiveServer.queryLogPath', './datavis-out/query.log'),
@@ -132,8 +124,8 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Derivation.showRules', false),
   o('Derivation.anchoredBonus', 1.0),
 
-  o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/templated.json"),
-
+  o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/cars"),
+  #o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/templated.json", "../../ext_git/vega-lite/examples/specs/"),
   #o('Templates.inPaths', "./#{$path}/templates/scatter.json", "./#{$path}/templates/colored-scatter.json", "./#{$path}/templates/bubble.json"),
 
   lambda { |e| system 'mkdir -p ./datavis-out/'; nil},

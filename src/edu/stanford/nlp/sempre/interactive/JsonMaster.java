@@ -24,14 +24,6 @@ public class JsonMaster extends Master {
     public int autocompleteCount = 5;
     @Option(gloss = "only allow interactive commands")
     public boolean onlyInteractive = false;
-
-    @Option(gloss = "try partial matches")
-    public boolean useAligner = true;
-
-    @Option(gloss = "use the best formula when no match or not provided")
-    public int maxSequence = 20;
-    @Option(gloss = "path to the citations")
-    public int maxChars = 200;
     
     @Option(gloss = "allow regular commands specified in Master")
     public boolean allowRegularCommands = false;
