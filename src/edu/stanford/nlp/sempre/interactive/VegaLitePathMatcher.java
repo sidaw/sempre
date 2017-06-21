@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre;
+package edu.stanford.nlp.sempre.interactive;
 
 import java.io.IOException;
 import java.nio.file.Files;

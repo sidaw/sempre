@@ -1,6 +1,6 @@
 package edu.stanford.nlp.sempre.test;
 
-import edu.stanford.nlp.sempre.VegaLitePathMatcher;
+import edu.stanford.nlp.sempre.interactive.VegaLitePathMatcher;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
