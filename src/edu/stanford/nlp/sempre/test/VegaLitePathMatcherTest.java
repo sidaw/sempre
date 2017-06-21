@@ -13,16 +13,16 @@ import static org.testng.AssertJUnit.assertEquals;
  * Created by Kelvin on 6/20/17.
  */
 public class VegaLitePathMatcherTest {
-    private String VEGA_LITE_PATHS = "plot/vega-lite-paths.txt";
+  private String VEGA_LITE_PATHS = "plot/vega-lite-paths.txt";
 
-    @Test
-    public void testMatch() throws IOException {
-        VegaLitePathMatcher matcher = new VegaLitePathMatcher(VEGA_LITE_PATHS);
+  @Test
+  public void testMatch() throws IOException {
+    VegaLitePathMatcher matcher = new VegaLitePathMatcher(VEGA_LITE_PATHS);
 
-        assertEquals(1343, matcher.match(Arrays.asList("opacity")).size());
+    assertEquals(1343, matcher.match(Arrays.asList("opacity")).size());
 
-        List<List<String>> matches = matcher.match(Arrays.asList("opacity", "boxWhisker"));
-        assertEquals(1, matches.size());
-        assertEquals(Arrays.asList("config", "boxWhisker", "opacity"), matches.get(0));
-    }
+    List<List<String>> matches = matcher.match(Arrays.asList("opacity", "boxWhisker"));
+    assertEquals(1, matches.size());
+    assertEquals(Arrays.asList("config", "boxWhisker", "opacity"), matches.get(0));
+  }
 }
