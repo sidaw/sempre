@@ -1,22 +1,24 @@
 package edu.stanford.nlp.sempre.test;
 
 import edu.stanford.nlp.sempre.JsonSchema;
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by Kelvin on 6/2/17.
  */
 public class JsonSchemaTest {
+    private String VEGA_LITE_PATH = "/Users/Kelvin/Dropbox/projects/sempre-plot/plot/vega-lite-v2.json";
+
     @Test
     public void testSchemas1() throws IOException {
-        File f = new File("/Users/Kelvin/Dropbox/projects/sempre-plot/plot/vega-lite-v2.json");
+        File f = new File(VEGA_LITE_PATH);
         JsonSchema schema = JsonSchema.fromFile(f);
 
         List<JsonSchema> transformSchemas = schema.schemas("transform", "items");
@@ -48,7 +50,7 @@ public class JsonSchemaTest {
 
     @Test
     public void testSchemas2() throws IOException {
-        File f = new File("/Users/Kelvin/Dropbox/projects/sempre-plot/plot/vega-lite-v2.json");
+        File f = new File(VEGA_LITE_PATH);
         JsonSchema schema = JsonSchema.fromFile(f);
 
         List<JsonSchema> repeatSchemas = schema.schemas("encoding", "column", "field", "repeat");
