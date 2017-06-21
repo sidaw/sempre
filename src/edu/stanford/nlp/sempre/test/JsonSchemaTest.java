@@ -1,3 +1,6 @@
+package edu.stanford.nlp.sempre.test;
+
+import edu.stanford.nlp.sempre.JsonSchema;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
