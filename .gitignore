@@ -40,6 +40,7 @@ rdf
 # interactive outputs
 int-output*
 int-backup
+datavis-out*
 interactive/.ipynb_checkpoints
 # Community server logs
 community-server/data

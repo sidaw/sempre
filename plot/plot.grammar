@@ -1,0 +1,14 @@
+(rule $ROOT ($Action) (IdentityFn) (floating 1))
+## domain specific
+
+(rule $Value ($TOKEN) (NumberFn))
+(rule $Value ($PHRASE) (interactive.JsonFn isValue))
+
+# might want compositional paths
+(rule $PathPattern ($PHRASE) (interactive.JsonFn isPath))
+(rule $Path ($PathPattern) (interactive.JsonFn expand))
+
+(rule $Action ($Path $Value) (lambda p (lambda v (: set (var p) (var v)))) (floating 1))
+(rule $Action ($FileName) (lambda v (: new (var v))))
+
+(rule $FileName (new) (interactive.JsonFn template))

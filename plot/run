@@ -83,10 +83,10 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   'edu.stanford.nlp.sempre.Main',
   #figOpts,
   o('server'),
-  o('masterType', 'edu.stanford.nlp.sempre.interactive.InteractiveMaster'),
+  o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
   o('Executor', 'interactive.JsonExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
-  selo(0, 'Grammar.inPaths', "./#{$path}/sub.grammar"),
+  selo(0, 'Grammar.inPaths', "./#{$path}/plot.grammar"),
 
   o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
@@ -95,9 +95,11 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('LanguageAnalyzer.lowerCaseTokens', true),
 
   o('Parser.pruneErrorValues', true),
-  o('Parser', 'interactive.InteractiveBeamParser'),
+  o('Parser', 'FloatingParser'),
+  o('FloatingParser.defaultIsFloating', false),
+  o('FloatingParser.useAnchorsOnce', true),
   o('Parser.callSetEvaluation', false),
-  o('Parser.coarsePrune', true),
+  o('Parser.coarsePrune', false),
 
   o('Parser.beamSize', 50),
   o('InteractiveBeamParser.maxNewTreesPerSpan', 5001),
@@ -110,28 +112,20 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Params.adaptiveStepSize', true),
   #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
 
-  o('InteractiveMaster.intOutputPath', './datavis-out/'),
-  o('InteractiveMaster.onlyInteractive', true),
-
-  o('InteractiveMaster.useAligner', false),
-  o('InteractiveMaster.maxSequence', 20),
-  o('InteractiveMaster.maxChars', 200),
-
-  o('DefinitionAligner.strategies', 'ExactExclusion'),
-
+  o('JsonMaster.intOutputPath', './datavis-out/'),
   o('InteractiveServer.numThreads', 16),
   o('InteractiveServer.maxCandidates', 50),
   o('InteractiveServer.queryLogPath', './datavis-out/query.log'),
   o('InteractiveServer.responseLogPath', './datavis-out/response.log'),
-  o('InteractiveServer.port', 8410),
+  o('InteractiveServer.port', 8405),
 
   o('Derivation.showTypes', false),
   o('Derivation.showValues', false),
   o('Derivation.showRules', false),
   o('Derivation.anchoredBonus', 1.0),
 
-  o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/colored-scatter.json"),
-
+  o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/cars"),
+  #o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/templated.json", "../../ext_git/vega-lite/examples/specs/"),
   #o('Templates.inPaths', "./#{$path}/templates/scatter.json", "./#{$path}/templates/colored-scatter.json", "./#{$path}/templates/bubble.json"),
 
   lambda { |e| system 'mkdir -p ./datavis-out/'; nil},

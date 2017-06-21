@@ -21,6 +21,8 @@ public abstract class ParserState {
     public double probDiffPruningThresh = 100;
     @Option(gloss = "Throw features away after scoring to save memory")
     public boolean throwFeaturesAway = false;
+    @Option(gloss = "merge distinct derivations with the same formula")
+    public boolean mapToFormula = true;
   }
   public static Options opts = new Options();
 
@@ -132,6 +134,22 @@ public abstract class ParserState {
     }
     
     Derivation.sortByScore(derivations);
+    
+    if (opts.mapToFormula) {
+      HashSet<Formula> uniqueFormulas = new HashSet<>();
+      List<Derivation> derivsByFormula = new ArrayList<>();
+      for (Derivation d : derivations) {
+        boolean contains  = uniqueFormulas.contains(d.formula);
+        if (Parser.opts.verbose > 2)
+          LogInfo.logs("ParserState.mapToFormula contains:%s (%s) %s in %s", contains, cellDescription, d.formula, uniqueFormulas);
+        if (!contains) {
+          derivsByFormula.add(d);
+          uniqueFormulas.add(d.formula);
+        }
+      }
+      derivations.retainAll(derivsByFormula);
+    }
+
 
     // Print out information
     if (Parser.opts.verbose >= 3) {

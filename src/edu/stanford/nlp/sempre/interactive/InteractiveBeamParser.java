@@ -287,7 +287,7 @@ class InteractiveBeamParserState extends ChartParserState {
     String cell = cellString(cat, start, end);
     if (cellsPruned.contains(cell))
       return;
-
+    
     cellsPruned.add(cell);
     pruneCell(cell, derivations);
   }

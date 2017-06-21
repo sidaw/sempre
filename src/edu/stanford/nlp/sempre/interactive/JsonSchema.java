@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre;
+package edu.stanford.nlp.sempre.interactive;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
