@@ -14,11 +14,12 @@ import java.util.List;
  * Created by Kelvin on 6/2/17.
  */
 public class JsonSchemaTest {
-    private String VEGA_LITE_PATH = "/Users/Kelvin/Dropbox/projects/sempre-plot/plot/vega-lite-v2.json";
+    // WARNING: assumes current working directory is the root of the repo
+    private String VEGA_LITE_SCHEMA = "plot/vega-lite-v2.json";
 
     @Test
     public void testSchemas1() throws IOException {
-        File f = new File(VEGA_LITE_PATH);
+        File f = new File(VEGA_LITE_SCHEMA);
         JsonSchema schema = JsonSchema.fromFile(f);
 
         List<JsonSchema> transformSchemas = schema.schemas("transform", "items");
@@ -50,7 +51,7 @@ public class JsonSchemaTest {
 
     @Test
     public void testSchemas2() throws IOException {
-        File f = new File(VEGA_LITE_PATH);
+        File f = new File(VEGA_LITE_SCHEMA);
         JsonSchema schema = JsonSchema.fromFile(f);
 
         List<JsonSchema> repeatSchemas = schema.schemas("encoding", "column", "field", "repeat");
