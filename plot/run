@@ -128,6 +128,8 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   #o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/templated.json", "../../ext_git/vega-lite/examples/specs/"),
   #o('Templates.inPaths', "./#{$path}/templates/scatter.json", "./#{$path}/templates/colored-scatter.json", "./#{$path}/templates/bubble.json"),
 
+  o('VegaEngine.verbose', 1),
+
   lambda { |e| system 'mkdir -p ./datavis-out/'; nil},
   lambda { |e| system 'mkdir -p ./datavis-out/log/'; nil},
 nil) })

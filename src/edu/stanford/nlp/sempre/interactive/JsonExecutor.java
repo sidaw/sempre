@@ -2,7 +2,6 @@ package edu.stanford.nlp.sempre.interactive;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.ErrorValue;
@@ -15,6 +14,8 @@ import edu.stanford.nlp.sempre.StringValue;
 import edu.stanford.nlp.sempre.Value;
 import edu.stanford.nlp.sempre.ValueFormula;
 import edu.stanford.nlp.sempre.Executor.Response;
+import edu.stanford.nlp.sempre.interactive.VegaEngine;
+import edu.stanford.nlp.sempre.interactive.VegaEngine.VegaResponse;
 import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -33,6 +34,8 @@ public class JsonExecutor extends Executor {
 
   public static Options opts = new Options();
 
+  private VegaEngine vegaEngine = new VegaEngine();
+
   @Override
   public Response execute(Formula formula, ContextValue context) {
     JsonContextValue jsonContext; 
@@ -40,10 +43,12 @@ public class JsonExecutor extends Executor {
       jsonContext = (JsonContextValue)context;
     else
       jsonContext = JsonContextValue.defaultContext();
+    JsonNode jsonNode = JsonUtils.toObjectNode(jsonContext.json);
+    VegaResponse contextResponse = vegaEngine.compileVegaLite(jsonNode);
     
     formula = Formulas.betaReduction(formula);
     try {
-      JsonNode result = execute((ActionFormula)formula, jsonContext);
+      JsonNode result = execute((ActionFormula)formula, jsonContext, contextResponse);
       return new Response(new JsonValue(result));
     } catch (Exception e) {
       // Comment this out if we expect lots of innocuous type checking failures
@@ -61,13 +66,15 @@ public class JsonExecutor extends Executor {
   }
   
   @SuppressWarnings("rawtypes")
-  private JsonNode execute(ActionFormula f, JsonContextValue jsonContext) {
+  private JsonNode execute(ActionFormula f, JsonContextValue jsonContext, VegaResponse contextResponse) {
     if (opts.verbose >= 1) {
       LogInfo.begin_track("JsonExecutor");
       LogInfo.logs("Executing: %s", f);
       LogInfo.logs("World: %s", jsonContext.getJson());
+      LogInfo.logs("VegaContext: %s", contextResponse.vegaSpec);
       LogInfo.end_track();
     }
+    JsonNode result = null;
     if (f.mode == ActionFormula.Mode.primitive) {
       // use reflection to call primitive stuff
       Value method = ((ValueFormula) f.args.get(0)).value;
@@ -77,18 +84,33 @@ public class JsonExecutor extends Executor {
         Formula pathf = f.args.get(1);
         Value value = ((ValueFormula) f.args.get(2)).value;
         String path = getString(pathf);
-        
-        ObjectNode result = JsonUtils.toObjectNode(jsonContext.json);
-        JsonUtils.setPathValue(result, path, JsonUtils.toJsonNode(((StringValue)value).value));
-        return result;
-        
+        ObjectNode objNode = JsonUtils.toObjectNode(jsonContext.json);
+        JsonUtils.setPathValue(objNode, path, JsonUtils.toJsonNode(((StringValue)value).value));
+        result = objNode;
       } else if (id.equals("new")) {
         Formula filename = f.args.get(1);
         String key = getString(filename);
-        return JsonUtils.toJsonNode(Json.readMapHard(Templates.singleton().templatesMap.get(key)));
+        result = JsonUtils.toJsonNode(Json.readMapHard(Templates.singleton().templatesMap.get(key)));
       }
     }
-    return null;
+    // Compile Vega-lite spec
+    VegaResponse vr = vegaEngine.compileVegaLite(result, contextResponse);
+    if (opts.verbose >= 2) {
+      LogInfo.logs("Vega-lite spec: %s", result.toString());
+      LogInfo.logs("Vega spec: %s", vr.vegaSpec.toString());
+      LogInfo.logs("Compiler message: %s", vr.message);
+      if (vr.svg != null) {
+        LogInfo.logs("SVG: %s", vr.svg);
+      }
+    }
+    if (!vr.isGoodChange(contextResponse)) {
+      if (vr.isClean()) {
+        throw new RuntimeException("Output was unchanged");
+      } else {
+        throw new RuntimeException(vr.message);
+      }
+    }
+    return result;
   }
   
   private Object naiveSetJsonPath(Formula path, Value v) {
