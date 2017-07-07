@@ -1,6 +1,9 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -22,6 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.Headers;
@@ -102,22 +106,34 @@ public class InteractiveServer {
 
       URI uri = exchange.getRequestURI();
       this.remoteHost = exchange.getRemoteAddress().getHostName();
+      String requestMethod = exchange.getRequestMethod();
+      String inputParams;
 
-      // Don't use uri.getQuery: it can't distinguish between '+' and '-'
-      String[] tokens = uri.toString().split("\\?");
-      if (tokens.length == 2) {
-        for (String s : tokens[1].split("&")) {
-          String[] kv = s.split("=", 2);
-          try {
-            String key = URLDecoder.decode(kv[0], "UTF-8");
-            String value = URLDecoder.decode(kv[1], "UTF-8");
-            // logs("%s => %s", key, value);
-            reqParams.put(key, value);
-          } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-          }
+      if ("GET".equals(requestMethod)) {
+        // Don't use uri.getQuery: it can't distinguish between '+' and '-'
+        String[] tokens = uri.toString().split("\\?");
+        inputParams = (tokens.length == 2) ? tokens[1] : "";
+      } else if ("POST".equals(requestMethod)) {
+        InputStream inStream = exchange.getRequestBody();
+        inputParams = new BufferedReader(new InputStreamReader(inStream))
+            .lines().collect(Collectors.joining("\n"));
+        inStream.close();
+      } else {
+        throw new RuntimeException("Unsupported request method: " + requestMethod);
+      }
+
+      for (String s : inputParams.split("&")) {
+        String[] kv = s.split("=", 2);
+        try {
+          String key = URLDecoder.decode(kv[0], "UTF-8");
+          String value = URLDecoder.decode(kv[1], "UTF-8");
+          // logs("%s => %s", key, value);
+          reqParams.put(key, value);
+        } catch (UnsupportedEncodingException e) {
+          throw new RuntimeException(e);
         }
       }
+
       // do not decode sessionId, keep it filename and lisptree friendly
       String sessionId = URLEncoder.encode(MapUtils.get(reqParams, "sessionId", ""), "UTF-8");
       if (sessionId != null) {
@@ -126,8 +142,9 @@ public class InteractiveServer {
         isNewSession = true;
       }
 
-      if (opts.verbose >= 2)
-        logs("GET %s from %s (%ssessionId=%s)", uri, remoteHost, isNewSession ? "new " : "", sessionId);
+      if (opts.verbose >= 2) {
+        LogInfo.logs("%s %s from %s (%ssessionId=%s)", requestMethod, uri, remoteHost, isNewSession ? "new " : "", sessionId);
+      }
 
       String uriPath = uri.getPath();
       if (uriPath.equals("/"))
@@ -198,9 +215,9 @@ public class InteractiveServer {
             item.put("score", deriv.getScore());
             item.put("prob", deriv.getProb());
             item.put("anchored", deriv.allAnchored); // used only anchored rules
-            
+
             item.put("formula", deriv.formula.toString());
-        
+
             items.add(item);
           }
         }
