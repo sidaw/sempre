@@ -24,7 +24,7 @@ public class JsonMaster extends Master {
     public int autocompleteCount = 5;
     @Option(gloss = "only allow interactive commands")
     public boolean onlyInteractive = false;
-    
+
     @Option(gloss = "allow regular commands specified in Master")
     public boolean allowRegularCommands = false;
   }
@@ -67,8 +67,12 @@ public class JsonMaster extends Master {
     QueryStats stats = new QueryStats(response, command);
     // Start of interactive commands
     if (command.equals("q")) {
+      // Syntax ["q", utterance (string), context (object; optional)]
       // Create example
       String utt = (String) args.get(1);
+      if (args.size() >= 3) {
+        session.context = new JsonContextValue(args.get(2));
+      }
       Example ex = exampleFromUtterance(utt, session);
 
       builder.parser.parse(builder.params, ex, false);
@@ -79,12 +83,13 @@ public class JsonMaster extends Master {
       LogInfo.logs("parse stats: %s", response.stats);
       response.ex = ex;
     } else if (command.equals("accept")) {
-      
+
     } else if (command.equals("context")) {
+      // Syntax ["context"] or ["context", context (object)]
       if (args.size() == 1) {
         LogInfo.logs("%s", session.context);
       } else {
-        session.context = new JsonContextValue(args.get(1)); 
+        session.context = new JsonContextValue(args.get(1));
         response.stats.put("context_length", args.get(1).toString().length());
       }
     } else {
