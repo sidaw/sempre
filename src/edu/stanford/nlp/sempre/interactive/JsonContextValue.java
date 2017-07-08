@@ -22,7 +22,7 @@ public class JsonContextValue extends ContextValue {
   }
 
   public static JsonContextValue defaultContext() {
-    return new JsonContextValue(Json.readMapHard((String)Templates.singleton().templates.get(0)));
+    return new JsonContextValue(Json.readMapHard((String)VegaResources.templates.get(0)));
   }
 
   @Override

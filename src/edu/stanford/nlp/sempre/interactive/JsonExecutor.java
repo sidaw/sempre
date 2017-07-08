@@ -1,7 +1,13 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
+
 import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.ErrorValue;
@@ -27,14 +33,24 @@ public class JsonExecutor extends Executor {
   public static class Options {
     @Option(gloss = "Print stack trace on exception")
     public boolean printStackTrace = false;
-    
     @Option(gloss = "Verbosity")
     public int verbose = 0;
+    @Option(gloss = "Compile vega")
+    public boolean compileVega = true;
   }
+  public static final String SEPARATOR = "::";
 
   public static Options opts = new Options();
 
-  private VegaEngine vegaEngine = new VegaEngine();
+  private VegaEngine vegaEngine;
+  private VegaResources vegaResource;
+  
+  public JsonExecutor() {
+    if (opts.compileVega)
+      vegaEngine = new VegaEngine();
+
+    vegaResource = new VegaResources();
+  }
 
   @Override
   public Response execute(Formula formula, ContextValue context) {
@@ -43,12 +59,10 @@ public class JsonExecutor extends Executor {
       jsonContext = (JsonContextValue)context;
     else
       jsonContext = JsonContextValue.defaultContext();
-    JsonNode jsonNode = JsonUtils.toObjectNode(jsonContext.json);
-    VegaResponse contextResponse = vegaEngine.compileVegaLite(jsonNode);
     
     formula = Formulas.betaReduction(formula);
     try {
-      JsonNode result = execute((ActionFormula)formula, jsonContext, contextResponse);
+      JsonNode result = execute((ActionFormula)formula, jsonContext);
       return new Response(new JsonValue(result));
     } catch (Exception e) {
       // Comment this out if we expect lots of innocuous type checking failures
@@ -66,14 +80,7 @@ public class JsonExecutor extends Executor {
   }
   
   @SuppressWarnings("rawtypes")
-  private JsonNode execute(ActionFormula f, JsonContextValue jsonContext, VegaResponse contextResponse) {
-    if (opts.verbose >= 1) {
-      LogInfo.begin_track("JsonExecutor");
-      LogInfo.logs("Executing: %s", f);
-      LogInfo.logs("World: %s", jsonContext.getJson());
-      LogInfo.logs("VegaContext: %s", contextResponse.vegaSpec);
-      LogInfo.end_track();
-    }
+  private JsonNode execute(ActionFormula f, JsonContextValue jsonContext) {
     JsonNode result = null;
     if (f.mode == ActionFormula.Mode.primitive) {
       // use reflection to call primitive stuff
@@ -83,26 +90,40 @@ public class JsonExecutor extends Executor {
       if (id.equals("set")) {
         Formula pathf = f.args.get(1);
         Value value = ((ValueFormula) f.args.get(2)).value;
-        String path = getString(pathf);
+        String path = Formulas.getString(pathf);
+        String fullpath = path.substring(path.indexOf(SEPARATOR) + SEPARATOR.length());
         ObjectNode objNode = JsonUtils.toObjectNode(jsonContext.json);
-        JsonUtils.setPathValue(objNode, path, JsonUtils.toJsonNode(((StringValue)value).value));
+        JsonUtils.setPathValue(objNode, fullpath, JsonUtils.toJsonNode(((StringValue)value).value));
         result = objNode;
       } else if (id.equals("new")) {
         Formula filename = f.args.get(1);
-        String key = getString(filename);
-        result = JsonUtils.toJsonNode(Json.readMapHard(Templates.singleton().templatesMap.get(key)));
+        String key = Formulas.getString(filename);
+        return JsonUtils.toJsonNode(Json.readMapHard(VegaResources.templatesMap.get(key)));
       }
     }
+    if (opts.verbose >= 1) {
+      LogInfo.logs("Executed: %s", f);
+      LogInfo.logs("Before: %s", jsonContext.getJson());
+      LogInfo.logs("After: %s", result);
+    }
+    
+    if (!opts.compileVega) return result;
+
     // Compile Vega-lite spec
+    VegaResponse contextResponse = vegaEngine.compileVegaLite(JsonUtils.toObjectNode(jsonContext.json));
     VegaResponse vr = vegaEngine.compileVegaLite(result, contextResponse);
+  
     if (opts.verbose >= 2) {
+      LogInfo.logs("VegaContext: %s", contextResponse.vegaSpec);
       LogInfo.logs("Vega-lite spec: %s", result.toString());
       LogInfo.logs("Vega spec: %s", vr.vegaSpec.toString());
       LogInfo.logs("Compiler message: %s", vr.message);
       if (vr.svg != null) {
         LogInfo.logs("SVG: %s", vr.svg);
       }
-    }
+    } else if (opts.verbose >= 1) 
+      LogInfo.logs("Compiler message: %s", vr.message);
+    
     if (!vr.isGoodChange(contextResponse)) {
       if (vr.isClean()) {
         throw new RuntimeException("Output was unchanged");
@@ -113,7 +134,15 @@ public class JsonExecutor extends Executor {
     return result;
   }
   
-  private Object naiveSetJsonPath(Formula path, Value v) {
-    return null;
+  public static List<String> pathFormulaToList(ActionFormula pathFormula) {
+    List<Formula> stringFormulas = pathFormula.mapToList(f -> {
+      if (f instanceof ActionFormula && ((ActionFormula)f).mode == ActionFormula.Mode.sequential)
+        return Lists.newArrayList();
+      else return Lists.newArrayList(f);
+    }, true);
+    
+    List<String> path = stringFormulas.stream().map(f -> Formulas.getString(f)).collect(Collectors.toList());
+    LogInfo.logs("PathPattern %s -> %s", pathFormula, path);
+    return path;
   }
 }

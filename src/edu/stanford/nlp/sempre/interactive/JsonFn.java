@@ -1,15 +1,18 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.testng.collections.Lists;
+import com.google.common.collect.Lists;
 
+import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.AtomicSemType;
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Derivation;
@@ -22,9 +25,11 @@ import edu.stanford.nlp.sempre.MultipleDerivationStream;
 import edu.stanford.nlp.sempre.NameValue;
 import edu.stanford.nlp.sempre.SemType;
 import edu.stanford.nlp.sempre.SemanticFn;
+import edu.stanford.nlp.sempre.SingleDerivationStream;
 import edu.stanford.nlp.sempre.StringValue;
 import edu.stanford.nlp.sempre.ValueFormula;
 import fig.basic.LispTree;
+import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
@@ -53,7 +58,9 @@ public class JsonFn extends SemanticFn {
 
   @Override
   public DerivationStream call(final Example ex, final Callable c) {
-    if (mode == Mode.isPath || mode == Mode.isValue) {
+    if (mode == Mode.isPath) {
+      return new IsPathStream(ex, c);
+    } else if (mode == Mode.isValue) {
       return (new IdentityFn()).call(ex, c);
     } else if (mode == Mode.expand) {
       return new JsonPathStream(ex, c);
@@ -70,14 +77,15 @@ public class JsonFn extends SemanticFn {
 
     public TemplateStream(Callable c) {
       callable = c;
-      this.templatesIterator = Templates.singleton().templatesMap.entrySet().iterator();
+      this.templatesIterator = VegaResources.templatesMap.entrySet().stream()
+          .filter(s -> s.getKey().contains(c.childStringValue(0))).iterator();
     }
 
     @Override
     public Derivation createDerivation() {
       if (!templatesIterator.hasNext()) return null;
-      
-      Formula formula = new ValueFormula<>(new StringValue(templatesIterator.next().getKey()));
+
+      Formula formula = new ValueFormula<>(new NameValue(templatesIterator.next().getKey()));
       // change to using just the name of the template
       return new Derivation.Builder()
           .withCallable(callable)
@@ -87,48 +95,63 @@ public class JsonFn extends SemanticFn {
   }
 
   static class JsonPathStream extends MultipleDerivationStream {
-    List<String> paths;
+    List<String> path;
+    Callable callable;
+    int currIndex = 0;
+    List<List<String>> matches;
+    
+    public JsonPathStream(Example ex, Callable c) {
+      Formula childFormula = c.child(0).formula;
+      if (childFormula instanceof ValueFormula)
+        path = Lists.newArrayList(Formulas.getString(childFormula));
+      else if (childFormula instanceof ActionFormula)
+        path = JsonExecutor.pathFormulaToList((ActionFormula)childFormula);
+      else
+        throw new RuntimeException("invalid path " + childFormula);
+      List<List<String>> allmatches = VegaResources.allPathsMatcher.match(path);
+      matches = allmatches;
+// hacky filtering, use only paths that overlaps with the context, should really be handled via features
+//      List<String> contextPaths = JsonUtils.allPaths(JsonUtils.toJsonNode(((JsonContextValue)ex.context).json));
+//      matches = allmatches.stream()
+//          .filter(s -> contextPaths.stream().anyMatch( t -> t.contains(s.get(0))))
+//          .collect(Collectors.toList());
+      // LogInfo.logs("JsonFn matched %d (%d in context) paths for %s", allmatches.size(), matches.size(), path);
+      callable = c;
+    }
+    
+    @Override
+    public Derivation createDerivation() {
+      if (matches.size() == 0) return null;
+      if (currIndex >= matches.size()) return null;
+      List<String> match = matches.get(currIndex++);
+      NameValue fullPath = new NameValue( String.join("*", this.path) + JsonExecutor.SEPARATOR + "$." + String.join(".", match));
+      return new Derivation.Builder()
+          .withCallable(callable)
+          .formula(new ValueFormula<NameValue>(fullPath))
+          .createDerivation();
+    }
+  }
+  
+  // takes a token and check if it can be a path
+  static class IsPathStream extends SingleDerivationStream {
+    Set<String> keys;
     Callable callable;
     int currIndex = 0;
 
-    public JsonPathStream(Example ex, Callable c) {
-      callable = c;
-      paths = expandPath(c.childStringValue(0), ex.context);
+    public IsPathStream(Example ex, Callable c) {
+      callable = c;      
+      keys = VegaResources.allPathsMatcher.pathKeys();
     }
 
     @Override
     public Derivation createDerivation() {
-      if (currIndex == paths.size()) return null;
-      String path = paths.get(currIndex++);
-      Formula formula = new ValueFormula<StringValue>(new StringValue(path));
+      if (!keys.contains(callable.childStringValue(0)))
+        return null;
+      Formula formula = new ValueFormula<NameValue>(new NameValue(callable.childStringValue(0)));
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(formula)
           .createDerivation();
     }
-  }
-
-  public static List<String> expandPath(String PathPattern, ContextValue context) {
-    return basicExpandPath(PathPattern, context);
-  }
-
-  // POLESTAR functionalities
-  public static List<String> basicExpandPath(String pattern, ContextValue context) {
-    List<String> allowed = Lists.newArrayList(
-        "$.encoding.*.field",
-        "$.encoding.*.field",
-        "$.encoding.*.axis.title"
-        );
-
-    List<String> encodings = Lists.newArrayList(
-        "x", "y", "column", "row", "size", "color", "shape", "detail", "text"
-        );
-    List<String> allPaths = allowed.stream()
-        .flatMap(s -> encodings.stream().map(t -> s.replace("*", t))).collect(Collectors.toList());
-    allPaths.addAll(Templates.singleton().uniquePaths);
-    
-    return allPaths.stream().filter(s -> {
-      return Arrays.asList(pattern.split(" ")).stream().allMatch(t -> Arrays.asList(s.split("\\.")).contains(t));
-    }).collect(Collectors.toList());
   }
 }

@@ -1,8 +1,9 @@
 """Script to compute all possible paths through a JSON object conforming to the Vega-lite specification.
 
 Args:
-    schema_path (str): path to the JSON Schema file, e.g. "/Downloads/vega-lite-v2.json"
-    out_path (str): path to save the computed paths, e.g. "/Desktop/vega-lite-paths.txt"
+    schema_path (str): path to the JSON Schema file, e.g. "./vega-lite-v2.json"
+    out_path (str): path to save the computed paths, e.g. "./vega-lite-paths.txt"
+    filter: elements that should not appear in extracted paths
 
 - The out file contains one path per line, where the elements of the path are separated by tabs.
 - There should be roughly 30k paths.
@@ -19,8 +20,10 @@ import argparse
 
 # parse command line args
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument('schema_path')
-arg_parser.add_argument('out_path')
+arg_parser.add_argument('--schema_path', default='vega-lite-v2.json')
+arg_parser.add_argument('--out_path', default='vega-lite-paths.txt')
+arg_parser.add_argument('--filter', default='items vconcat hconcat layer spec repeat')
+
 args = arg_parser.parse_args()
 
 
@@ -42,7 +45,7 @@ class Node(namedtuple('Node', ['schema', 'full_path'])):
 
 def children(node):
     """Return the children of a given node.
-    
+
     Args:
         node (Node)
 
@@ -95,7 +98,9 @@ paths.remove(tuple())
 
 # write paths to file
 with open(args.out_path, 'w') as f:
-    paths = sorted(paths)
+    if args.filter:
+        notallowed = args.filter.split(' ');
+        paths = [ps for ps in sorted(paths) if all([p not in notallowed for p in ps]) ]
     for path in paths:
         line = '{}\n'.format('\t'.join(path))
         f.write(line)

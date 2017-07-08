@@ -40,8 +40,14 @@ rdf
 # interactive outputs
 int-output*
 int-backup
-datavis-out*
+
 interactive/.ipynb_checkpoints
 # Community server logs
 community-server/data
 community-server/data-backup
+
+# plotting stuff
+plot-out*
+plot/specs
+plot/templates
+plot/vega-lite-paths.txt

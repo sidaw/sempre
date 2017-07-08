@@ -31,6 +31,11 @@ public class VegaLitePathMatcher {
     }
   }
 
+  // return all allowed path elements
+  public Set<String> pathKeys() {
+    return index.keySet();
+  }
+  
   /**
    * Given a list of keys, return all paths containing those keys (not necessarily in the order provided).
    */
@@ -51,5 +56,14 @@ public class VegaLitePathMatcher {
     matches.sort(Comparator.comparing(join));
 
     return matches;
+  }
+  
+  /**
+   * Given a list of keys, return all paths containing those keys in that order
+   */
+  public List<List<String>> orderedMatch(List<String> keys) {
+    // after removing everything but the keys, equal to the keys
+    return match(keys).stream().filter(
+        s -> s.stream().filter(keys::contains).collect(Collectors.toList()).equals(keys)).collect(Collectors.toList());
   }
 }
