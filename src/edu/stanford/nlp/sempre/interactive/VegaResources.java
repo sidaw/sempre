@@ -43,7 +43,7 @@ public class VegaResources {
   public static VegaLitePathMatcher allPathsMatcher;
   public static VegaLitePathMatcher templatesPathsMatcher;
   
-  private Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "TemplateJsonPaths.txt");
+  private Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "PathInTemplates.txt");
   
   public static ArrayList<String> templates;
   public static Map<String, String> templatesMap;
@@ -93,7 +93,7 @@ public class VegaResources {
     Collections.sort(uniquePaths, Ordering.usingToString());
     
     {
-      PrintWriter writer = IOUtils.openOutHard(JsonMaster.opts.intOutputPath + "/PathInTemplates.txt");
+      PrintWriter writer = IOUtils.openOutHard(savePath.toString());
       for (String path: uniquePaths) {
         writer.println(path);
       }
