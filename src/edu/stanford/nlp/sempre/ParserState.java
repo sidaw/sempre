@@ -22,7 +22,7 @@ public abstract class ParserState {
     @Option(gloss = "Throw features away after scoring to save memory")
     public boolean throwFeaturesAway = false;
     @Option(gloss = "merge distinct derivations with the same formula")
-    public boolean mapToFormula = true;
+    public boolean mapToFormula = false;
   }
   public static Options opts = new Options();
 

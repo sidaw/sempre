@@ -18,20 +18,13 @@ import org.testng.util.Strings;
  * @author sidaw
  */
 public class JsonUtils  {
-  public static List<String> allPaths(String json) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readTree(json);
-      List<String> allPaths = new ArrayList<>();
-      getPaths(node, "$", allPaths);
-      return allPaths;
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return null;
+  public static List<String> allPaths(JsonNode node) {
+    List<String> allPaths = new ArrayList<>();
+    getPaths(node, "", allPaths);
+    return allPaths;
   }
-  
-  public static void getPaths(JsonNode node, String prefix, List<String> paths) {
+
+  private static void getPaths(JsonNode node, String prefix, List<String> paths) {
     if (node.isValueNode()) {
       paths.add(prefix); return;
     } else if (node.isArray()) {
@@ -43,11 +36,11 @@ public class JsonUtils  {
       Iterator<String> names = node.fieldNames();
       while (names.hasNext()) {
         String childName = names.next();
-        getPaths(node.get(childName), prefix + "." + childName, paths);
+        getPaths(node.get(childName), prefix + "\t" + childName, paths);
       }
     }
   }
-  
+
   public static JsonNode toJsonNode(Object jsonobj) {
     ObjectMapper mapper = new ObjectMapper();
     return mapper.convertValue(jsonobj, JsonNode.class);
@@ -56,13 +49,13 @@ public class JsonUtils  {
     ObjectMapper mapper = new ObjectMapper();
     return mapper.convertValue(jsonobj, ObjectNode.class);
   }
-  
+
   public static void setPathValue(ObjectNode context, String path, JsonNode value) {
     List<String> jsonPath = Arrays.asList(path.split("\\."));
     List<String> objectPath = jsonPath.subList(1, jsonPath.size()-1);
     String lastPath = jsonPath.get(jsonPath.size()-1);
     ObjectNode node = context;
-    
+
     for (String name : objectPath) {
       if (name.endsWith("]"))
         throw new RuntimeException("not implemented: assign value to array");
@@ -74,5 +67,5 @@ public class JsonUtils  {
     }
     node.put(lastPath, value);
   }
-  
+
 }

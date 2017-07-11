@@ -75,6 +75,11 @@ addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
   nil)
 })
 
+addMode('setup', 'run some setup scripts for plotting', lambda { |e| l(
+  lambda { |e| system 'cd plot && python vega_lite_paths.py --filter "items vconcat hconcat layer spec repeat"'},
+  lambda { |e| system 'cd plot && svn checkout https://github.com/vega/vega-lite/trunk/examples/specs'},
+  lambda { |e| system 'cd plot && bash makedir.sh'},
+nil) })
 ############################################################
 # {2016-07-02} [sidaw]: interactive semantic parsing
 addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
@@ -92,7 +97,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
 
-  o('LanguageAnalyzer.lowerCaseTokens', true),
+  o('LanguageAnalyzer.lowerCaseTokens', false),
 
   o('Parser.pruneErrorValues', true),
   o('Parser', 'FloatingParser'),
@@ -100,9 +105,8 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('FloatingParser.useAnchorsOnce', true),
   o('Parser.callSetEvaluation', false),
   o('Parser.coarsePrune', false),
-
+  o('ParserState.mapToFormula', true),
   o('Parser.beamSize', 50),
-  o('InteractiveBeamParser.maxNewTreesPerSpan', 5001),
   o('ParserState.customExpectedCounts', 'None'),
 
   o('Params.l1Reg', 'nonlazy'),
@@ -112,11 +116,11 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Params.adaptiveStepSize', true),
   #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
 
-  o('JsonMaster.intOutputPath', './datavis-out/'),
-  o('InteractiveServer.numThreads', 16),
-  o('InteractiveServer.maxCandidates', 50),
-  o('InteractiveServer.queryLogPath', './datavis-out/query.log'),
-  o('InteractiveServer.responseLogPath', './datavis-out/response.log'),
+  o('JsonMaster.intOutputPath', './plot-out/'),
+  o('InteractiveServer.numThreads', 8),
+  o('InteractiveServer.maxCandidates', 100),
+  o('InteractiveServer.queryLogPath', './plot-out/query.log'),
+  o('InteractiveServer.responseLogPath', './plot-out/response.log'),
   o('InteractiveServer.port', 8405),
 
   o('Derivation.showTypes', false),
@@ -124,12 +128,14 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Derivation.showRules', false),
   o('Derivation.anchoredBonus', 1.0),
 
-  o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/cars"),
-  #o('Templates.inPaths', "./#{$path}/templates/bubble0.json", "./#{$path}/templates/templated.json", "../../ext_git/vega-lite/examples/specs/"),
-  #o('Templates.inPaths', "./#{$path}/templates/scatter.json", "./#{$path}/templates/colored-scatter.json", "./#{$path}/templates/bubble.json"),
+  o('VegaResources.vegaSpecifications', "./#{$path}/templates/population", "./#{$path}/templates/car", "./#{$path}/templates/stocks"),
+  selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 
-  lambda { |e| system 'mkdir -p ./datavis-out/'; nil},
-  lambda { |e| system 'mkdir -p ./datavis-out/log/'; nil},
+  o('VegaEngine.verbose', 1),
+  o('JsonExecutor.compileVega', true),
+
+  lambda { |e| system 'mkdir -p ./plot-out/'; nil},
+  lambda { |e| system 'mkdir -p ./plot-out/log/'; nil},
 nil) })
 ############################################################
 

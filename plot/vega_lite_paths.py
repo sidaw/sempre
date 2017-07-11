@@ -1,8 +1,9 @@
 """Script to compute all possible paths through a JSON object conforming to the Vega-lite specification.
 
 Args:
-    schema_path (str): path to the JSON Schema file, e.g. "/Downloads/vega-lite-v2.json"
-    out_path (str): path to save the computed paths, e.g. "/Desktop/vega-lite-paths.txt"
+    schema_path (str): path to the JSON Schema file, e.g. "./vega-lite-v2.json"
+    out_path (str): path to save the computed paths, e.g. "./vega-lite-paths.txt"
+    filter: elements that should not appear in extracted paths
 
 - The out file contains one path per line, where the elements of the path are separated by tabs.
 - There should be roughly 30k paths.
@@ -22,7 +23,11 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('--schema_path', default='vega-lite-v2.json')
 arg_parser.add_argument('--out_path', default='vega-lite-paths.txt')
 arg_parser.add_argument('--filter', default='items vconcat hconcat layer spec repeat')
+
 arg_parser.add_argument('--descriptions', default='True') #Make arg 'True' if want the descriptions 
+
+
+
 args = arg_parser.parse_args()
 
 
@@ -48,7 +53,7 @@ class Node(namedtuple('Node', ['schema', 'full_path', 'description'])):
 
 def children(node):
     """Return the children of a given node.
-    
+
     Args:
         node (Node)
 
@@ -137,3 +142,4 @@ with open(args.out_path, 'w') as f:
 	        definition = re.sub(r"[^A-Za-z-:,. \t]+", '', ''.join(path_list[file_path_index:]).encode('utf8')) 
 	        line = line + '\tDefinition: ' + definition
 	    f.write(line+'\n')
+
