@@ -3,11 +3,14 @@ package edu.stanford.nlp.sempre.interactive;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Strings;
+
 import edu.stanford.nlp.sempre.Builder;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Session;
+import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
@@ -27,12 +30,27 @@ public class JsonMaster extends Master {
 
     @Option(gloss = "allow regular commands specified in Master")
     public boolean allowRegularCommands = false;
+    
+    @Option(gloss = "initial training set")
+    public String dataPath = "";
   }
 
   public static Options opts = new Options();
 
   public JsonMaster(Builder builder) {
     super(builder);
+    learn();
+  }
+  
+  public void learn() {
+    if (!Strings.isNullOrEmpty(opts.dataPath)) {
+      List<String> lines = IOUtils.readLinesHard(opts.dataPath);
+      for (String line : lines) {
+        // Dataset.fromJsonlines, put it in a group and use standard stuff.
+        Example ex = JsonUtils.exampleFromJson(line);
+        learner.onlineLearnExample(ex);
+      }
+    }
   }
 
   @Override

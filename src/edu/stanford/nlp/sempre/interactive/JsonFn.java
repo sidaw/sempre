@@ -124,7 +124,7 @@ public class JsonFn extends SemanticFn {
       if (matches.size() == 0) return null;
       if (currIndex >= matches.size()) return null;
       List<String> match = matches.get(currIndex++);
-      NameValue fullPath = new NameValue( String.join("*", this.path) + JsonExecutor.SEPARATOR + "$." + String.join(".", match));
+      NameValue fullPath = new NameValue("$." + String.join(".", match), String.join("*", this.path));
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(new ValueFormula<NameValue>(fullPath))

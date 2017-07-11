@@ -4,13 +4,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.stanford.nlp.sempre.ActionFormula;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Formulas;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.Values;
+import edu.stanford.nlp.sempre.ActionFormula.Mode;
+import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.testng.util.Strings;
 
@@ -68,4 +79,21 @@ public class JsonUtils  {
     node.put(lastPath, value);
   }
 
+  public static Example exampleFromJson(String jsonstr) {
+    // avoiding the JsonCreator since lisp values are annoying
+    Map<String, Object> jsonObj = Json.readMapHard(jsonstr);   
+    
+    return new Example((String)jsonObj.get("id"), (String)jsonObj.get("utterance"),
+        new JsonContextValue(jsonObj.get("context")),
+        null,
+        new JsonValue(jsonObj.get("targetValue")), null); 
+  }
+
+  public static List<Example> readExamples(String path) {
+    try (Stream<String> stream = Files.lines(Paths.get(path))) {
+      return stream.map(JsonUtils::exampleFromJson).collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

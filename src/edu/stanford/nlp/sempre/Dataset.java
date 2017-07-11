@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 
+import edu.stanford.nlp.sempre.interactive.JsonUtils;
 import fig.basic.*;
 import fig.exec.Execution;
 import fig.prob.SampleUtils;
@@ -94,7 +95,7 @@ public class Dataset {
   public void readFromPathPairs(List<Pair<String, String>> pathPairs) {
     // Try to detect whether we need JSON.
     for (Pair<String, String> pathPair : pathPairs) {
-      if (pathPair.getSecond().endsWith(".json")) {
+      if (pathPair.getSecond().endsWith(".json") || pathPair.getSecond().endsWith("jsonl")) {
         readJsonFromPathPairs(pathPairs);
         return;
       }
@@ -114,15 +115,18 @@ public class Dataset {
     }
   }
 
-
   private void readJsonFromPathPairs(List<Pair<String, String>> pathPairs) {
     List<GroupInfo> groups = Lists.newArrayListWithCapacity(pathPairs.size());
     for (Pair<String, String> pathPair : pathPairs) {
       String group = pathPair.getFirst();
       String path = pathPair.getSecond();
-      List<Example> examples = Json.readValueHard(
+      List<Example> examples;
+      if (path.endsWith("json"))
+        examples = Json.readValueHard(
           IOUtils.openInHard(path),
           new TypeReference<List<Example>>() { });
+      else
+        examples = JsonUtils.readExamples(path);
       GroupInfo gi = new GroupInfo(group, examples);
       gi.path = path;
       groups.add(gi);

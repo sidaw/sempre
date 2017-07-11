@@ -9,13 +9,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 
 import edu.stanford.nlp.sempre.ActionFormula;
+import edu.stanford.nlp.sempre.BooleanValue;
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.ErrorValue;
 import edu.stanford.nlp.sempre.Executor;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.ListValue;
 import edu.stanford.nlp.sempre.NameValue;
+import edu.stanford.nlp.sempre.NumberValue;
 import edu.stanford.nlp.sempre.StringValue;
 import edu.stanford.nlp.sempre.Value;
 import edu.stanford.nlp.sempre.ValueFormula;
@@ -38,7 +41,6 @@ public class JsonExecutor extends Executor {
     @Option(gloss = "Compile vega")
     public boolean compileVega = true;
   }
-  public static final String SEPARATOR = "::";
 
   public static Options opts = new Options();
 
@@ -73,7 +75,31 @@ public class JsonExecutor extends Executor {
       return new Response(ErrorValue.badJava(e.toString()));
     }
   }
-
+  
+  private static Object toObject(Value value) {
+    if (value instanceof NumberValue) {
+      // Unfortunately, NumberValues don't make a distinction between ints and
+      // doubles, so this is a hack.
+      double x = ((NumberValue) value).value;
+      if (x == (int) x)
+        return new Integer((int) x);
+      return new Double(x);
+    } else if (value instanceof NameValue) {
+      String id = ((NameValue) value).id;
+      return id;
+    } else if (value instanceof BooleanValue) {
+      return ((BooleanValue) value).value;
+    } else if (value instanceof StringValue) {
+      return ((StringValue) value).value;
+    } else if (value instanceof ListValue) {
+      List<Object> list = Lists.newArrayList();
+      for (Value elem : ((ListValue) value).values)
+        list.add(toObject(elem));
+      return list;
+    } else {
+      return value; // Preserve the Value (which can be an object)
+    }
+  }
   @SuppressWarnings("rawtypes")
   private String getString(Formula f) {
     return ((StringValue)((ValueFormula)f).value).value;
@@ -90,10 +116,9 @@ public class JsonExecutor extends Executor {
       if (id.equals("set")) {
         Formula pathf = f.args.get(1);
         Value value = ((ValueFormula) f.args.get(2)).value;
-        String path = Formulas.getString(pathf);
-        String fullpath = path.substring(path.indexOf(SEPARATOR) + SEPARATOR.length());
+        String fullpath = Formulas.getString(pathf);
         ObjectNode objNode = JsonUtils.toObjectNode(jsonContext.json);
-        JsonUtils.setPathValue(objNode, fullpath, JsonUtils.toJsonNode(((StringValue)value).value));
+        JsonUtils.setPathValue(objNode, fullpath, JsonUtils.toJsonNode(toObject(value)));
         result = objNode;
       } else if (id.equals("new")) {
         Formula filename = f.args.get(1);
@@ -103,7 +128,7 @@ public class JsonExecutor extends Executor {
     }
     if (opts.verbose >= 1) {
       LogInfo.logs("Executed: %s", f);
-      LogInfo.logs("Before: %s", jsonContext.getJson());
+      LogInfo.logs("Before: %s", jsonContext);
       LogInfo.logs("After: %s", result);
     }
     

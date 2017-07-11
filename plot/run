@@ -134,6 +134,11 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('VegaEngine.verbose', 1),
   o('JsonExecutor.compileVega', true),
 
+  # learning stuff
+  o('Dataset.inPaths', "train:./#{$path}/sampledata.jsonl"),
+  o('Parser.callSetEvaluation', true),
+  o('Learner.maxTrainIters', 2),
+
   lambda { |e| system 'mkdir -p ./plot-out/'; nil},
   lambda { |e| system 'mkdir -p ./plot-out/log/'; nil},
 nil) })

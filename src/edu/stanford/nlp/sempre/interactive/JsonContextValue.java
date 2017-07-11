@@ -11,14 +11,17 @@ import fig.basic.LogInfo;
 
 public class JsonContextValue extends ContextValue {
   Object json;
-  public Object getJson() {
-    return json;
-  }
   
   public JsonContextValue(Object jsonString) {
     super(null, null, new ArrayList<Exchange>(), null);
     LogInfo.logs("JsonContextValue %s", jsonString);
     json = jsonString;
+  }
+  
+  public JsonContextValue(String jsonString) {
+    super(null, null, new ArrayList<Exchange>(), null);
+    LogInfo.logs("JsonContextValue String %s", jsonString);
+    json = Json.readMapHard(jsonString);
   }
 
   public static JsonContextValue defaultContext() {
