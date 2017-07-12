@@ -12,15 +12,15 @@ import fig.basic.LogInfo;
 public class JsonContextValue extends ContextValue {
   Object json;
   
-  public JsonContextValue(Object jsonString) {
+  public JsonContextValue(Object jsonObj) {
     super(null, null, new ArrayList<Exchange>(), null);
-    LogInfo.logs("JsonContextValue %s", jsonString);
-    json = jsonString;
+    LogInfo.logs("JsonContextValue %s", JsonUtils.toJsonNode(jsonObj));
+    json = jsonObj;
   }
   
   public JsonContextValue(String jsonString) {
     super(null, null, new ArrayList<Exchange>(), null);
-    LogInfo.logs("JsonContextValue String %s", jsonString);
+    LogInfo.logs("JsonContextValue %s", jsonString);
     json = Json.readMapHard(jsonString);
   }
 

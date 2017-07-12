@@ -118,7 +118,7 @@ public class JsonExecutor extends Executor {
         Value value = ((ValueFormula) f.args.get(2)).value;
         String fullpath = Formulas.getString(pathf);
         ObjectNode objNode = JsonUtils.toObjectNode(jsonContext.json);
-        JsonUtils.setPathValue(objNode, fullpath, JsonUtils.toJsonNode(toObject(value)));
+        JsonUtils.setPathValue(objNode, fullpath, ((JsonValue)value).json);
         result = objNode;
       } else if (id.equals("new")) {
         Formula filename = f.args.get(1);

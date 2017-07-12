@@ -128,6 +128,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Derivation.showRules', false),
   o('Derivation.anchoredBonus', 1.0),
 
+  o('VegaResources.vegaSchema', "./#{$path}/vega-lite-v2.json"),
   o('VegaResources.vegaSpecifications', "./#{$path}/templates/population", "./#{$path}/templates/car", "./#{$path}/templates/stocks"),
   selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 

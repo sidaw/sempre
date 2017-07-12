@@ -37,6 +37,7 @@ public class VegaResources {
   public static class Options {
     @Option(gloss = "File or directory containing example vega ") List<String> vegaSpecifications;
     @Option(gloss = "File containing all valid VegaPaths") String allVegaJsonPaths;
+    @Option(gloss = "File containing the vega schema") String vegaSchema;
   }
   public static Options opts = new Options();
 
@@ -47,6 +48,8 @@ public class VegaResources {
   
   public static ArrayList<String> templates;
   public static Map<String, String> templatesMap;
+
+  public static JsonSchema vegaSchema;
   
   public VegaResources() {
     try {
@@ -62,6 +65,9 @@ public class VegaResources {
         LogInfo.logs("loaded %d keys", allPathsMatcher.pathKeys().size());
       }
       
+      if (opts.vegaSchema != null) {
+        vegaSchema = JsonSchema.fromFile(new File(opts.vegaSchema));
+      }  
     }
     catch (IOException e) {
       e.printStackTrace();
@@ -87,7 +93,7 @@ public class VegaResources {
 
     List<String> allPaths = new ArrayList<>();
     for (String json : templates) {
-      allPaths.addAll(JsonUtils.allPaths(JsonUtils.toJsonNode(Json.readMapHard(json))));
+      allPaths.addAll(JsonUtils.allPathValues(JsonUtils.toJsonNode(Json.readMapHard(json))));
     }
     List<String> uniquePaths = Sets.newHashSet(allPaths).stream().filter(p -> !p.contains("[")).collect(Collectors.toList());
     Collections.sort(uniquePaths, Ordering.usingToString());

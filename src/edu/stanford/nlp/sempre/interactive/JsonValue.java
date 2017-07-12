@@ -1,6 +1,12 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.NumberSerializers.NumberSerializer;
+import com.google.common.base.Strings;
 
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.StringValue;
@@ -20,7 +26,9 @@ public class JsonValue extends Value {
   public JsonValue(Object jsonObj) {
     super();
     json = JsonUtils.toJsonNode(jsonObj);
+    
   }
+  
   @Override
   public String sortString() { return Json.writeValueAsStringHard(json); }
   @Override
@@ -30,8 +38,10 @@ public class JsonValue extends Value {
   }
   @Override
   public LispTree toLispTree() {
-    // TODO Auto-generated method stub
-    return new StringValue(Json.writeValueAsStringHard(json)).toLispTree();
+    LispTree tree = LispTree.proto.newList();
+    tree.addChild("json");
+    tree.addChild(Json.writeValueAsStringHard(json));
+    return tree;
   }
   @Override
   public boolean equals(Object o) {

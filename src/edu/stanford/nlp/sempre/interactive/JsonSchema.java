@@ -119,7 +119,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
   public List<String> enums() {
     // I'm assuming that enums are always text, although this may not be true.
     if (!node.has("enum")) {
-      throw new RuntimeException("No 'enum'.");
+      return null;
     }
     JsonNode enumNode = node.get("enum");
     List<String> values = new ArrayList<>();

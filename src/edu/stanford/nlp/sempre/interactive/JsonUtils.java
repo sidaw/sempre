@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -31,23 +32,36 @@ import org.testng.util.Strings;
 public class JsonUtils  {
   public static List<String> allPaths(JsonNode node) {
     List<String> allPaths = new ArrayList<>();
-    getPaths(node, "", allPaths);
+    getPaths(node, "$", false,  allPaths);
+    return allPaths;
+  }
+  
+  public static List<String> allPathValues(JsonNode node) {
+    List<String> allPaths = new ArrayList<>();
+    getPaths(node, "$", true,  allPaths);
     return allPaths;
   }
 
-  private static void getPaths(JsonNode node, String prefix, List<String> paths) {
+  private static void getPaths(JsonNode node, String prefix, boolean addValue, List<String> paths) {
+    if (addValue)
+      paths.add(prefix + "\t:\t" + node.toString());
+ 
     if (node.isValueNode()) {
-      paths.add(prefix); return;
+      if (!addValue)
+        paths.add(prefix);
+      else
+        paths.add(prefix + "\t:\t" + node.toString());
+      return;
     } else if (node.isArray()) {
       for (int i = 0; node.has(i); i++) {
         int childInd = i;
-        getPaths(node.get(i), prefix + "[" + childInd + "]", paths);
+        getPaths(node.get(i), prefix + "[" + childInd + "]", addValue, paths);
       }
     } else if (node.isObject()) {
       Iterator<String> names = node.fieldNames();
       while (names.hasNext()) {
         String childName = names.next();
-        getPaths(node.get(childName), prefix + "\t" + childName, paths);
+        getPaths(node.get(childName), prefix + "\t" + childName, addValue, paths);
       }
     }
   }
