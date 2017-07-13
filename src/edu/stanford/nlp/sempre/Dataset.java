@@ -5,13 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 
-import edu.stanford.nlp.sempre.interactive.JsonUtils;
 import fig.basic.*;
 import fig.exec.Execution;
 import fig.prob.SampleUtils;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A dataset contains a set of examples, which are keyed by group (e.g., train,
@@ -121,17 +124,35 @@ public class Dataset {
       String group = pathPair.getFirst();
       String path = pathPair.getSecond();
       List<Example> examples;
-      if (path.endsWith("json"))
-        examples = Json.readValueHard(
-          IOUtils.openInHard(path),
-          new TypeReference<List<Example>>() { });
+      if (path.endsWith("jsonl"))
+        examples = readJsonlExamples(path);
       else
-        examples = JsonUtils.readExamples(path);
+        examples = Json.readValueHard(
+            IOUtils.openInHard(path),
+            new TypeReference<List<Example>>() { });
+      
       GroupInfo gi = new GroupInfo(group, examples);
       gi.path = path;
       groups.add(gi);
     }
     readFromGroupInfos(groups);
+  }
+  
+  private static Example exampleFromJson(String jsonstr) {
+    // avoiding the JsonCreator since lisp values are annoying
+    Map<String, Object> jsonObj = Json.readMapHard(jsonstr);   
+    
+    return new Example((String)jsonObj.get("id"), (String)jsonObj.get("utterance"),
+        new JsonContextValue(jsonObj.get("context")),
+        null,
+        new JsonValue(jsonObj.get("targetValue")), null); 
+  }
+  public static List<Example> readJsonlExamples(String path) {
+    try (Stream<String> stream = Files.lines(Paths.get(path))) {
+      return stream.map(Dataset::exampleFromJson).collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private void readFromGroupInfos(List<GroupInfo> groupInfos) {

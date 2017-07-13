@@ -16,6 +16,8 @@ import edu.stanford.nlp.sempre.Executor;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.JsonContextValue;
+import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.ListValue;
 import edu.stanford.nlp.sempre.NameValue;
 import edu.stanford.nlp.sempre.NumberValue;
@@ -60,7 +62,7 @@ public class JsonExecutor extends Executor {
     if (context instanceof JsonContextValue)
       jsonContext = (JsonContextValue)context;
     else
-      jsonContext = JsonContextValue.defaultContext();
+      jsonContext = new JsonContextValue(Json.readMapHard((String)VegaResources.templates.get(0)));
     
     formula = Formulas.betaReduction(formula);
     try {
@@ -117,8 +119,8 @@ public class JsonExecutor extends Executor {
         Formula pathf = f.args.get(1);
         Value value = ((ValueFormula) f.args.get(2)).value;
         String fullpath = Formulas.getString(pathf);
-        ObjectNode objNode = JsonUtils.toObjectNode(jsonContext.json);
-        JsonUtils.setPathValue(objNode, fullpath, ((JsonValue)value).json);
+        ObjectNode objNode = (ObjectNode) jsonContext.getJsonNode();
+        JsonUtils.setPathValue(objNode, fullpath, ((JsonValue)value).getJsonNode());
         result = objNode;
       } else if (id.equals("new")) {
         Formula filename = f.args.get(1);
@@ -135,7 +137,7 @@ public class JsonExecutor extends Executor {
     if (!opts.compileVega) return result;
 
     // Compile Vega-lite spec
-    VegaResponse contextResponse = vegaEngine.compileVegaLite(JsonUtils.toObjectNode(jsonContext.json));
+    VegaResponse contextResponse = vegaEngine.compileVegaLite(jsonContext.getJsonNode());
     VegaResponse vr = vegaEngine.compileVegaLite(result, contextResponse);
   
     if (opts.verbose >= 2) {

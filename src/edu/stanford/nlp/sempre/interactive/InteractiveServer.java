@@ -37,6 +37,7 @@ import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.ErrorValue;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Session;
 import edu.stanford.nlp.sempre.StringValue;
@@ -207,7 +208,7 @@ public class InteractiveServer {
             else if (value instanceof ErrorValue)
               item.put("value", ((ErrorValue) value).sortString());
             else if (value instanceof JsonValue)
-              item.put("value", ((JsonValue) value).json);
+              item.put("value", ((JsonValue) value).getJsonNode());
             else if (value != null)
               item.put("value", value.sortString());
             else

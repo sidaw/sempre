@@ -1,20 +1,24 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre;
 
 import java.util.ArrayList;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.Json;
 import fig.basic.LogInfo;
 
 public class JsonContextValue extends ContextValue {
   Object json;
   
+  public Object getObject() {
+    return json;
+  }
+  public JsonNode getJsonNode() {
+    return Json.getMapper().convertValue(json, JsonNode.class);
+  }
+  
   public JsonContextValue(Object jsonObj) {
     super(null, null, new ArrayList<Exchange>(), null);
-    LogInfo.logs("JsonContextValue %s", JsonUtils.toJsonNode(jsonObj));
+    LogInfo.logs("JsonContextValue %s", Json.getMapper().convertValue(jsonObj, JsonNode.class));
     json = jsonObj;
   }
   
@@ -24,9 +28,6 @@ public class JsonContextValue extends ContextValue {
     json = Json.readMapHard(jsonString);
   }
 
-  public static JsonContextValue defaultContext() {
-    return new JsonContextValue(Json.readMapHard((String)VegaResources.templates.get(0)));
-  }
 
   @Override
   public String toString() {

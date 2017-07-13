@@ -1,32 +1,33 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.std.NumberSerializers.NumberSerializer;
-import com.google.common.base.Strings;
-
-import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.StringValue;
-import edu.stanford.nlp.sempre.Value;
 import fig.basic.LispTree;
-import fig.basic.LogInfo;
+
 /***
  * merely wraps a json object in Value
  * @author sidaw
  */
 public class JsonValue extends Value {
   JsonNode json;
+  String richType = "notype";
+  
+  public JsonNode getJsonNode() {
+    return json;
+  }
+  
   public JsonValue(JsonNode jsonNode) {
     super();
     json = jsonNode;
   }
+  
+  public JsonValue withType(String type) {
+    this.richType = type;
+    return this;
+  }
+  
   public JsonValue(Object jsonObj) {
     super();
-    json = JsonUtils.toJsonNode(jsonObj);
-    
+    json = Json.getMapper().convertValue(jsonObj, JsonNode.class);
   }
   
   @Override
@@ -41,6 +42,7 @@ public class JsonValue extends Value {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("json");
     tree.addChild(Json.writeValueAsStringHard(json));
+    tree.addChild(this.richType);
     return tree;
   }
   @Override
@@ -53,5 +55,9 @@ public class JsonValue extends Value {
   public int hashCode() {
     // TODO Auto-generated method stub
     return 0;
+  }
+
+  public String getRichType() {
+    return richType;
   }
 }

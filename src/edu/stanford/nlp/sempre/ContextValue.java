@@ -3,7 +3,6 @@ package edu.stanford.nlp.sempre;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import edu.stanford.nlp.sempre.interactive.JsonContextValue;
 import fig.basic.LispTree;
 import java.util.*;
 
@@ -144,9 +143,6 @@ public class ContextValue extends Value {
 
   @JsonCreator
   public static ContextValue fromString(String str) {
-    if (str.startsWith("{")) 
-      return new JsonContextValue(str);
-    
     return new ContextValue(LispTree.proto.parseFromString(str));
   }
 }

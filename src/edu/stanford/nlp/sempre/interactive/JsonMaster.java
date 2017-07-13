@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import edu.stanford.nlp.sempre.Builder;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.JsonContextValue;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Session;
 import fig.basic.IOUtils;
@@ -39,20 +40,8 @@ public class JsonMaster extends Master {
 
   public JsonMaster(Builder builder) {
     super(builder);
-    learn();
   }
   
-  public void learn() {
-    if (!Strings.isNullOrEmpty(opts.dataPath)) {
-      List<String> lines = IOUtils.readLinesHard(opts.dataPath);
-      for (String line : lines) {
-        // Dataset.fromJsonlines, put it in a group and use standard stuff.
-        Example ex = JsonUtils.exampleFromJson(line);
-        learner.onlineLearnExample(ex);
-      }
-    }
-  }
-
   @Override
   protected void printHelp() {
     // interactive commands

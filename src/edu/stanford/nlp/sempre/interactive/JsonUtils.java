@@ -13,6 +13,7 @@ import edu.stanford.nlp.sempre.Values;
 import edu.stanford.nlp.sempre.ActionFormula.Mode;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
+import fig.basic.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,44 +25,40 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.testng.collections.Lists;
 import org.testng.util.Strings;
 
 /**
  * @author sidaw
  */
 public class JsonUtils  {
-  public static List<String> allPaths(JsonNode node) {
-    List<String> allPaths = new ArrayList<>();
-    getPaths(node, "$", false,  allPaths);
+  
+  public static List<Pair<List<String>, JsonNode>> allPathValues(JsonNode node) {
+    List<Pair<List<String>, JsonNode>> allPaths = new ArrayList<>();
+    getPaths(node, new ArrayList<>(), allPaths);
     return allPaths;
   }
   
-  public static List<String> allPathValues(JsonNode node) {
-    List<String> allPaths = new ArrayList<>();
-    getPaths(node, "$", true,  allPaths);
-    return allPaths;
+  private static List<String> extendPath(List<String> path, String... extend) {
+    List<String> newPath = new ArrayList<>(path);
+    newPath.addAll(Arrays.asList(extend));
+    return newPath;
   }
 
-  private static void getPaths(JsonNode node, String prefix, boolean addValue, List<String> paths) {
-    if (addValue)
-      paths.add(prefix + "\t:\t" + node.toString());
- 
+  private static void getPaths(JsonNode node, List<String> path, List<Pair<List<String>, JsonNode>> paths) {
+    paths.add(new Pair<>(path, node));
     if (node.isValueNode()) {
-      if (!addValue)
-        paths.add(prefix);
-      else
-        paths.add(prefix + "\t:\t" + node.toString());
       return;
     } else if (node.isArray()) {
       for (int i = 0; node.has(i); i++) {
         int childInd = i;
-        getPaths(node.get(i), prefix + "[" + childInd + "]", addValue, paths);
+        getPaths(node.get(i), extendPath(path, "[" + childInd + "]"), paths);
       }
     } else if (node.isObject()) {
       Iterator<String> names = node.fieldNames();
       while (names.hasNext()) {
         String childName = names.next();
-        getPaths(node.get(childName), prefix + "\t" + childName, addValue, paths);
+        getPaths(node.get(childName), extendPath(path, childName), paths);
       }
     }
   }
@@ -91,23 +88,5 @@ public class JsonUtils  {
       }
     }
     node.put(lastPath, value);
-  }
-
-  public static Example exampleFromJson(String jsonstr) {
-    // avoiding the JsonCreator since lisp values are annoying
-    Map<String, Object> jsonObj = Json.readMapHard(jsonstr);   
-    
-    return new Example((String)jsonObj.get("id"), (String)jsonObj.get("utterance"),
-        new JsonContextValue(jsonObj.get("context")),
-        null,
-        new JsonValue(jsonObj.get("targetValue")), null); 
-  }
-
-  public static List<Example> readExamples(String path) {
-    try (Stream<String> stream = Files.lines(Paths.get(path))) {
-      return stream.map(JsonUtils::exampleFromJson).collect(Collectors.toList());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }
