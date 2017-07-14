@@ -199,10 +199,15 @@ public class InteractiveServer {
                 InteractiveServer.opts.maxCandidates));
             allCandidates = allCandidates.subList(0, InteractiveServer.opts.maxCandidates);
           }
-
+          int errorValueCount = 0;
           for (Derivation deriv : allCandidates) {
-            Map<String, Object> item = new HashMap<String, Object>();
             Value value = deriv.getValue();
+            if (value instanceof ErrorValue) {
+              errorValueCount++;
+              continue;
+            }
+            Map<String, Object> item = new HashMap<String, Object>();
+            
             if (value instanceof StringValue)
               item.put("value", ((StringValue) value).value);
             else if (value instanceof ErrorValue)
@@ -222,6 +227,7 @@ public class InteractiveServer {
 
             items.add(item);
           }
+          LogInfo.logs("Server: %d / %d error values", errorValueCount, allCandidates.size());
         }
       }
       return json;

@@ -70,7 +70,7 @@ public class JsonExecutor extends Executor {
     } catch (Exception e) {
       // Comment this out if we expect lots of innocuous type checking failures
       if (opts.printStackTrace) {
-        LogInfo.log("Failed to execute " + formula.toString());
+        LogInfo.log("Failed to execute: " + formula.toString());
         e.printStackTrace();
       }
       return new Response(ErrorValue.badJava(e.toString()));
