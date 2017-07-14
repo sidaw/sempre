@@ -3,7 +3,6 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-import edu.stanford.nlp.sempre.interactive.DALExecutor.Options;
 import fig.basic.LispTree;
 import fig.basic.Option;
 

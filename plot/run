@@ -76,7 +76,7 @@ addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
 })
 
 addMode('setup', 'run some setup scripts for plotting', lambda { |e| l(
-  lambda { |e| system 'cd plot && python vega_lite_paths.py --filter "items vconcat hconcat layer spec repeat"'},
+  lambda { |e| system 'cd plot && python vega_lite_paths.py -is_typed --filter "items vconcat hconcat layer spec repeat encode selection"'},
   lambda { |e| system 'cd plot && svn checkout https://github.com/vega/vega-lite/trunk/examples/specs'},
   lambda { |e| system 'cd plot && bash makedir.sh'},
 nil) })
@@ -89,7 +89,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   #figOpts,
   o('server'),
   o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
-  o('Executor', 'interactive.JsonExecutor'),
+  o('Executor', 'interactive.VegaExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
   selo(0, 'Grammar.inPaths', "./#{$path}/plot.grammar"),
 
@@ -103,10 +103,11 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Parser', 'FloatingParser'),
   o('FloatingParser.defaultIsFloating', false),
   o('FloatingParser.useAnchorsOnce', true),
+  o('FloatingParser.allowCanonicalUtteranceOverride', true),
   o('Parser.callSetEvaluation', false),
   o('Parser.coarsePrune', false),
   o('ParserState.mapToFormula', true),
-  o('Parser.beamSize', 50),
+  o('Parser.beamSize', 200),
   o('ParserState.customExpectedCounts', 'None'),
 
   o('Params.l1Reg', 'nonlazy'),
@@ -128,11 +129,22 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Derivation.showRules', false),
   o('Derivation.anchoredBonus', 1.0),
 
+  o('VegaResources.vegaSchema', "./#{$path}/vega-lite-v2.json"),
   o('VegaResources.vegaSpecifications', "./#{$path}/templates/population", "./#{$path}/templates/car", "./#{$path}/templates/stocks"),
   selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 
   o('VegaEngine.verbose', 1),
-  o('JsonExecutor.compileVega', true),
+  o('VegaExecutor.compileVega', true),
+  o('JsonFn.maxJoins', 200),
+
+  # learning stuff
+  o('Dataset.inPaths', "train:./#{$path}/sampledata.jsonl"),
+  o('Parser.callSetEvaluation', true),
+
+  o('FeatureExtractor.featureComputers', 'FloatingFeatureComputer', 'interactive.VegaFeatureComputer'),
+  o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule'),
+
+  o('Learner.maxTrainIters', 2),
 
   lambda { |e| system 'mkdir -p ./plot-out/'; nil},
   lambda { |e| system 'mkdir -p ./plot-out/log/'; nil},

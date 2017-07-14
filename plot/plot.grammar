@@ -1,15 +1,18 @@
 (rule $ROOT ($Action) (IdentityFn) (floating 1))
 ## domain specific
 
-(rule $Value ($TOKEN) (NumberFn))
-(rule $Value ($PHRASE) (interactive.JsonFn isValue))
-(rule $PathToken ($TOKEN) (interactive.JsonFn isPath))
+(rule $Regular ($TOKEN) (FilterTokenFn nottoken anypath anyvalue))
+(rule $Value ($Regular) (interactive.JsonFn jsonValue))
+(rule $PathToken ($Regular) (interactive.JsonFn isPath))
 
 (rule $PathPattern ($PathPattern $PathToken) (lambda p1 (lambda p2 (:s (var p1) (var p2)))))
 (rule $PathPattern ($PathToken) (IdentityFn))
 
-(rule $Path ($PathPattern) (interactive.JsonFn expand))
-(rule $Action ($Path $Value) (lambda p (lambda v (: set (var p) (var v)))) (floating 1))
+# generate candidates from the paths, should be floating
+(rule $PathPattern (anypath) (ConstantFn *))
+(rule $Value (anyvalue) (ConstantFn *))
 
-(rule $Action (new $FileName) (lambda v (: new (var v))))
+(rule $Action ($PathPattern $Value) (interactive.JsonFn join) (floating 1))
+
+(rule $Action (new $FileName) (lambda v (: new (var v))) (anchored 1))
 (rule $FileName ($TOKEN) (interactive.JsonFn template))

@@ -2,11 +2,14 @@ package edu.stanford.nlp.sempre.interactive;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 // TODO: handle objects that have a list of allowable types
 
@@ -15,6 +18,8 @@ import java.util.function.Function;
  */
 public class JsonSchema implements Comparable<JsonSchema> {
 
+  public static final String NOTYPE = "notype";
+  
   public static class RefResolver {
     private JsonNode rootNode;
 
@@ -115,11 +120,47 @@ public class JsonSchema implements Comparable<JsonSchema> {
     }
     return node.get("type").asText();
   }
+  
+  
+  private List<String> simplePath(List<String> path) {
+    if (path.size() == 0) return new ArrayList<>();
+    int lastInd = path.size() - 1;
+    for (; lastInd > 0; lastInd--) {
+      if (path.get(lastInd).startsWith("#/definitions"))
+        break;
+    }
+    return path.subList(lastInd, path.size() ).stream()
+        .filter(p -> !p.equals("items") && !p.equals("properties") && !p.startsWith("anyOf["))
+        .map(s -> s.replace("#/definitions/", "#/"))
+        .collect(Collectors.toList());
+  }
+  
+  // include enum types, definitions for object items
+  public String schemaType() {
+    if (!node.has("type")) {
+      return NOTYPE;
+    }
+    String type = node.get("type").asText();
+    // object types is the last object definition
+    if (type.equals("object")) {
+      return String.join(".", simplePath(schemaPath));
+    }
+    // enum types are always strings
+    if (type.equals("string") && node.has("enum")) {
+      return String.join(".", simplePath(schemaPath)) + ".enum";
+    }
+    // string types is the immediate field before
+    String prev = schemaPath.get(schemaPath.size()-1);
+    if (type.equals("string") && !prev.startsWith("anyOf[")) {
+      return schemaPath.get(schemaPath.size()-1) + ".string";
+    }
+    return node.get("type").asText();
+  }
 
   public List<String> enums() {
     // I'm assuming that enums are always text, although this may not be true.
     if (!node.has("enum")) {
-      throw new RuntimeException("No 'enum'.");
+      return null;
     }
     JsonNode enumNode = node.get("enum");
     List<String> values = new ArrayList<>();

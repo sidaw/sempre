@@ -37,6 +37,7 @@ import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.ErrorValue;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Session;
 import edu.stanford.nlp.sempre.StringValue;
@@ -198,16 +199,21 @@ public class InteractiveServer {
                 InteractiveServer.opts.maxCandidates));
             allCandidates = allCandidates.subList(0, InteractiveServer.opts.maxCandidates);
           }
-
+          int errorValueCount = 0;
           for (Derivation deriv : allCandidates) {
-            Map<String, Object> item = new HashMap<String, Object>();
             Value value = deriv.getValue();
+            if (value instanceof ErrorValue) {
+              errorValueCount++;
+              continue;
+            }
+            Map<String, Object> item = new HashMap<String, Object>();
+            
             if (value instanceof StringValue)
               item.put("value", ((StringValue) value).value);
             else if (value instanceof ErrorValue)
               item.put("value", ((ErrorValue) value).sortString());
             else if (value instanceof JsonValue)
-              item.put("value", ((JsonValue) value).json);
+              item.put("value", ((JsonValue) value).getJsonNode());
             else if (value != null)
               item.put("value", value.sortString());
             else
@@ -217,9 +223,11 @@ public class InteractiveServer {
             item.put("anchored", deriv.allAnchored); // used only anchored rules
 
             item.put("formula", deriv.formula.toString());
+            item.put("canonical", deriv.canonicalUtterance);
 
             items.add(item);
           }
+          LogInfo.logs("Server: %d / %d error values", errorValueCount, allCandidates.size());
         }
       }
       return json;

@@ -1,42 +1,64 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.stanford.nlp.sempre.ActionFormula;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Formulas;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.Values;
+import edu.stanford.nlp.sempre.ActionFormula.Mode;
+import fig.basic.LispTree;
 import fig.basic.LogInfo;
+import fig.basic.Pair;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.testng.collections.Lists;
 import org.testng.util.Strings;
 
 /**
  * @author sidaw
  */
 public class JsonUtils  {
-  public static List<String> allPaths(JsonNode node) {
-    List<String> allPaths = new ArrayList<>();
-    getPaths(node, "", allPaths);
+  
+  public static List<Pair<List<String>, JsonNode>> allPathValues(JsonNode node) {
+    List<Pair<List<String>, JsonNode>> allPaths = new ArrayList<>();
+    getPaths(node, new ArrayList<>(), allPaths);
     return allPaths;
   }
+  
+  private static List<String> extendPath(List<String> path, String... extend) {
+    List<String> newPath = new ArrayList<>(path);
+    newPath.addAll(Arrays.asList(extend));
+    return newPath;
+  }
 
-  private static void getPaths(JsonNode node, String prefix, List<String> paths) {
+  private static void getPaths(JsonNode node, List<String> path, List<Pair<List<String>, JsonNode>> paths) {
+    paths.add(new Pair<>(path, node));
     if (node.isValueNode()) {
-      paths.add(prefix); return;
+      return;
     } else if (node.isArray()) {
       for (int i = 0; node.has(i); i++) {
         int childInd = i;
-        getPaths(node.get(i), prefix + "[" + childInd + "]", paths);
+        getPaths(node.get(i), extendPath(path, "[" + childInd + "]"), paths);
       }
     } else if (node.isObject()) {
       Iterator<String> names = node.fieldNames();
       while (names.hasNext()) {
         String childName = names.next();
-        getPaths(node.get(childName), prefix + "\t" + childName, paths);
+        getPaths(node.get(childName), extendPath(path, childName), paths);
       }
     }
   }
@@ -67,5 +89,4 @@ public class JsonUtils  {
     }
     node.put(lastPath, value);
   }
-
 }
