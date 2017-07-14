@@ -1,6 +1,5 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,17 +23,14 @@ import edu.stanford.nlp.sempre.NumberValue;
 import edu.stanford.nlp.sempre.StringValue;
 import edu.stanford.nlp.sempre.Value;
 import edu.stanford.nlp.sempre.ValueFormula;
-import edu.stanford.nlp.sempre.Executor.Response;
-import edu.stanford.nlp.sempre.interactive.VegaEngine;
 import edu.stanford.nlp.sempre.interactive.VegaEngine.VegaResponse;
-import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
  * Process formula whose interpretation depends on a JsonContext and Schema
  */
-public class JsonExecutor extends Executor {
+public class VegaExecutor extends Executor {
   public static class Options {
     @Option(gloss = "Print stack trace on exception")
     public boolean printStackTrace = false;
@@ -49,7 +45,7 @@ public class JsonExecutor extends Executor {
   private VegaEngine vegaEngine;
   private VegaResources vegaResource;
   
-  public JsonExecutor() {
+  public VegaExecutor() {
     if (opts.compileVega)
       vegaEngine = new VegaEngine();
     vegaResource = new VegaResources();

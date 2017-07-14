@@ -120,7 +120,8 @@ public class JsonFn extends SemanticFn {
       }
 
       private void nextPath() {
-        LogInfo.logs("JsonFn.nextPath %s", nextValue);
+        if (opts.verbose > 1)
+          LogInfo.logs("JsonFn.nextPath %s", nextValue);
         while (pathIterator.hasNext() && !valueIterator.hasNext()) {
           currentPath = pathIterator.next();
           valueIterator = getValueFn.apply(currentPath);
@@ -154,7 +155,7 @@ public class JsonFn extends SemanticFn {
       if (pathFormula instanceof ValueFormula) {
         pathPattern = "*".equals(Formulas.getString(pathFormula))? Lists.newArrayList() : Lists.newArrayList(Formulas.getString(pathFormula));
       } else if (pathFormula instanceof ActionFormula) {
-        pathPattern = JsonExecutor.pathFormulaToList((ActionFormula)pathFormula);
+        pathPattern = VegaExecutor.pathFormulaToList((ActionFormula)pathFormula);
       } else {
         throw new RuntimeException("unsuppported path formula: " + pathFormula);
       }

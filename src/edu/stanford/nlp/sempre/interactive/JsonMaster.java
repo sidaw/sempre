@@ -1,22 +1,28 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 
 import edu.stanford.nlp.sempre.Builder;
 import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Formula;
+import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.JsonContextValue;
+import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Session;
 import fig.basic.IOUtils;
+import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
- * Handle queries in json as opposed to lisp tree
+ * Handle queries in Json, since embedding json into LispTree is bad
  */
 public class JsonMaster extends Master {
   public static class Options {
@@ -57,7 +63,10 @@ public class JsonMaster extends Master {
 
   @Override
   public Response processQuery(Session session, String line) {
-    LogInfo.begin_track("InteractiveMaster.handleQuery");
+    if (session.id.equals("stdin")) {
+      return super.processQuery(session, line);
+    }
+    LogInfo.begin_track("JsonMaster.handleQuery");
     LogInfo.logs("session %s", session.id);
     LogInfo.logs("query %s", line);
     line = line.trim();
@@ -86,11 +95,20 @@ public class JsonMaster extends Master {
 
       stats.size(ex.predDerivations != null ? ex.predDerivations.size() : 0);
       stats.status(InteractiveUtils.getParseStatus(ex));
-
+      session.updateContext();
       LogInfo.logs("parse stats: %s", response.stats);
       response.ex = ex;
     } else if (command.equals("accept")) {
-
+      // Syntax ["accept", {"utterance":X, "targetValue":X, "context":X}]
+      // using lastExample seems unreliable, different tabs etc.
+      Map<String, Object> example = (Map<String, Object>) args.get(1);
+      String utt = (String) example.get("utterance");
+      Object targetValue = example.get("targetValue");
+      Object context = example.get("context");
+      Example ex = exampleFromUtterance(utt, session);
+      ex.targetValue = new JsonValue(targetValue);
+      ex.context = new JsonContextValue(context);
+      learner.onlineLearnExample(ex);
     } else if (command.equals("context")) {
       // Syntax ["context"] or ["context", context (object)]
       if (args.size() == 1) {

@@ -89,7 +89,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   #figOpts,
   o('server'),
   o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
-  o('Executor', 'interactive.JsonExecutor'),
+  o('Executor', 'interactive.VegaExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
   selo(0, 'Grammar.inPaths', "./#{$path}/plot.grammar"),
 
@@ -134,12 +134,16 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 
   o('VegaEngine.verbose', 1),
-  o('JsonExecutor.compileVega', true),
+  o('VegaExecutor.compileVega', true),
   o('JsonFn.maxJoins', 200),
 
   # learning stuff
   o('Dataset.inPaths', "train:./#{$path}/sampledata.jsonl"),
   o('Parser.callSetEvaluation', true),
+
+  o('FeatureExtractor.featureComputers', 'FloatingFeatureComputer', 'interactive.VegaFeatureComputer'),
+  o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule'),
+
   o('Learner.maxTrainIters', 2),
 
   lambda { |e| system 'mkdir -p ./plot-out/'; nil},
