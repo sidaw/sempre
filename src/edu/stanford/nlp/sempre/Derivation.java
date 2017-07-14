@@ -62,7 +62,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public Formula formula;
     public List<Derivation> matches = new ArrayList<>();
     public List<String> tokens;
-    public String symbol; 
+    public String symbol;
   }
   public InteractiveInfo grammarInfo = new InteractiveInfo();
 

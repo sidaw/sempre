@@ -131,11 +131,12 @@ public class JsonSchema implements Comparable<JsonSchema> {
     }
     return path.subList(lastInd, path.size() ).stream()
         .filter(p -> !p.equals("items") && !p.equals("properties") && !p.startsWith("anyOf["))
+        .map(s -> s.replace("#/definitions/", "#/"))
         .collect(Collectors.toList());
   }
   
   // include enum types, definitions for object items
-  public String richType() {
+  public String schemaType() {
     if (!node.has("type")) {
       return NOTYPE;
     }
@@ -153,9 +154,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
     if (type.equals("string") && !prev.startsWith("anyOf[")) {
       return schemaPath.get(schemaPath.size()-1) + ".string";
     }
-    
     return node.get("type").asText();
-
   }
 
   public List<String> enums() {

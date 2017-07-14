@@ -9,7 +9,8 @@ import fig.basic.LispTree;
  */
 public class JsonValue extends Value {
   JsonNode json;
-  String richType = "notype";
+  String schemaType = "notype";
+  String jsonType = "string";
   
   public JsonNode getJsonNode() {
     return json;
@@ -18,11 +19,16 @@ public class JsonValue extends Value {
   public JsonValue(JsonNode jsonNode) {
     super();
     json = jsonNode;
+    inferJsonType();
   }
   
-  public JsonValue withType(String type) {
-    this.richType = type;
+  public JsonValue withSchemaType(String type) {
+    this.schemaType = type;
     return this;
+  }
+  
+  private void inferJsonType() {
+    this.jsonType = json.getNodeType().toString().toLowerCase();
   }
   
   public JsonValue(Object jsonObj) {
@@ -34,7 +40,6 @@ public class JsonValue extends Value {
   public String sortString() { return Json.writeValueAsStringHard(json); }
   @Override
   public String toString() {
-    // TODO Auto-generated method stub
     return sortString();
   }
   @Override
@@ -42,7 +47,7 @@ public class JsonValue extends Value {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("json");
     tree.addChild(Json.writeValueAsStringHard(json));
-    tree.addChild(this.richType);
+    tree.addChild(this.schemaType);
     return tree;
   }
   @Override
@@ -57,7 +62,7 @@ public class JsonValue extends Value {
     return 0;
   }
 
-  public String getRichType() {
-    return richType;
+  public String getSchemaType() {
+    return schemaType;
   }
 }

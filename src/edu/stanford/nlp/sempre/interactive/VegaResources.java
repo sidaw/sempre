@@ -67,9 +67,9 @@ public class VegaResources {
     List<JsonSchema> schemas = vegaSchema.schemas(path);
     List<JsonValue> values = new ArrayList<>();
     for (JsonSchema schema : schemas) {
-      String type = schema.richType();
+      String type = schema.schemaType();
       if (!type.equals(JsonSchema.NOTYPE) && typeToValues.containsKey(type))
-        values.addAll(typeToValues.get(schema.richType()));
+        values.addAll(typeToValues.get(schema.schemaType()));
     }
     // LogInfo.logs("VegaResources.getValues %s %s", path, values);
     return values;
@@ -84,19 +84,17 @@ public class VegaResources {
       if (opts.vegaSchema != null) {
         vegaSchema = JsonSchema.fromFile(new File(opts.vegaSchema));
       }
-
       if (opts.vegaSpecifications != null) {
         processVegaTemplates();
       }
-
       if (opts.allVegaJsonPaths != null) {
         LogInfo.logs("VegaResources loading possible paths");
         allPathsMatcher = new VegaLitePathMatcher(opts.allVegaJsonPaths);
         LogInfo.logs("loaded %d keys", allPathsMatcher.pathKeys().size());
       }
-    }
-    catch (IOException ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
+      throw new RuntimeException(ex);
     }
   }
 
@@ -132,16 +130,28 @@ public class VegaResources {
         JsonNode value = pathValue.getSecond();
         try {
           for (JsonSchema schema: vegaSchema.schemas(path)) {
-            String type = schema.richType();
-            MapUtils.addToList(typeToValues, type, new JsonValue(value).withType(type));
-            writer.println( schema.richType() + "\t" + path + "\t" + value);
+            String type = schema.schemaType();
+            if (type.equals("null") || type.equals("number") || type.equals("string") || type.endsWith(".string") || type.equals("boolean")) continue;
+            MapUtils.addToList(typeToValues, type, new JsonValue(value).withSchemaType(type));
+            writer.println( schema.schemaType() + "\t" + path + "\t" + value);
           }
         } catch (RuntimeException ex) {
           LogInfo.logs("VegaResource %s %s", path, ex);
           ex.printStackTrace();
         }
       }
-      Json.prettyWriteValueHard(new File(savePath.toString()+".json"), typeToValues);
+      
+      MapUtils.addToList(typeToValues, "boolean", new JsonValue(true).withSchemaType("boolean"));
+      MapUtils.addToList(typeToValues, "boolean", new JsonValue(false).withSchemaType("boolean"));
+      MapUtils.addToList(typeToValues, "number", new JsonValue(42).withSchemaType("number"));
+      MapUtils.addToList(typeToValues, "number", new JsonValue(312).withSchemaType("number"));
+      MapUtils.addToList(typeToValues, "string", new JsonValue("randomteststring").withSchemaType("string"));
+      
+      Json.prettyWriteValueHard(new File(savePath.toString()+".json"),
+          typeToValues.entrySet().stream().map(e -> {
+            return Lists.newArrayList(e.getKey(),
+                e.getValue().stream().map(jv -> jv.getJsonNode()).collect(Collectors.toList()));
+          }).collect(Collectors.toList()) );
       writer.close();
     }
 

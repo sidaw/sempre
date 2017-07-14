@@ -218,6 +218,7 @@ public class InteractiveServer {
             item.put("anchored", deriv.allAnchored); // used only anchored rules
 
             item.put("formula", deriv.formula.toString());
+            item.put("canonical", deriv.canonicalUtterance);
 
             items.add(item);
           }

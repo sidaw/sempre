@@ -1,4 +1,4 @@
-(rule $ROOT ($Action) (IdentityFn) (floating 1))
+# (rule $ROOT ($Action) (IdentityFn) (anchored 1))
 ## domain specific
 
 (rule $Regular ($TOKEN) (FilterTokenFn nottoken anypath anyvalue))
@@ -14,8 +14,8 @@
 
 # TODO: anypath : valuetype
 # TODO: config : anyvalue
-(rule $Action ($PathPattern $Value) (interactive.JsonFn join) (anchored 1))
+(rule $ROOT ($PathPattern $Value) (interactive.JsonFn join) (anchored 1))
 # (rule $Action ($PathPattern $Value) (interactive.JsonFn join) (floating 1))
 
-(rule $Action (new $FileName) (lambda v (: new (var v))))
+(rule $ROOT (new $FileName) (lambda v (: new (var v))))
 (rule $FileName ($TOKEN) (interactive.JsonFn template))

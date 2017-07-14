@@ -52,7 +52,6 @@ public class JsonExecutor extends Executor {
   public JsonExecutor() {
     if (opts.compileVega)
       vegaEngine = new VegaEngine();
-
     vegaResource = new VegaResources();
   }
 

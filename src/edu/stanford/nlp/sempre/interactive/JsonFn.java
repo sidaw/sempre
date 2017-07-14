@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -38,6 +39,9 @@ public class JsonFn extends SemanticFn {
   public static class Options {
     @Option(gloss = "verbosity")
     public int verbose = 0;
+    
+    @Option(gloss = "verbosity")
+    public int maxJoins = Integer.MAX_VALUE;
   }
 
   public static Options opts = new Options();
@@ -96,8 +100,7 @@ public class JsonFn extends SemanticFn {
     Callable callable;
     Iterator<Pair<List<String>, JsonValue>> iterator;
     List<String> pathPattern;
-    boolean anyPath = false;
-    boolean anyValue = false;
+    int generated = 0;
 
     // when there is not too many Paths,
     // where Path restrict the values that need to be considered
@@ -117,6 +120,7 @@ public class JsonFn extends SemanticFn {
       }
 
       private void nextPath() {
+        LogInfo.logs("JsonFn.nextPath %s", nextValue);
         while (pathIterator.hasNext() && !valueIterator.hasNext()) {
           currentPath = pathIterator.next();
           valueIterator = getValueFn.apply(currentPath);
@@ -127,6 +131,7 @@ public class JsonFn extends SemanticFn {
       }
 
       public boolean hasNext() {
+        if (generated++ > opts.maxJoins) return false;
         return nextValue != null;
       }
 
@@ -169,6 +174,10 @@ public class JsonFn extends SemanticFn {
         pathToValue = p -> Collections.emptyIterator();
       }
       
+      if (opts.verbose > 0) {
+        List<List<String>> currentpaths = VegaResources.allPathsMatcher.match(pathPattern);
+        LogInfo.logs("JsonFn Path %s, size %s", currentpaths, currentpaths.size());
+      }
       iterator = new EnumeratePathsIterator(VegaResources.allPathsMatcher.match(pathPattern).iterator(),
          pathToValue);
     }
@@ -179,9 +188,9 @@ public class JsonFn extends SemanticFn {
 
       for (JsonSchema schema : pathSchemas) {
         try {
-          if (schema.type().equals("string") && schema.enums() != null) {
+          if (schema.schemaType().endsWith(".enum")) {
             if (schema.enums().contains(value.getJsonNode().asText())) return true;
-          } else if (value.getRichType().equals(schema.type()))
+          } else if (value.getSchemaType().equals(schema.type()))
             return true;
         } catch (Exception e) {
           LogInfo.logs("checkType exception %s %s", e, path);
@@ -192,22 +201,27 @@ public class JsonFn extends SemanticFn {
     }
 
     private Derivation derivFromPathValue(List<String> path, JsonValue value) {
-      NameValue fullPath = new NameValue("$." + String.join(".", path), String.join("*", this.pathPattern));
+      NameValue fullPath = new NameValue("$." + String.join(".", path));
       Formula setFormula = new ActionFormula(ActionFormula.Mode.primitive,
           Lists.newArrayList(new ValueFormula<NameValue>(new NameValue("set")),
               new ValueFormula<NameValue>(fullPath),
               new ValueFormula<JsonValue>(value)));
-      return new Derivation.Builder()
+      Derivation deriv = new Derivation.Builder()
           .withCallable(callable)
           .formula(setFormula)
           .createDerivation();
+      deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
+          value.getJsonNode().toString(),
+          VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaType())
+          .collect(Collectors.toList()),
+          value.getSchemaType());
+      return deriv;
     }
 
     @Override
     public Derivation createDerivation() {
       while (iterator.hasNext()) {
         Pair<List<String>, JsonValue> next = iterator.next();
-        // LogInfo.logs("Join %s", next);
         if (checkType(next.getFirst(), next.getSecond())) {
           return derivFromPathValue(next.getFirst(), next.getSecond());
         }
@@ -248,15 +262,34 @@ public class JsonFn extends SemanticFn {
       callable = c;      
     }
 
+    private Double parseNumber(String string) {
+      try {
+        return Double.valueOf(string);
+      } catch (NumberFormatException e) {
+        return null;
+      }
+    }
+    
+    private Boolean parseBoolean(String string) {
+      if (string.equals("true"))
+        return true;
+      else if (string.equals("false"))
+        return false;
+      else return null;
+    }
+    
     @Override
     public Derivation createDerivation() {
       JsonValue value;
-      try {
-        Double number = Double.parseDouble(callable.childStringValue(0));
-        value = new JsonValue(number).withType("number");
-      } catch (Exception e) {
-        String string = callable.childStringValue(0);
-        value = new JsonValue(string).withType("string");
+      String string = callable.childStringValue(0);
+      
+      // cant just use getNodeType, because 100 and true are also strings
+      if (parseNumber(string) != null)
+        value = new JsonValue(parseNumber(string)).withSchemaType("number");
+      else if (parseBoolean(string) != null) {
+        value = new JsonValue(parseBoolean(string)).withSchemaType("boolean");
+      } else {
+        value = new JsonValue(string).withSchemaType("string");
       }
       Formula formula = new ValueFormula<JsonValue>(value);
       return new Derivation.Builder()

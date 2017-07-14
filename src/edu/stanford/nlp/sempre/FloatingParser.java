@@ -6,6 +6,8 @@ import fig.exec.Execution;
 import java.io.PrintWriter;
 import java.util.*;
 
+import com.google.common.base.Strings;
+
 import static fig.basic.LogInfo.logs;
 
 /**
@@ -85,6 +87,8 @@ public class FloatingParser extends Parser {
     public boolean summarizeRuleTime = false;
     @Option(gloss = "Stop the parser if it has used more than this amount of time (in seconds)")
     public int maxFloatingParsingTime = 600;
+    @Option(gloss = "if DerivationStream wants to override canonical utterance")
+    public boolean allowCanonicalUtteranceOverride = false;
   }
 
   public static Options opts = new Options();
@@ -239,7 +243,10 @@ class FloatingParserState extends ParserState {
     while (results.hasNext()) {
       Derivation newDeriv = results.next();
       if (FloatingParser.opts.betaReduce) newDeriv = newDeriv.betaReduction();
-      newDeriv.canonicalUtterance = canonicalUtterance;
+      
+      // in case someone wants to modify the cannonicalUtterance
+      if (FloatingParser.opts.allowCanonicalUtteranceOverride && Strings.isNullOrEmpty(newDeriv.canonicalUtterance))
+        newDeriv.canonicalUtterance = canonicalUtterance;
 
       // make sure we execute
       if (FloatingParser.opts.executeAllDerivations && !(newDeriv.type instanceof FuncSemType))
