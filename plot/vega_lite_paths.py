@@ -24,6 +24,10 @@ arg_parser.add_argument('--schema_path', default='vega-lite-v2.json')
 arg_parser.add_argument('--out_path', default='vega-lite-paths.txt')
 arg_parser.add_argument('--filter', default='items vconcat hconcat layer spec repeat')
 
+arg_parser.add_argument('--descriptions', default='True') #Make arg 'True' if want the descriptions 
+
+
+
 args = arg_parser.parse_args()
 
 
@@ -35,12 +39,16 @@ resolve = lambda ref: resolver.resolve(ref)[1]
 
 
 # represents a node in the schema
-class Node(namedtuple('Node', ['schema', 'full_path'])):
+class Node(namedtuple('Node', ['schema', 'full_path', 'description'])):
 
     @property
     def path(self):
         # remove "anyOf"s and references
-        return tuple(key for key in self.full_path if not (key.startswith("anyOf[") or key.startswith("#/")))
+        return tuple(key for key in self.full_path if not (key.startswith("anyOf[") or key.startswith("#/"))) 
+    
+    @property
+    def definition(self):
+	    return self.description
 
 
 def children(node):
@@ -57,7 +65,11 @@ def children(node):
 
     if "anyOf" in schema:
         for i, s in enumerate(schema["anyOf"]):
-            child_nodes.append(Node(s, full_path + ["anyOf[{}]".format(i)]))
+	        d = "None"
+	        if "description" in s and (args.descriptions == 'True'):
+	            d = s["description"]
+	        child_nodes.append(Node(s, full_path + ["anyOf[{}]".format(i)], d))
+
 
     # jump through reference
     if "$ref" in schema:
@@ -65,16 +77,28 @@ def children(node):
 
         # avoid circular references
         if not (ref in full_path):
-            child_nodes.append(Node(resolve(ref), full_path + [ref]))
+	        d = "None" 
+ 	        if "description" in resolve(ref) and (args.descriptions == 'True'):
+	            d = resolve(ref)["description"]
+	        child_nodes.append(Node(resolve(ref), full_path + [ref], d))
+            
 
     # arrays have "items"
     if "items" in schema:
-        child_nodes.append(Node(schema["items"], full_path + ["items"]))
+	    d = "None"
+	    if "description" in schema["items"] and (args.descriptions == 'True'):
+	        d = schema["items"]["description"]
+	    child_nodes.append(Node(schema["items"], full_path + ["items"], d))
+         
 
     # objects have "properties"
     if "properties" in schema:
-        for key, s in sorted(schema["properties"].items()):
-            child_nodes.append(Node(s, full_path + [key]))
+        for key, s in sorted(schema["properties"].items()): 
+	        d = "None"
+	        if "description" in s and (args.descriptions == 'True'):
+	            d=s["description"]
+	        child_nodes.append(Node(s, full_path + [key], d))
+              
 
     return child_nodes
 
@@ -83,24 +107,39 @@ def children(node):
 print 'Exploring paths'
 
 paths = set()
-seed = Node(schema, [])
+seed = Node(schema, [], "None")
 queue = deque([seed])
 
 while len(queue) > 0:
     state = queue.pop()
-    paths.add(state.path)
-    new_states = children(state)
+    if args.descriptions == 'True':
+        paths.add(state.path+tuple(" ")+tuple(state.definition))
+    else:
+	    paths.add(state.path+tuple(" ")) 
+    new_states = children(state)    
     for state in reversed(new_states):
         queue.append(state)
 
-# remove empty path
-paths.remove(tuple())
+# remove empty path 
+if args.descriptions == 'True':
+    paths.remove(tuple(" ")+tuple("None"))
+else:
+	paths.remove(tuple(" "))
 
-# write paths to file
+# write paths to file 
+import re
 with open(args.out_path, 'w') as f:
+    paths = sorted(paths) 
     if args.filter:
-        notallowed = args.filter.split(' ');
-        paths = [ps for ps in sorted(paths) if all([p not in notallowed for p in ps]) ]
+	    notallowed = args.filter.split(' ');
+	    paths = [ps for ps in sorted(paths) if all([p not in notallowed for p in ps])]
     for path in paths:
-        line = '{}\n'.format('\t'.join(path))
-        f.write(line)
+	    path_list = list(path)
+	    file_path_index = path_list.index(" ")
+	    file_path = re.sub(r"[^A-Za-z-:,. \t]+", '', '\t'.join(path_list[:file_path_index]).encode('utf8'))
+	    line = file_path
+	    if args.descriptions == 'True':  
+	        definition = re.sub(r"[^A-Za-z-:,. \t]+", '', ''.join(path_list[file_path_index:]).encode('utf8')) 
+	        line = line + '\tDefinition: ' + definition
+	    f.write(line+'\n')
+
