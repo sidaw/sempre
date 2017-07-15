@@ -23,13 +23,9 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('--schema_path', default='vega-lite-v2.json')
 arg_parser.add_argument('--out_path', default='vega-lite-paths.txt')
 arg_parser.add_argument('--filter', default='items vconcat hconcat layer spec repeat')
-
-arg_parser.add_argument('--descriptions', default='True') #Make arg 'True' if want the descriptions 
-
-
+arg_parser.add_argument('--descriptions', default='False') #Make arg 'True' if want the descriptions
 
 args = arg_parser.parse_args()
-
 
 # load Vega Lite schema and reference resolver
 with open(args.schema_path) as f:
@@ -44,8 +40,8 @@ class Node(namedtuple('Node', ['schema', 'full_path', 'description'])):
     @property
     def path(self):
         # remove "anyOf"s and references
-        return tuple(key for key in self.full_path if not (key.startswith("anyOf[") or key.startswith("#/"))) 
-    
+        return tuple(key for key in self.full_path if not (key.startswith("anyOf[") or key.startswith("#/")))
+
     @property
     def definition(self):
 	    return self.description
@@ -77,11 +73,11 @@ def children(node):
 
         # avoid circular references
         if not (ref in full_path):
-	        d = "None" 
+	        d = "None"
  	        if "description" in resolve(ref) and (args.descriptions == 'True'):
 	            d = resolve(ref)["description"]
 	        child_nodes.append(Node(resolve(ref), full_path + [ref], d))
-            
+
 
     # arrays have "items"
     if "items" in schema:
@@ -89,16 +85,16 @@ def children(node):
 	    if "description" in schema["items"] and (args.descriptions == 'True'):
 	        d = schema["items"]["description"]
 	    child_nodes.append(Node(schema["items"], full_path + ["items"], d))
-         
+
 
     # objects have "properties"
     if "properties" in schema:
-        for key, s in sorted(schema["properties"].items()): 
+        for key, s in sorted(schema["properties"].items()):
 	        d = "None"
 	        if "description" in s and (args.descriptions == 'True'):
 	            d=s["description"]
 	        child_nodes.append(Node(s, full_path + [key], d))
-              
+
 
     return child_nodes
 
@@ -115,21 +111,21 @@ while len(queue) > 0:
     if args.descriptions == 'True':
         paths.add(state.path+tuple(" ")+tuple(state.definition))
     else:
-	    paths.add(state.path+tuple(" ")) 
-    new_states = children(state)    
+	    paths.add(state.path+tuple(" "))
+    new_states = children(state)
     for state in reversed(new_states):
         queue.append(state)
 
-# remove empty path 
+# remove empty path
 if args.descriptions == 'True':
     paths.remove(tuple(" ")+tuple("None"))
 else:
 	paths.remove(tuple(" "))
 
-# write paths to file 
+# write paths to file
 import re
 with open(args.out_path, 'w') as f:
-    paths = sorted(paths) 
+    paths = sorted(paths)
     if args.filter:
 	    notallowed = args.filter.split(' ');
 	    paths = [ps for ps in sorted(paths) if all([p not in notallowed for p in ps])]
@@ -138,8 +134,7 @@ with open(args.out_path, 'w') as f:
 	    file_path_index = path_list.index(" ")
 	    file_path = re.sub(r"[^A-Za-z-:,. \t]+", '', '\t'.join(path_list[:file_path_index]).encode('utf8'))
 	    line = file_path
-	    if args.descriptions == 'True':  
-	        definition = re.sub(r"[^A-Za-z-:,. \t]+", '', ''.join(path_list[file_path_index:]).encode('utf8')) 
+	    if args.descriptions == 'True':
+	        definition = re.sub(r"[^A-Za-z-:,. \t]+", '', ''.join(path_list[file_path_index:]).encode('utf8'))
 	        line = line + '\tDefinition: ' + definition
 	    f.write(line+'\n')
-
