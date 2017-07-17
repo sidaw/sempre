@@ -76,7 +76,7 @@ addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
 })
 
 addMode('setup', 'run some setup scripts for plotting', lambda { |e| l(
-  lambda { |e| system 'cd plot && python vega_lite_paths.py -is_typed --filter "items vconcat hconcat layer spec repeat encode selection"'},
+  lambda { |e| system 'cd plot && python vega_lite_paths.py --filter "items vconcat hconcat layer spec repeat encode selection" --description False'},
   lambda { |e| system 'cd plot && svn checkout https://github.com/vega/vega-lite/trunk/examples/specs'},
   lambda { |e| system 'cd plot && svn checkout https://github.com/vega/vega-editor/trunk/data'},
   lambda { |e| system 'cd plot && bash makedir.sh'},
@@ -135,7 +135,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 
   o('VegaEngine.verbose', 1),
-  o('VegaExecutor.compileVega', true),
+  o('VegaExecutor.compileVega', false),
   o('JsonFn.maxJoins', 200),
 
   # learning stuff
