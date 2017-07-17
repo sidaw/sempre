@@ -928,7 +928,7 @@ var falsy = accessor(function() { return false; }, empty, 'false');
 
 function log(method, level, input) {
   var args = [level].concat([].slice.call(input));
-  console[method].apply(console, args); // eslint-disable-line no-console
+  console.log(level + ": " + JSON.stringify(input));
 }
 
 var None  = 0;
@@ -10140,7 +10140,9 @@ function run(encode) {
       ++count;
     }
   } catch (err) {
-    error = err;
+    //error = err;
+    console.log(err.stack);
+    throw err
   }
 
   // reset pulse map
@@ -33709,6 +33711,13 @@ function ContextFork(ctx) {
   }
 }
 
+function readDataLocal(uri) {
+  var match = uri.match(/.*\/data\/(.*)\.json/);
+  var name = match[1];
+  var data = readFile('plot/data/' + name + '.json');
+  return data
+}
+
 Context.prototype = ContextFork.prototype = {
   fork: function() {
     var ctx = new ContextFork(this);
@@ -33732,7 +33741,8 @@ Context.prototype = ContextFork.prototype = {
       if (data.$ingest) {
         df.ingest(op, data.$ingest, data.$format);
       } else if (data.$request) {
-        df.request(op, data.$request, data.$format);
+        var data = readDataLocal(data.$request);
+        df.ingest(op, data, data.$format)
       } else {
         df.pulse(op, df.changeset().insert(data));
       }

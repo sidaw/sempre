@@ -78,6 +78,7 @@ addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
 addMode('setup', 'run some setup scripts for plotting', lambda { |e| l(
   lambda { |e| system 'cd plot && python vega_lite_paths.py -is_typed --filter "items vconcat hconcat layer spec repeat encode selection"'},
   lambda { |e| system 'cd plot && svn checkout https://github.com/vega/vega-lite/trunk/examples/specs'},
+  lambda { |e| system 'cd plot && svn checkout https://github.com/vega/vega-editor/trunk/data'},
   lambda { |e| system 'cd plot && bash makedir.sh'},
 nil) })
 ############################################################

@@ -140,8 +140,8 @@ public class VegaExecutor extends Executor {
       LogInfo.logs("Vega-lite spec: %s", result.toString());
       LogInfo.logs("Vega spec: %s", vr.vegaSpec.toString());
       LogInfo.logs("Compiler message: %s", vr.message);
-      if (vr.svg != null) {
-        LogInfo.logs("SVG: %s", vr.svg);
+      if (vr.image != null) {
+        LogInfo.logs("Image: %s", vr.image);
       }
     } else if (opts.verbose >= 1) 
       LogInfo.logs("Compiler message: %s", vr.message);
