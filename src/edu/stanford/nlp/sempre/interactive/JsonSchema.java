@@ -4,17 +4,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
+import fig.basic.LogInfo;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 // TODO: handle objects that have a list of allowable types
 
 /**
- * Created by Kelvin on 6/1/17.
+ * @author kelvin sidaw
  */
 public class JsonSchema implements Comparable<JsonSchema> {
 
@@ -88,7 +91,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
   }
 
   public String toString() {
-    return String.format("%s\npath: %s\ntype: %s", name(), schemaPath(), type());
+    return String.format("%s\npath: %s\ntype: %s", name(), schemaPath(), schemaType());
   }
 
   @Override
@@ -146,6 +149,10 @@ public class JsonSchema implements Comparable<JsonSchema> {
       return String.join(".", simplePath(schemaPath));
     }
     // enum types are always strings
+    if (type.equals("string") && node.has("enum")) {
+      return String.join(".", simplePath(schemaPath)) + ".enum";
+    }
+    // extension types are also strings?
     if (type.equals("string") && node.has("enum")) {
       return String.join(".", simplePath(schemaPath)) + ".enum";
     }
@@ -242,5 +249,53 @@ public class JsonSchema implements Comparable<JsonSchema> {
     List<String> newPath = new ArrayList<>(path);
     newPath.addAll(Arrays.asList(extend));
     return newPath;
+  }
+  
+  private Set<JsonSchema> children() {
+    Set<JsonSchema> schemaSet = new HashSet<>();
+
+    if (node.has("anyOf")) {
+      JsonNode anyOfNode = node.get("anyOf");
+      int i = 0;
+      for (JsonNode element : anyOfNode) {
+        List<String> newSchemaPath = extendPath(schemaPath, String.format("anyOf[%d]", i));
+        schemaSet.add(new JsonSchema(element, name, newSchemaPath, resolver));
+        i += 1;
+      }
+    } else if (node.has("$ref")) {
+      String ref = node.get("$ref").asText();
+      // avoid circular paths
+      if (!this.schemaPath.contains(ref)) {
+        JsonNode refNode = resolver.resolve(ref);
+        List<String> newSchemaPath = extendPath(schemaPath, ref);
+        schemaSet.add(new JsonSchema(refNode, name, newSchemaPath, resolver));
+      } else {
+        LogInfo.logs("Excluded due to loop %s: %s", this.schemaPath, ref);
+      }
+    } else if (node.has("properties")) {
+      Iterator<Entry<String, JsonNode>> fieldIterator = node.get("properties").fields();
+      while (fieldIterator.hasNext()) {
+        Entry<String, JsonNode> entry = fieldIterator.next();
+        List<String> newSchemaPath = extendPath(schemaPath, "properties", entry.getKey());
+        schemaSet.add(new JsonSchema(entry.getValue(), entry.getKey(), newSchemaPath, resolver));
+      }
+    }
+    return schemaSet;
+  }
+  
+  public List<String> simplePath() {
+    return this.schemaPath.stream().filter(s ->
+    !s.equals("properties") && !s.equals("items") && !s.startsWith("#/") && !s.startsWith("anyOf"))
+        .collect(Collectors.toList());
+  }
+  
+  public List<JsonSchema> descendents() {
+    List<JsonSchema> schemaSet = new ArrayList<>();
+    for (JsonSchema child : children()) {
+      schemaSet.add(this);
+      schemaSet.add(child);
+      schemaSet.addAll(child.descendents());
+    }
+    return schemaSet;
   }
 }

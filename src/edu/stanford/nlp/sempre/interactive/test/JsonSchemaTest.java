@@ -1,7 +1,12 @@
-package edu.stanford.nlp.sempre.test;
+package edu.stanford.nlp.sempre.interactive.test;
 
-import edu.stanford.nlp.sempre.JsonSchema;
+import edu.stanford.nlp.sempre.interactive.JsonSchema;
+import fig.basic.LogInfo;
+
+import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Sets;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -9,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -71,5 +78,32 @@ public class JsonSchemaTest {
     // test that enums is working
     assertEquals("string", repeatSchema.type());
     assertEquals(Arrays.asList("column", "row"), repeatSchema.enums());
+  }
+  
+  @Test
+  public void testAllSchemas() throws IOException {
+    File f = new File(VEGA_LITE_SCHEMA);
+    JsonSchema schema = JsonSchema.fromFile(f);
+    List<JsonSchema> descendents = schema.descendents();
+    for (JsonSchema desc : descendents) {
+      LogInfo.logs("SchemaTest.all %s", desc.schemaPath());
+    }
+    LogInfo.logs("Got %d paths", descendents.size());
+    
+    Set<List<String>> simplePaths = descendents.stream().map(s -> s.simplePath()).collect(Collectors.toSet());
+    for (List<?> desc : simplePaths) {
+      LogInfo.logs("SchemaTest.simple %s", desc);
+    }
+    LogInfo.logs("Got %d distinct simple paths", simplePaths.size());
+    
+    Set<String> filter = Sets.newHashSet("vconcat", "hconcat", "repeat", "spec", "layer", "items");
+    Set<List<String>> filteredPaths = descendents.stream().map(s -> s.simplePath())
+        .filter(p -> p.stream().allMatch(s -> !filter.contains(s)))
+        .collect(Collectors.toSet());
+    LogInfo.logs("Got %d distinct simple path not containing %s", filteredPaths.size(), filter);
+    AssertJUnit.assertTrue(filteredPaths.size()==1233);
+    
+    List<JsonSchema> enums = descendents.stream().collect(Collectors.toSet()).stream().filter(s -> s.node().has("enum")).collect(Collectors.toList());
+    LogInfo.logs("Got %d enums", enums.size());
   }
 }

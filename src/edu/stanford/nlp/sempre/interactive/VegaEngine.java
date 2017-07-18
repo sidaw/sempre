@@ -6,6 +6,8 @@ import edu.stanford.nlp.sempre.Json;
 import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.Option;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -35,13 +37,13 @@ public class VegaEngine {
    * Results of compiling a Vega or Vega-lite spec
    */
   public static class VegaResponse {
-    public VegaResponse(JsonNode vegaSpec, String svg, String message) {
+    public VegaResponse(JsonNode vegaSpec, VegaImage image, String message) {
       this.vegaSpec = vegaSpec;
-      this.svg = svg;
+      this.image = image;
       this.message = message;
     }
     public final JsonNode vegaSpec;
-    public final String svg;
+    public final VegaImage image;
     public final String message;
 
     public boolean isClean() {
@@ -52,12 +54,41 @@ public class VegaEngine {
      * Checks if compiled without issue and might be different from |context|
      */
     public boolean isGoodChange(VegaResponse context) {
-       if (!isClean()) return false;
-       if (context == null) return true;
-       if (vegaSpec == null) return true;
-       if (vegaSpec.equals(context.vegaSpec)) return false;
-       if (svg == null) return true;
-       return !svg.equals(context.svg);
+      if (!isClean()) return false;
+      if (context == null) return true;
+      if (vegaSpec == null) return true;
+      if (vegaSpec.equals(context.vegaSpec)) return false;
+      if (image == null || image.svg == null) return true;
+      if (context.image == null || context.image.svg == null) return true;
+      return !image.equals(context.image);
+    }
+  }
+  /**
+   * Represents an image.  SVG is insufficient because it doesn't have background.
+   */
+  public static class VegaImage {
+    public VegaImage(String svg, String background) {
+      this.svg = svg;
+      this.background = background;
+    }
+    public final String svg;
+    public final String background;
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == null) return false;
+      if (!(obj instanceof VegaImage)) return false;
+      VegaImage other = (VegaImage) obj;
+      if (svg == null && other.svg != null) return false;
+      if (svg != null && !svg.equals(other.svg)) return false;
+      if (background == null && other.background != null) return false;
+      if (background != null && !background.equals(other.background)) return false;
+      return true;
+    }
+
+    @Override
+    public String toString() {
+      return "Background=" + background + ", SVG=" + svg;
     }
   }
 
@@ -77,9 +108,10 @@ public class VegaEngine {
     ScriptEngineManager factory = new ScriptEngineManager();
     scriptEngine = factory.getEngineByName("nashorn");
     try {
+      scriptEngine.eval(new java.io.FileReader("plot/js-lib/nashorn-polyfill.js"));
+      scriptEngine.eval(new java.io.FileReader("plot/js-lib/synchronous-promise.js"));
       scriptEngine.eval(new java.io.FileReader("plot/js-lib/vega.js"));
       scriptEngine.eval(new java.io.FileReader("plot/js-lib/vega-lite.js"));
-      scriptEngine.eval(new java.io.FileReader("plot/js-lib/nashorn-polyfill.js"));
       if (opts.verbose >= 1) {
         LogInfo.logs("Vega version: %s", scriptEngine.eval("vega['version']"));
         LogInfo.logs("Vega-lite version: %s", scriptEngine.eval("vl['version']"));
@@ -97,9 +129,10 @@ public class VegaEngine {
       "var vega_spec = vl.compile(JSON.parse(vl_str)).spec;" + 
       "var vega_spec_str = JSON.stringify(vega_spec);";
   public static final String SVG_SCRIPT =
-      "var view = new vega.View(vega.parse(vega_spec)).renderer('none').initialize();" +
-      "view.run();" + 
-      "var svg = view.toSVGNow();";
+      "var view = new vega.View(vega.parse(vega_spec, {logLevel: vega.Info})).renderer('none').initialize();" +
+      "var background = view._background;" +
+      "var svg = null;" +
+      "view.toSVG().then(function(x){ svg = x });";
 
   /**
    * Compile a Vega-lite spec into Vega, then into SVG if compilation worked.
@@ -116,6 +149,7 @@ public class VegaEngine {
     VegaResponse vr = null;
     JsonNode vegaSpec = null;
     String svg = null;
+    String background = null;
     try {
       scriptEngine.eval(COMPILE_SCRIPT);
       String vegaStr = (String) scriptEngine.get("vega_spec_str");
@@ -124,13 +158,21 @@ public class VegaEngine {
       vr = new VegaResponse(vegaSpec, null, message);
       if (vr.isGoodChange(contextResponse) && opts.compileToSVG) {
         // Abort if we already know this is not a good change
-        // i.e. compiler complaiend or vegaSpec is identical
+        // i.e. compiler complained or vegaSpec is identical
         scriptEngine.eval(SVG_SCRIPT);
-        svg = scriptEngine.get("svg").toString();
-        vr = new VegaResponse(vegaSpec, svg, message);
+        String msg2 = sw.toString();
+        if (opts.verbose >= 2) {
+          LogInfo.logs("SVG Rendering Logs: " + msg2);
+        }
+        svg = (String) scriptEngine.get("svg");
+        background = (String) scriptEngine.get("background");
+        vr = new VegaResponse(vegaSpec, new VegaImage(svg, background) , message);
       }
     } catch (ScriptException e) {
-      vr = new VegaResponse(vegaSpec, svg, e.getMessage());
+      if (opts.verbose >= 2) {
+        e.printStackTrace();
+      }
+      vr = new VegaResponse(vegaSpec, new VegaImage(svg, background), e.getMessage());
     } finally {
       sc.setWriter(oldWriter);
       // Just to be safe, remove bindings
@@ -139,6 +181,7 @@ public class VegaEngine {
       bindings.remove("vega_spec_str");
       bindings.remove("view");
       bindings.remove("svg");
+      bindings.remove("background");
     }
     return vr;
   }
