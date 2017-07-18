@@ -3,6 +3,10 @@
 
 (rule $Regular ($TOKEN) (FilterTokenFn nottoken anypath anyvalue))
 (rule $Value ($Regular) (interactive.JsonFn jsonValue))
+# (rule $Value ($Regular) (interactive.VegaFn enum))
+# (rule $Value ($Regular) (interactive.VegaFn field))
+# (rule $Value ($Regular) (interactive.VegaFn color))
+
 (rule $PathToken ($Regular) (interactive.JsonFn isPath))
 
 (rule $PathPattern ($PathPattern $PathToken) (lambda p1 (lambda p2 (:s (var p1) (var p2)))))

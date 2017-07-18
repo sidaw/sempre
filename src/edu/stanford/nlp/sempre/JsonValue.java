@@ -1,16 +1,21 @@
 package edu.stanford.nlp.sempre;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.JsonNode;
+
 import fig.basic.LispTree;
 
 /***
  * merely wraps a json object in Value
+ * also stores the type
  * @author sidaw
  */
 public class JsonValue extends Value {
   JsonNode json;
   String schemaType = "notype";
   String jsonType = "string";
+  Set<String> schemaTypes;
   
   public JsonNode getJsonNode() {
     return json;

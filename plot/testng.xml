@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="SempreInteractiveTestSuite" verbose="10">
+  <test name="PlottingTests">
+    <classes>
+      <class name="edu.stanford.nlp.sempre.interactive.test.JsonSchemaTest">
+      </class>
+			<!--
+			<class name="edu.stanford.nlp.sempre.interactive.test.FloatingParsingTest">
+			</class>
+			-->
+    </classes>
+  </test>
+</suite>
