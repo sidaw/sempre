@@ -105,5 +105,6 @@ public class JsonSchemaTest {
     
     List<JsonSchema> enums = descendents.stream().collect(Collectors.toSet()).stream().filter(s -> s.node().has("enum")).collect(Collectors.toList());
     LogInfo.logs("Got %d enums", enums.size());
+    AssertJUnit.assertTrue(enums.size() > 50);
   }
 }

@@ -2,12 +2,12 @@
 ## domain specific
 
 (rule $Regular ($TOKEN) (FilterTokenFn nottoken anypath anyvalue))
-(rule $Value ($Regular) (interactive.JsonFn jsonValue))
-# (rule $Value ($Regular) (interactive.VegaFn enum))
-# (rule $Value ($Regular) (interactive.VegaFn field))
-# (rule $Value ($Regular) (interactive.VegaFn color))
+(rule $Value ($Regular) (interactive.JsonFn JsonValue))
+(rule $Value ($Regular) (interactive.VegaFn Enum))
+(rule $Value ($Regular) (interactive.VegaFn Field))
+(rule $Value ($Regular) (interactive.VegaFn Color))
 
-(rule $PathToken ($Regular) (interactive.JsonFn isPath))
+(rule $PathToken ($Regular) (interactive.JsonFn PathElement))
 
 (rule $PathPattern ($PathPattern $PathToken) (lambda p1 (lambda p2 (:s (var p1) (var p2)))))
 (rule $PathPattern ($PathToken) (IdentityFn))
@@ -16,7 +16,7 @@
 (rule $PathPattern (anypath) (ConstantFn *))
 (rule $Value (anyvalue) (ConstantFn *))
 
-(rule $Action ($PathPattern $Value) (interactive.JsonFn join) (floating 1))
+(rule $Action ($PathPattern $Value) (interactive.JsonFn Join) (floating 1))
 
 (rule $Action (new $FileName) (lambda v (: new (var v))) (anchored 1))
-(rule $FileName ($TOKEN) (interactive.JsonFn template))
+(rule $FileName ($TOKEN) (interactive.JsonFn Template))

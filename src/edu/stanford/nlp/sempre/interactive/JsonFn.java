@@ -39,14 +39,14 @@ public class JsonFn extends SemanticFn {
   public static class Options {
     @Option(gloss = "verbosity")
     public int verbose = 0;
-    
+
     @Option(gloss = "verbosity")
     public int maxJoins = Integer.MAX_VALUE;
   }
 
   public static Options opts = new Options();
   Formula arg1, arg2;
-  enum Mode {isPath, jsonValue, template, join};
+  enum Mode {PathElement, JsonValue, Template, Join};
   Mode mode;
   DerivationStream stream;
 
@@ -60,13 +60,13 @@ public class JsonFn extends SemanticFn {
 
   @Override
   public DerivationStream call(final Example ex, final Callable c) {
-    if (mode == Mode.isPath) {
+    if (mode == Mode.PathElement) {
       return new IsPathStream(ex, c);
-    } else if (mode == Mode.jsonValue) {
+    } else if (mode == Mode.JsonValue) {
       return new JsonValueStream(ex, c);
-    } else if (mode == Mode.join) {
+    } else if (mode == Mode.Join) {
       return new JoinStream(ex, c);
-    } else if (mode == Mode.template) {
+    } else if (mode == Mode.Template) {
       return new TemplateStream(c);
     }
     return null;
@@ -159,12 +159,12 @@ public class JsonFn extends SemanticFn {
       } else {
         throw new RuntimeException("unsuppported path formula: " + pathFormula);
       }
-      
+
       // all the different ways of getting values
       Function<List<String>, Iterator<JsonValue>> pathToValue;
       if (valueFormula instanceof ValueFormula) {
         Value v = ((ValueFormula)valueFormula).value;
-        
+
         if ("*".equals(Formulas.getString(valueFormula))) {
           // LogInfo.logs("JoinStream.anyvalue %s", v);
           pathToValue = p -> VegaResources.getValues(p).iterator();
@@ -174,29 +174,38 @@ public class JsonFn extends SemanticFn {
       } else {
         pathToValue = p -> Collections.emptyIterator();
       }
-      
+
       if (opts.verbose > 0) {
         List<List<String>> currentpaths = VegaResources.allPathsMatcher.match(pathPattern);
         LogInfo.logs("JsonFn Path %s, size %s", currentpaths, currentpaths.size());
       }
       iterator = new EnumeratePathsIterator(VegaResources.allPathsMatcher.match(pathPattern).iterator(),
-         pathToValue);
+          pathToValue);
     }
 
     private boolean checkType(List<String> path, JsonValue value) {
       JsonSchema jsonSchema = VegaResources.vegaSchema;
       List<JsonSchema> pathSchemas = jsonSchema.schemas(path);
-
+      String stringValue = value.getJsonNode().asText();
       for (JsonSchema schema : pathSchemas) {
-        try {
-          if (schema.schemaType().endsWith(".enum")) {
-            if (schema.enums().contains(value.getJsonNode().asText())) return true;
-          } else if (value.getSchemaType().equals(schema.type()))
+        if (value.getSchemaType().equals(schema.schemaType()))
+          return true;
+        if (value.getSchemaType().equals("string") && schema.schemaType().endsWith("string"))
+          return true;
+        if (schema.schemaType().endsWith("enum") && schema.enums().contains(stringValue))
+          return true;
+        if (value.getSchemaType().equals("color")) {
+         // LogInfo.logs("checking color %s for %s", value, schema.schemaType());
+          if (schema.schemaType().endsWith("Color.string")) {
+            LogInfo.logs("checked color %s for %s", value, schema.schemaType());
             return true;
-        } catch (Exception e) {
-          LogInfo.logs("checkType exception %s %s", e, path);
-          return false;
+          }
         }
+        if (value.getSchemaType().equals("field") && schema.schemaType().endsWith("field.string"))
+          return true;
+
+        if (schema.schemaType().equals(JsonSchema.NOTYPE))
+          throw new RuntimeException("JsonFn: schema has no type: " + schema);
       }
       return false;
     }
@@ -270,7 +279,7 @@ public class JsonFn extends SemanticFn {
         return null;
       }
     }
-    
+
     private Boolean parseBoolean(String string) {
       if (string.equals("true"))
         return true;
@@ -278,12 +287,12 @@ public class JsonFn extends SemanticFn {
         return false;
       else return null;
     }
-    
+
     @Override
     public Derivation createDerivation() {
       JsonValue value;
       String string = callable.childStringValue(0);
-      
+
       // cant just use getNodeType, because 100 and true are also strings
       if (parseNumber(string) != null)
         value = new JsonValue(parseNumber(string)).withSchemaType("number");
