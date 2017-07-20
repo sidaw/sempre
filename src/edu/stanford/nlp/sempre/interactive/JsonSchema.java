@@ -291,9 +291,8 @@ public class JsonSchema implements Comparable<JsonSchema> {
   
   public List<JsonSchema> descendents() {
     List<JsonSchema> schemaSet = new ArrayList<>();
+    schemaSet.add(this);
     for (JsonSchema child : children()) {
-      schemaSet.add(this);
-      schemaSet.add(child);
       schemaSet.addAll(child.descendents());
     }
     return schemaSet;

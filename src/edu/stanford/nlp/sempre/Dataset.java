@@ -140,6 +140,7 @@ public class Dataset {
   
   private static Example exampleFromJson(String jsonstr) {
     // avoiding the JsonCreator since lisp values are annoying
+    // TODO: load by reflection to avoid dependency?
     Map<String, Object> jsonObj = Json.readMapHard(jsonstr);   
     
     return new Example((String)jsonObj.get("id"), (String)jsonObj.get("utterance"),
@@ -147,6 +148,7 @@ public class Dataset {
         null,
         new JsonValue(jsonObj.get("targetValue")), null); 
   }
+  
   public static List<Example> readJsonlExamples(String path) {
     try (Stream<String> stream = Files.lines(Paths.get(path))) {
       return stream.map(Dataset::exampleFromJson).collect(Collectors.toList());

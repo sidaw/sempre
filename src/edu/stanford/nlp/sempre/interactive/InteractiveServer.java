@@ -71,6 +71,8 @@ public class InteractiveServer {
     public String fullResponseLogPath;
     @Option
     public int maxExecutionTime = 10; // in seconds
+    @Option(gloss="if the query is already in json, then parse it instead of storing an escaped string")
+    public boolean isJsonQuery = false;
   }
 
   public static Options opts = new Options();
@@ -273,9 +275,13 @@ public class InteractiveServer {
       synchronized (queryLogLock) { // write the query log
         Map<String, Object> jsonMap = new LinkedHashMap<>();
         jsonMap.put("count", queryNumber);
-        jsonMap.put("q", query);
-        // jsonMap.put("remote", remoteHost);
-        // jsonMap.put("time", queryTime.toString());
+        if (opts.isJsonQuery)
+          jsonMap.put("q", Json.readValueHard(query, ArrayList.class));
+        else
+          jsonMap.put("q", query);
+        
+        jsonMap.put("remote", remoteHost);
+        jsonMap.put("time", queryTime.toString());
         jsonMap.put("sessionId", sessionId);
         reqParams.remove("q");
         jsonMap.putAll(reqParams);

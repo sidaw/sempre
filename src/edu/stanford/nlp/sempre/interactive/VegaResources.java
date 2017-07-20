@@ -37,7 +37,7 @@ import fig.basic.Option;
 import fig.basic.Pair;
 
 /**
- * exposes some static vega resources
+ * Vega-specific code that loads the schema, colors, and generate paths and type maps
  * @author sidaw
  */
 
@@ -48,15 +48,16 @@ public class VegaResources {
     @Option(gloss = "File containing all valid VegaPaths") String allVegaJsonPaths;
     @Option(gloss = "File containing the vega schema") String vegaSchema;
     @Option(gloss = "File containing object values to try") String valueTemplates;
-    @Option(gloss = "path elements to exclude") Set<String> excludedPaths;
+    @Option(gloss = "Path elements to exclude") Set<String> excludedPaths;
+    @Option(gloss = "File containing all the colors") String colorFile;
   }
   public static Options opts = new Options();
+  private final Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "PathInTemplates.txt");
 
+  
   public static VegaLitePathMatcher allPathsMatcher;
-
-  private Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "PathInTemplates.txt");
-
-  private List<List<String>> filteredPaths;
+  private static List<List<String>> filteredPaths;
+  private static List<JsonSchema> descendents;
 
   public static ArrayList<String> templates;
   public static Map<String, String> templatesMap;
@@ -64,16 +65,23 @@ public class VegaResources {
   public static JsonSchema vegaSchema;
 
   private static Map<String, List<JsonValue>> typeToValues;
-  private static Map<String, Set<String>> valueToTypes;
-  private static Map<String, Set<List<String>>> valueToPaths;
+  private static Map<String, Set<String>> enumValueToTypes;
+  private static Map<String, Set<List<String>>> enumValueToPaths;
+  
+  private static Set<String> colorSet;
 
   public VegaResources() {
     try {
-      if (opts.vegaSchema != null) {
+      if (!Strings.isNullOrEmpty(opts.vegaSchema)) {
         LogInfo.begin_track("Loading schemas from %s", opts.vegaSchema);
         vegaSchema = JsonSchema.fromFile(new File(opts.vegaSchema));
         LogInfo.end_track();
       }
+      
+      List<JsonSchema> allDescendents = vegaSchema.descendents();
+      descendents = allDescendents.stream().filter(s -> s.node().has("type")).collect(Collectors.toList());
+      LogInfo.logs("Got %d descendents, %d typed", allDescendents.size(), descendents.size());
+      
       if (opts.vegaSpecifications != null) {
         LogInfo.begin_track("Loading examples from %s", opts.vegaSpecifications);
         processVegaTemplates();
@@ -86,8 +94,13 @@ public class VegaResources {
 
       // generate valueToTypes and valueToSet
       generateValueMaps();
-      LogInfo.logs("gathering valueToTypes: %d distinct enum values", valueToTypes.size());
+      LogInfo.logs("gathering valueToTypes: %d distinct enum values", enumValueToTypes.size());
       
+      if (!Strings.isNullOrEmpty(opts.colorFile)) {
+        colorSet = Json.readMapHard(String.join("\n", IOUtils.readLines(opts.colorFile))).keySet();
+        LogInfo.logs("loaded %d colors from %s", colorSet.size(), opts.colorFile);
+      }
+     
     } catch (Exception ex) {
       ex.printStackTrace();
       throw new RuntimeException(ex);
@@ -95,7 +108,6 @@ public class VegaResources {
   }
 
   private List<List<String>> allSimplePaths() {
-    List<JsonSchema> descendents = vegaSchema.descendents();
     Set<List<String>> simplePaths = descendents.stream().map(s -> s.simplePath()).collect(Collectors.toSet());
     LogInfo.logs("Got %d distinct simple paths", simplePaths.size());
 
@@ -106,14 +118,14 @@ public class VegaResources {
   }
 
   private void generateValueMaps() {
-    Set<JsonSchema> descendents = vegaSchema.descendents().stream().collect(Collectors.toSet());
-    valueToTypes = new HashMap<>();
-    valueToPaths = new HashMap<>();
-    for (JsonSchema schema: descendents) {
+    Set<JsonSchema> descendentsSet = descendents.stream().collect(Collectors.toSet());
+    enumValueToTypes = new HashMap<>();
+    enumValueToPaths = new HashMap<>();
+    for (JsonSchema schema: descendentsSet) {
       if (schema.enums() != null) {
         for (String e : schema.enums()) {
-          MapUtils.addToSet(valueToTypes, e, schema.schemaType());
-          MapUtils.addToSet(valueToPaths, e, schema.simplePath());
+          MapUtils.addToSet(enumValueToTypes, e, schema.schemaType());
+          MapUtils.addToSet(enumValueToPaths, e, schema.simplePath());
         }
       }
     }
@@ -209,14 +221,17 @@ public class VegaResources {
   }
 
   public static Set<String> getEnumTypes(String value) {
-    if (valueToTypes.containsKey(value)) return valueToTypes.get(value);
+    if (enumValueToTypes.containsKey(value)) return enumValueToTypes.get(value);
     return null;
   }
 
   public static Set<List<String>> getEnumPaths(String value) {
-    if (valueToPaths.containsKey(value)) return valueToPaths.get(value);
+    if (enumValueToPaths.containsKey(value)) return enumValueToPaths.get(value);
     return null;
   }
-
+  
+  public static Set<String> getColorSet() {
+    return colorSet;
+  }
 }
 
