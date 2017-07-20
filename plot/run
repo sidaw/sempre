@@ -81,6 +81,14 @@ addMode('setup', 'run some setup scripts for plotting', lambda { |e| l(
   lambda { |e| system 'cd plot && svn checkout https://github.com/vega/vega-editor/trunk/data'},
   lambda { |e| system 'cd plot && bash makedir.sh'},
 nil) })
+
+addMode('trash', 'put int-output into trash with time stamp', lambda { |e| l(
+  lambda { |e| system 'echo "trashing plot-out with time stamp"'},
+  lambda { |e| system 'mv plot-out plot-out-trash-`date +%Y-%m-%d.%H:%M:%S`'},
+  lambda { |e| system 'rm -rf plot-out-trash-*'},
+  lambda { |e| system 'mkdir -p ./plot-out'},
+nil)})
+
 ############################################################
 # {2016-07-02} [sidaw]: interactive semantic parsing
 addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
