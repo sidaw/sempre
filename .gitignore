@@ -52,3 +52,5 @@ plot/specs
 plot/templates
 plot/vega-lite-paths.txt
 plot/plotting.lexicon
+plot/data/
+plot/sampledata.jsonl

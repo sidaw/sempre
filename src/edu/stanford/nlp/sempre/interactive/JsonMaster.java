@@ -37,7 +37,7 @@ public class JsonMaster extends Master {
 
     @Option(gloss = "allow regular commands specified in Master")
     public boolean allowRegularCommands = false;
-    
+
     @Option(gloss = "initial training set")
     public String dataPath = "";
   }
@@ -47,7 +47,7 @@ public class JsonMaster extends Master {
   public JsonMaster(Builder builder) {
     super(builder);
   }
-  
+
   @Override
   protected void printHelp() {
     // interactive commands
@@ -76,21 +76,42 @@ public class JsonMaster extends Master {
     return response;
   }
 
+  @SuppressWarnings("unchecked")
   void handleCommand(Session session, String line, Response response) {
-    @SuppressWarnings("unchecked")
     List<Object> args = Json.readValueHard(line, List.class);
     String command = (String) args.get(0);
     QueryStats stats = new QueryStats(response, command);
+
     // Start of interactive commands
     if (command.equals("q")) {
-      // Syntax ["q", utterance (string), context (object; optional)]
-      // Create example
-      String utt = (String) args.get(1);
-      if (args.size() >= 3) {
-        session.context = new JsonContextValue(args.get(2));
+      /* Issue a query. This will create a new Example.
+       *
+       * Usage:
+       * - ["q", utterance (string)]
+       *     The current context will be used.
+       * - ["q", utterance (string), context (object)] (deprecated)
+       * - ["q", {
+       *     "context": context (object),
+       *     "fields": fields (array[string]),
+       *     "utterance": utterance (string)
+       *   }]
+       */
+      String utt;
+      if (args.get(1) instanceof String) {
+        utt = (String) args.get(1);
+        if (args.size() > 2) {
+          session.context = new JsonContextValue(args.get(2));
+        }
+      } else {
+        Map<String, Object> kv = (Map<String, Object>) args.get(1);
+        utt = (String) kv.get("utterance");
+        session.context = new JsonContextValue(kv.get("context"));
+        // TODO: Store the fields somewhere
+        List<String> fields = (List<String>) kv.get("fields");
       }
-      Example ex = exampleFromUtterance(utt, session);
 
+      // Create the example
+      Example ex = exampleFromUtterance(utt, session);
       builder.parser.parse(builder.params, ex, false);
 
       stats.size(ex.predDerivations != null ? ex.predDerivations.size() : 0);
@@ -98,25 +119,43 @@ public class JsonMaster extends Master {
       session.updateContext();
       LogInfo.logs("parse stats: %s", response.stats);
       response.ex = ex;
+
     } else if (command.equals("accept")) {
-      // Syntax ["accept", {"utterance":X, "targetValue":X, "context":X}]
-      // using lastExample seems unreliable, different tabs etc.
-      Map<String, Object> example = (Map<String, Object>) args.get(1);
-      String utt = (String) example.get("utterance");
-      Object targetValue = example.get("targetValue");
-      Object context = example.get("context");
+      /* Accept the user's selection.
+       *
+       * Usage:
+       * - ["accept", {
+       *     "context": context (object),
+       *     "utterance": utterance (string),
+       *     "targetValue": targetValue (...)
+       *   }]
+       *
+       * Using lastExample seems unreliable, different tabs etc.
+       */
+      Map<String, Object> kv = (Map<String, Object>) args.get(1);
+      String utt = (String) kv.get("utterance");
+      Object targetValue = kv.get("targetValue");
+      Object context = kv.get("context");
       Example ex = exampleFromUtterance(utt, session);
       ex.targetValue = new JsonValue(targetValue);
       ex.context = new JsonContextValue(context);
       learner.onlineLearnExample(ex);
+
     } else if (command.equals("context")) {
-      // Syntax ["context"] or ["context", context (object)]
+      /* Set the session's context.
+       *
+       * Usage:
+       * - ["context"]
+       *     Returns the sessions's context
+       * - ["context", context (object)]
+       */
       if (args.size() == 1) {
         LogInfo.logs("%s", session.context);
       } else {
         session.context = new JsonContextValue(args.get(1));
         response.stats.put("context_length", args.get(1).toString().length());
       }
+
     } else {
       LogInfo.log("Invalid command: " + args);
     }
