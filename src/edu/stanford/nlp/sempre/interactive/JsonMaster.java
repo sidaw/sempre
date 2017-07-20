@@ -108,6 +108,7 @@ public class JsonMaster extends Master {
       Example ex = exampleFromUtterance(utt, session);
       ex.targetValue = new JsonValue(targetValue);
       ex.context = new JsonContextValue(context);
+      builder.parser.parse(builder.params, ex, true);
       learner.onlineLearnExample(ex);
     } else if (command.equals("context")) {
       // Syntax ["context"] or ["context", context (object)]

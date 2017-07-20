@@ -3,7 +3,6 @@ package edu.stanford.nlp.sempre;
 import java.util.ArrayList;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fig.basic.LogInfo;
 
 public class JsonContextValue extends ContextValue {
