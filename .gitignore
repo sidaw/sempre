@@ -48,6 +48,7 @@ community-server/data-backup
 
 # plotting stuff
 plot-out*
+plot-data*
 plot/specs
 plot/templates
 plot/vega-lite-paths.txt

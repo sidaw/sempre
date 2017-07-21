@@ -204,8 +204,6 @@ addModule('freebase', 'Freebase: need to construct Freebase schemas', lambda {
   pull('/u/nlp/data/semparse/webquestions/dataset_11/webquestions.examples.test.json', 'data/webquestions/dataset_11')
 })
 
-
-
 addModule('virtuoso', 'Virtuoso: if want to run own SPARQL server locally', lambda {
   updateGit('https://github.com/openlink/virtuoso-opensource')
   # Run this command to compile:
@@ -303,6 +301,11 @@ addModule('geo880', 'Data, lexicon, grammars and KB for geo880', lambda {
   pull('/u/nlp/data/semparse/geo880/geo880.lexicon', 'data/geo880', {:symlink => true})
   pull('/u/nlp/data/semparse/geo880/geo880.kg', 'data/geo880', {:symlink => true})
   pull('/u/nlp/data/semparse/geo880/geo880.type_hierarchy', 'data/geo880', {:symlink => true})
+})
+
+addModule('plot', 'data for sempre-plot using vega', lambda {
+  updateGit('https://github.com/stanfordnlp/plot-data')
+
 })
 ############################################################
 
