@@ -11,6 +11,8 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 import javax.script.Bindings;
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -29,6 +31,9 @@ public class VegaEngine {
 
     @Option(gloss = "Compile to SVG")
     public boolean compileToSVG = true;
+
+    @Option(gloss = "Cache vega compilation calls")
+    public boolean useCache = true;
   }
 
   public static Options opts = new Options();
@@ -62,6 +67,11 @@ public class VegaEngine {
       if (context.image == null || context.image.svg == null) return true;
       return !image.equals(context.image);
     }
+
+    @Override
+    public String toString() {
+      return "spec=(" + Json.writeValueAsStringHard(vegaSpec) + "), image=(" + image + "), message=" + message;
+    }
   }
   /**
    * Represents an image.  SVG is insufficient because it doesn't have background.
@@ -93,6 +103,7 @@ public class VegaEngine {
   }
 
   private final ScriptEngine scriptEngine;
+  public final Map<String, VegaResponse> cache = new HashMap<String, VegaResponse>();
 
   /**
    * Check if compiler complained.
@@ -138,6 +149,13 @@ public class VegaEngine {
    * Compile a Vega-lite spec into Vega, then into SVG if compilation worked.
    */
   public VegaResponse compileVegaLite(JsonNode vlSpec, VegaResponse contextResponse) {
+    String vlSpecStr = Json.writeValueAsStringHard(vlSpec);
+    String cacheKey = vlSpecStr + "|||" + contextResponse;  // Okay this is a silly hack
+    if (opts.useCache) {
+      if (cache.containsKey(cacheKey)) {
+        return cache.get(cacheKey);
+      }
+    }
     Invocable inv = (Invocable) scriptEngine;
     ScriptContext sc = scriptEngine.getContext();
     Bindings bindings = sc.getBindings(ScriptContext.ENGINE_SCOPE);
@@ -150,6 +168,7 @@ public class VegaEngine {
     JsonNode vegaSpec = null;
     String svg = null;
     String background = null;
+    long t0, t1;
     try {
       scriptEngine.eval(COMPILE_SCRIPT);
       String vegaStr = (String) scriptEngine.get("vega_spec_str");
@@ -182,6 +201,9 @@ public class VegaEngine {
       bindings.remove("view");
       bindings.remove("svg");
       bindings.remove("background");
+    }
+    if (opts.useCache) {
+      cache.put(cacheKey, vr); 
     }
     return vr;
   }
