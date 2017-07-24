@@ -33712,7 +33712,7 @@ function ContextFork(ctx) {
 }
 
 function readDataLocal(uri) {
-  var match = uri.match(/.*\/data\/(.*)\.json/);
+  var match = uri.match(/.*data\/(.*)\.json/);
   var name = match[1];
   var data = readFile('plot/data/' + name + '.json');
   return data
