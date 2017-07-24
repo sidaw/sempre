@@ -1,103 +1,64 @@
 import java.util.*;
 
-public class CanonicalUtterance
-{
+public class CanonicalUtterance {
 	String path;
 	String value;
-	public CanonicalUtterance() { }
+	String [][] complexUtterances = {complexPath("encoding.x.scale.nice", "Set scale to human-friendly value: "),
+		complexPath("spec.encoding.color.field", "Set the encoding type for the color field to be "),
+		complexPath("encoding.y.stack", "Set stack offset to be "), 
+		complexPath("layer.encoding.y.aggregate", "Aggregate over the y-axis data using "),
+		complexPath("layer.encoding.x.aggregate", "Aggregate over the x-axis data using "),
+		complexPath("encoding.y.aggregate", "Aggregate over the y-axis data using "),
+		complexPath("encoding.x.aggregate", "Aggregate over the x-axis data using "),
+		complexPath("transform.filter","Apply filter "), 
+		complexPath("encoding.x.scale","Zero baseline value included in the x scale domain is "),
+		complexPath("encoding.y.scale","Zero baseline value included in the y scale domain is "),
+		complexPath("encoding.color.field","Color the plot using color field from data source: "),
+		complexPath("encoding.color.type","Set the color data type to "),
+		complexPath("encoding.color","Set the color of the marks to ")}; 
+		
+	public CanonicalUtterance() { }	  
+	
 	//path should be seperated by period, e.g. encoding.y.timeUnit
 	public CanonicalUtterance(String path, String value) {
 		this.path = path;
 		this.value = value;
 	}
 
-
-	public String get_simple_canonical_utterance()
-	{     
-		String first_path_key = "";  
+	public String getSimpleCanonicalUtterance() {	  
+		String first_path_key = "";	 
 		if(path.split("\\.").length > 0)  {
-		    first_path_key = path.split("\\.")[0];
-         }	
-		if(first_path_key.equals("encoding") || first_path_key.equals("layer") || first_path_key.equals("config") || first_path_key.equals("spec"))
-		{   
+			first_path_key = path.split("\\.")[0];
+		 }	
+		//check if path starts with a high level key that can be removed when generating utterance
+		if(first_path_key.equals("encoding") || first_path_key.equals("layer") || first_path_key.equals("config") || first_path_key.equals("spec")) {	
 			int startPath = first_path_key.length() + 1;
 			path = path.substring(startPath);
 		}
-		String u = "Set "+path+" to "+value+".";
+		String u = "Set " + path + " to " + value + ".";
 		return u;
-
 	}
 
-
-	public String get_canonical_utterance()
-	{
-		String u = "";
-		if(path.equals("encoding.x.scale.nice"))
-		{
-			u = "Set scale to human-friendly value: "+value+".";
-		}  
-		else if(path.equals("spec.encoding.color.field"))  
-		{
-			u = "Set the encoding type for the color field to be "+value+".";
-		}  
-		else if(path.equals("encoding.y.stack")) 
-		{
-			u = "Set stack offset to be "+value+".";
-		}
-		else if(path.equals("layer.encoding.y.aggregate")) 
-		{
-			u = "Aggregate over the y-axis data using the "+value+" operation.";
-		} 
-		else if(path.equals("layer.encoding.x.aggregate")) 
-		{
-			u = "Aggregate over the x-axis data using the "+value+" operation.";
-		}
-		else if(path.equals("encoding.y.aggregate")) 
-		{
-			u = "Aggregate over the y-axis data using the "+value+" operation.";
-		} 
-		else if(path.equals("encoding.x.aggregate")) 
-		{
-			u = "Aggregate over the x-axis data using the "+value+" operation.";
-		} 
-		else if(path.equals("transform.filter")) 
-		{
-			u = "Apply filter "+value+".";
-		}
-		else if(path.equals("encoding.x.scale")) 
-		{
-			u = "Zero baseline value included in the x scale domain is "+value+".";
-		} 
-		else if(path.equals("encoding.y.scale")) 
-		{
-			u = "Zero baseline value included in the y scale domain is "+value+".";
-		} 
-		else if(path.equals("encoding.color.type")) 
-		{
-			u = "Set the color data type to "+value+".";
-		}
-		else if(path.equals("encoding.color.field")) 
-		{
-			u = "Color the plot using color field from "+value+" data source.";
-		}
-		else if(path.equals("encoding.color")) 
-		{
-			u = "Set the color of the marks to "+value+".";
-		} 
-		else
-		{
-			u = get_simple_canonical_utterance();
+	public String getCanonicalUtterance() {
+		String u = getSimpleCanonicalUtterance();
+		for (int i=0; i<complexUtterances.length; i++) { 
+			if(path.equals(complexUtterances[i][0])) {
+				u = complexUtterances[i][1] + value + ".";
+			}		
 		}
 		return u;
-
+	}
+	
+	public String[] complexPath(String path, String utterance) { 
+		String [] p = {path, utterance};
+		return p;
 	}
 
-	public static void main(String [] args)
-	{
-		CanonicalUtterance u = new CanonicalUtterance("encoding.y.timeUnit", "blue");
-		System.out.println(u.get_canonical_utterance());
+	public static void main(String [] args) {	
+		//example
+		CanonicalUtterance u = new CanonicalUtterance("transform.filter", "blue");
+		System.out.println(u.getCanonicalUtterance());
 	}
-
 }
 
 
