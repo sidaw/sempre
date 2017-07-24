@@ -34,15 +34,15 @@ public class CanonicalUtterance
 		String u = "";
 		if(path.equals("encoding.x.scale.nice"))
 		{
-			u = "Set scale to human-field value: "+value+".";
+			u = "Set scale to human-friendly value: "+value+".";
 		}  
 		else if(path.equals("spec.encoding.color.field"))  
 		{
-			u = "Set the encoding type for the color scheme to be "+value+".";
+			u = "Set the encoding type for the color field to be "+value+".";
 		}  
 		else if(path.equals("encoding.y.stack")) 
 		{
-			u = "Set stacking offset type to be "+value+".";
+			u = "Set stack offset to be "+value+".";
 		}
 		else if(path.equals("layer.encoding.y.aggregate")) 
 		{
@@ -62,7 +62,7 @@ public class CanonicalUtterance
 		} 
 		else if(path.equals("transform.filter")) 
 		{
-			u = "Apply the filter "+value+" to the plot data.";
+			u = "Apply filter "+value+".";
 		}
 		else if(path.equals("encoding.x.scale")) 
 		{
@@ -70,7 +70,7 @@ public class CanonicalUtterance
 		} 
 		else if(path.equals("encoding.y.scale")) 
 		{
-			u = "Zero baseline value included in the x scale domain is "+value+".";
+			u = "Zero baseline value included in the y scale domain is "+value+".";
 		} 
 		else if(path.equals("encoding.color.type")) 
 		{
@@ -78,7 +78,7 @@ public class CanonicalUtterance
 		}
 		else if(path.equals("encoding.color.field")) 
 		{
-			u = "Color the plot using colors based on "+value+" data source.";
+			u = "Color the plot using color field from "+value+" data source.";
 		}
 		else if(path.equals("encoding.color")) 
 		{
