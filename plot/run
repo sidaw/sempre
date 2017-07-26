@@ -94,7 +94,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   #rlwrap,
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
-  #figOpts,
+  figOpts,
   o('server'),
   o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
   o('Executor', 'interactive.VegaExecutor'),
