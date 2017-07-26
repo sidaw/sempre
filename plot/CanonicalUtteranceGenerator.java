@@ -27,9 +27,7 @@ public class CanonicalUtteranceGenerator {
 
   public String getSimpleCanonicalUtterance() {   
     String first_path_key = "";  
-    if(path.split("\\.").length > 0)  {
-      first_path_key = path.split("\\.")[0];
-     }  
+    first_path_key = path.split("\\.")[0];
     //check if path starts with a high level key that can be removed when generating utterance
     if(first_path_key.equals("encoding") || first_path_key.equals("layer") || first_path_key.equals("config") || first_path_key.equals("spec")) {   
       int startPath = first_path_key.length() + 1;
