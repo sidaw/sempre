@@ -19,6 +19,8 @@ Add run parameter `-Dataset.inPaths train1:plot-data/sidaw.ex.jsonl train2:plot-
 The turker data is probably not very reliable currently.
 
 To use lexicon in grammar: 
-run `python vega_lite_paths.py --descriptions True` to generate vega-lite-paths.txt which contains descriptions lexicon is based on
-run `python generate_lexicon.py` to generate  `plotting.lexicon` and`plotting_tfidf.lexicon`. 
-add run parameter: `-SimpleLexicon.inPaths ./plot/plotting_tfidf.lexicon`
+First, run `python vega_lite_paths.py --descriptions True` to generate vega-lite-paths.txt which contains descriptions lexicon is based on.
+
+Next, run `python generate_lexicon.py` to generate  `plotting.lexicon` and`plotting_tfidf.lexicon`. 
+
+Finally, add run parameter: `-SimpleLexicon.inPaths ./plot/plotting_tfidf.lexicon`
