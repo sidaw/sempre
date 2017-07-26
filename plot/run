@@ -94,7 +94,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   #rlwrap,
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
-  #figOpts,
+  figOpts,
   o('server'),
   o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
   o('Executor', 'interactive.VegaExecutor'),
@@ -115,7 +115,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Parser.callSetEvaluation', false),
   o('Parser.coarsePrune', false),
   o('ParserState.mapToFormula', true),
-  o('Parser.beamSize', 200),
+  o('Parser.beamSize', 1000),
   o('ParserState.customExpectedCounts', 'None'),
 
   o('Params.l1Reg', 'nonlazy'),
@@ -127,7 +127,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
 
   o('JsonMaster.intOutputPath', './plot-out/'),
   o('InteractiveServer.numThreads', 8),
-  o('InteractiveServer.maxCandidates', 100),
+  o('InteractiveServer.maxCandidates', 1000),
   o('InteractiveServer.queryLogPath', './plot-out/query.jsonl'),
   o('InteractiveServer.responseLogPath', './plot-out/response.jsonl'),
   o('InteractiveServer.port', 8405),
@@ -146,7 +146,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
 
   o('VegaEngine.verbose', 1),
   o('VegaExecutor.compileVega', false),
-  o('JsonFn.maxJoins', 500), # hack.
+  o('JsonFn.maxJoins', 1000), # hack.
 
   # learning stuff
   o('Dataset.inPaths', "train:./plot-data/sampledata.jsonl"),
@@ -155,7 +155,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('FeatureExtractor.featureComputers', 'FloatingFeatureComputer', 'interactive.VegaFeatureComputer'),
   o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule'),
 
-  o('Learner.maxTrainIters', 2),
+  o('Learner.maxTrainIters', 0),
 
   lambda { |e| system 'mkdir -p ./plot-out/'; nil},
   lambda { |e| system 'mkdir -p ./plot-out/log/'; nil},

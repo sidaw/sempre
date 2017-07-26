@@ -52,7 +52,7 @@ public class VegaResources {
     @Option(gloss = "File containing all the colors") String colorFile;
   }
   public static Options opts = new Options();
-  private final Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "PathInTemplates.txt");
+  private final Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "vegaResource");
 
   
   public static VegaLitePathMatcher allPathsMatcher;
@@ -91,10 +91,16 @@ public class VegaResources {
       filteredPaths = allSimplePaths();
       LogInfo.logs("Got %d distinct simple path not containing %s", filteredPaths.size(), opts.excludedPaths);
       allPathsMatcher = new VegaLitePathMatcher(filteredPaths);
+      Json.prettyWriteValueHard(new File(savePath.toString()+".path_elements.json"),
+          filteredPaths.stream().flatMap(List::stream)
+          .collect(Collectors.toSet()).stream().collect(Collectors.toList()) );
 
       // generate valueToTypes and valueToSet
       generateValueMaps();
       LogInfo.logs("gathering valueToTypes: %d distinct enum values", enumValueToTypes.size());
+      Json.prettyWriteValueHard(new File(savePath.toString()+".enums.json"),
+          enumValueToTypes.keySet().stream().collect(Collectors.toList())
+      );
       
       if (!Strings.isNullOrEmpty(opts.colorFile)) {
         colorSet = Json.readMapHard(String.join("\n", IOUtils.readLines(opts.colorFile))).keySet();
