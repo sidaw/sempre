@@ -3,6 +3,8 @@ package edu.stanford.nlp.sempre;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jackson.JsonNumEquals;
+import com.google.common.base.Equivalence;
 
 import fig.basic.LispTree;
 
@@ -12,6 +14,8 @@ import fig.basic.LispTree;
  * @author sidaw
  */
 public class JsonValue extends Value {
+  public static Equivalence<JsonNode> numEquals = JsonNumEquals.getInstance();
+
   JsonNode json;
   String schemaType = "notype";
   String jsonType = "string";
@@ -59,12 +63,12 @@ public class JsonValue extends Value {
   public boolean equals(Object o) {
     if (! (o instanceof JsonValue) )
       return false;
-    return this.json.equals(((JsonValue)o).json);
+    return numEquals.equivalent(this.json, ((JsonValue)o).json);
   }
   @Override
   public int hashCode() {
     // TODO Auto-generated method stub
-    return 0;
+    return numEquals.hash(this.json);
   }
 
   public String getSchemaType() {
