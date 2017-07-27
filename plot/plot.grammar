@@ -15,8 +15,8 @@
 #generate candidates from lexicon
 
 # generate candidates from the paths, should be floating
-(rule $PathPattern (anypath) (ConstantFn *))
-(rule $Value (anyvalue) (ConstantFn *)) 
+(rule $PathPattern (anypath) (ConstantFn *) (floating 1))
+(rule $Value (anyvalue) (ConstantFn *) (floating 1))
 
 (rule $Action ($PathPattern $Value) (interactive.JsonFn Join) (floating 1))
 
