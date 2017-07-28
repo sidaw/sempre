@@ -2,6 +2,7 @@
 ## domain specific
 
 (rule $Regular ($TOKEN) (FilterTokenFn nottoken anypath anyvalue))
+(rule $Regular ($PHRASE) (FilterSpanLengthFn 2 2))
 (rule $Value ($Regular) (interactive.JsonFn JsonValue))
 (rule $Value ($Regular) (interactive.VegaFn Enum))
 (rule $Value ($Regular) (interactive.VegaFn Field))

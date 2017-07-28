@@ -137,6 +137,7 @@ addModule('core', 'Core utilities (need to compile)', lambda {
   pull('/u/nlp/data/semparse/resources/jackson-core-2.2.0.jar')
   pull('/u/nlp/data/semparse/resources/jackson-annotations-2.2.0.jar')
   pull('/u/nlp/data/semparse/resources/jackson-databind-2.2.0.jar')
+  pull('http://central.maven.org/maven2/com/github/fge/jackson-coreutils/1.8/jackson-coreutils-1.8.jar')
 
   # jLine from maven central
   pull('http://central.maven.org/maven2/jline/jline/2.14.2/jline-2.14.2.jar')
@@ -305,7 +306,6 @@ addModule('geo880', 'Data, lexicon, grammars and KB for geo880', lambda {
 
 addModule('plot', 'data for sempre-plot using vega', lambda {
   updateGit('https://github.com/stanfordnlp/plot-data')
-
 })
 ############################################################
 

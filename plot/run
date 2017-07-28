@@ -115,7 +115,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Parser.callSetEvaluation', false),
   o('Parser.coarsePrune', false),
   o('ParserState.mapToFormula', true),
-  o('Parser.beamSize', 1000),
+  o('Parser.beamSize', 10000),
   o('ParserState.customExpectedCounts', 'None'),
 
   o('Params.l1Reg', 'nonlazy'),
@@ -146,14 +146,14 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
 
   o('VegaEngine.verbose', 1),
   o('VegaExecutor.compileVega', false),
-  o('JsonFn.maxJoins', 1000), # hack.
+  o('JsonFn.maxJoins', 10000), # hack.
 
   # learning stuff
   o('Dataset.inPaths', "train:./plot-data/sampledata.jsonl"),
   o('Parser.callSetEvaluation', true),
 
   o('FeatureExtractor.featureComputers', 'FloatingFeatureComputer', 'interactive.VegaFeatureComputer'),
-  o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule'),
+  o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule', 'pathPattern'),
 
   o('Learner.maxTrainIters', 0),
 
