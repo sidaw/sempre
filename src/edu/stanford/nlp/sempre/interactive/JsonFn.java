@@ -42,6 +42,9 @@ public class JsonFn extends SemanticFn {
 
     @Option(gloss = "verbosity")
     public int maxJoins = Integer.MAX_VALUE;
+
+    @Option(gloss = "Allow join to apply on * *")
+    public boolean joinOnStarStar = false;
   }
 
   public static Options opts = new Options();
@@ -151,7 +154,15 @@ public class JsonFn extends SemanticFn {
       callable = c;
       Formula pathFormula = c.child(0).formula;
       Formula valueFormula = c.child(1).formula;
-      // LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
+      if (!opts.joinOnStarStar) {
+        // If (join * *) is disallowed ...
+        if ("*".equals(Formulas.getString(pathFormula)) && "*".equals(Formulas.getString(valueFormula))) {
+          LogInfo.logs("JoinStream * * : Skipped");
+          iterator = Collections.emptyIterator();
+          return;
+        }
+      }
+      LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
       if (pathFormula instanceof ValueFormula) {
         pathPattern = "*".equals(Formulas.getString(pathFormula))? Lists.newArrayList() : Lists.newArrayList(Formulas.getString(pathFormula));
       } else if (pathFormula instanceof ActionFormula) {
@@ -188,24 +199,27 @@ public class JsonFn extends SemanticFn {
       List<JsonSchema> pathSchemas = jsonSchema.schemas(path);
       String stringValue = value.getJsonNode().asText();
       for (JsonSchema schema : pathSchemas) {
-        if (value.getSchemaType().equals(schema.schemaType()))
-          return true;
-        if (value.getSchemaType().equals("string") && schema.schemaType().endsWith("string"))
-          return true;
-        if (schema.schemaType().endsWith("enum") && schema.enums().contains(stringValue))
-          return true;
-        if (value.getSchemaType().equals("color")) {
-         // LogInfo.logs("checking color %s for %s", value, schema.schemaType());
-          if (schema.schemaType().endsWith("Color.string")) {
-            LogInfo.logs("checked color %s for %s", value, schema.schemaType());
+        String valueType = value.getSchemaType(), schemaTypes = schema.schemaType();
+        //LogInfo.logs("schema: %s | schemaType: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType);
+        for (String schemaType : schemaTypes.split(";")) {
+          if (valueType.equals(schemaType))
             return true;
+          if (valueType.equals("string") && schemaType.endsWith("string"))
+            return true;
+          if (schemaType.endsWith("enum") && schema.enums().contains(stringValue))
+            return true;
+          if (valueType.equals("color")) {
+           // LogInfo.logs("checking color %s for %s", value, schema.schemaType());
+            if (schemaType.endsWith("Color.string")) {
+              LogInfo.logs("checked color %s for %s", value, schemaType);
+              return true;
+            }
           }
+          if (valueType.equals("field") && schemaType.endsWith("field.string"))
+            return true;
+          if (schemaType.equals(JsonSchema.NOTYPE))
+            throw new RuntimeException("JsonFn: schema has no type: " + schema);
         }
-        if (value.getSchemaType().equals("field") && schema.schemaType().endsWith("field.string"))
-          return true;
-
-        if (schema.schemaType().equals(JsonSchema.NOTYPE))
-          throw new RuntimeException("JsonFn: schema has no type: " + schema);
       }
       return false;
     }
@@ -247,7 +261,7 @@ public class JsonFn extends SemanticFn {
     int currIndex = 0;
 
     public IsPathStream(Example ex, Callable c) {
-      callable = c;      
+      callable = c;
       keys = VegaResources.allPathsMatcher.pathKeys();
     }
 
@@ -269,7 +283,7 @@ public class JsonFn extends SemanticFn {
     int currIndex = 0;
 
     public JsonValueStream(Example ex, Callable c) {
-      callable = c;      
+      callable = c;
     }
 
     private Double parseNumber(String string) {

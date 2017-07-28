@@ -54,7 +54,7 @@ public class VegaResources {
   public static Options opts = new Options();
   private final Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "vegaResource");
 
-  
+
   public static VegaLitePathMatcher allPathsMatcher;
   private static List<List<String>> filteredPaths;
   private static List<JsonSchema> descendents;
@@ -67,7 +67,7 @@ public class VegaResources {
   private static Map<String, List<JsonValue>> typeToValues;
   private static Map<String, Set<String>> enumValueToTypes;
   private static Map<String, Set<List<String>>> enumValueToPaths;
-  
+
   private static Set<String> colorSet;
 
   public VegaResources() {
@@ -77,11 +77,11 @@ public class VegaResources {
         vegaSchema = JsonSchema.fromFile(new File(opts.vegaSchema));
         LogInfo.end_track();
       }
-      
+
       List<JsonSchema> allDescendents = vegaSchema.descendents();
       descendents = allDescendents.stream().filter(s -> s.node().has("type")).collect(Collectors.toList());
       LogInfo.logs("Got %d descendents, %d typed", allDescendents.size(), descendents.size());
-      
+
       if (opts.vegaSpecifications != null) {
         LogInfo.begin_track("Loading examples from %s", opts.vegaSpecifications);
         processVegaTemplates();
@@ -101,12 +101,12 @@ public class VegaResources {
       Json.prettyWriteValueHard(new File(savePath.toString()+".enums.json"),
           enumValueToTypes.keySet().stream().collect(Collectors.toList())
       );
-      
+
       if (!Strings.isNullOrEmpty(opts.colorFile)) {
         colorSet = Json.readMapHard(String.join("\n", IOUtils.readLines(opts.colorFile))).keySet();
         LogInfo.logs("loaded %d colors from %s", colorSet.size(), opts.colorFile);
       }
-     
+
     } catch (Exception ex) {
       ex.printStackTrace();
       throw new RuntimeException(ex);
@@ -185,8 +185,8 @@ public class VegaResources {
       // put in a few values for very general types
       MapUtils.addToList(typeToValues, "boolean", new JsonValue(true).withSchemaType("boolean"));
       MapUtils.addToList(typeToValues, "boolean", new JsonValue(false).withSchemaType("boolean"));
-      MapUtils.addToList(typeToValues, "number", new JsonValue(42).withSchemaType("number"));
-      MapUtils.addToList(typeToValues, "number", new JsonValue(312).withSchemaType("number"));
+      MapUtils.addToList(typeToValues, "number", new JsonValue(0).withSchemaType("number"));
+      MapUtils.addToList(typeToValues, "number", new JsonValue(100).withSchemaType("number"));
       MapUtils.addToList(typeToValues, "string", new JsonValue("randomteststring").withSchemaType("string"));
 
       Json.prettyWriteValueHard(new File(savePath.toString()+".json"),
@@ -235,7 +235,7 @@ public class VegaResources {
     if (enumValueToPaths.containsKey(value)) return enumValueToPaths.get(value);
     return null;
   }
-  
+
   public static Set<String> getColorSet() {
     return colorSet;
   }

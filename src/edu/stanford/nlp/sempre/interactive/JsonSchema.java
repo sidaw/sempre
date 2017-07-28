@@ -2,13 +2,11 @@ package edu.stanford.nlp.sempre.interactive;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 
 import fig.basic.LogInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -22,7 +20,7 @@ import java.util.stream.Collectors;
 public class JsonSchema implements Comparable<JsonSchema> {
 
   public static final String NOTYPE = "notype";
-  
+
   public static class RefResolver {
     private JsonNode rootNode;
 
@@ -123,8 +121,8 @@ public class JsonSchema implements Comparable<JsonSchema> {
     }
     return node.get("type").asText();
   }
-  
-  
+
+
   private List<String> simplePath(List<String> path) {
     if (path.size() == 0) return new ArrayList<>();
     int lastInd = path.size() - 1;
@@ -137,13 +135,25 @@ public class JsonSchema implements Comparable<JsonSchema> {
         .map(s -> s.replace("#/definitions/", "#/"))
         .collect(Collectors.toList());
   }
-  
+
   // include enum types, definitions for object items
   public String schemaType() {
     if (!node.has("type")) {
-      return NOTYPE;
+      throw new RuntimeException("type of " + simplePath() + " is an empty string.");
+      //return NOTYPE;
+    }
+    if (node.get("type").isArray()) {
+      // Join the multiple types with "|"
+      List<String> types = new ArrayList<>();
+      for (JsonNode child : node.get("type")) {
+        types.add(child.asText());
+      }
+      return String.join(";", types);
     }
     String type = node.get("type").asText();
+    if (type.isEmpty()) {
+      throw new RuntimeException("type of " + simplePath() + " is an empty string.");
+    }
     // object types is the last object definition
     if (type.equals("object")) {
       return String.join(".", simplePath(schemaPath));
@@ -152,16 +162,12 @@ public class JsonSchema implements Comparable<JsonSchema> {
     if (type.equals("string") && node.has("enum")) {
       return String.join(".", simplePath(schemaPath)) + ".enum";
     }
-    // extension types are also strings?
-    if (type.equals("string") && node.has("enum")) {
-      return String.join(".", simplePath(schemaPath)) + ".enum";
-    }
     // string types is the immediate field before
     String prev = schemaPath.get(schemaPath.size()-1);
     if (type.equals("string") && !prev.startsWith("anyOf[")) {
       return schemaPath.get(schemaPath.size()-1) + ".string";
     }
-    return node.get("type").asText();
+    return type;
   }
 
   public List<String> enums() {
@@ -250,7 +256,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
     newPath.addAll(Arrays.asList(extend));
     return newPath;
   }
-  
+
   private Set<JsonSchema> children() {
     Set<JsonSchema> schemaSet = new HashSet<>();
 
@@ -282,13 +288,13 @@ public class JsonSchema implements Comparable<JsonSchema> {
     }
     return schemaSet;
   }
-  
+
   public List<String> simplePath() {
     return this.schemaPath.stream().filter(s ->
     !s.equals("properties") && !s.equals("items") && !s.startsWith("#/") && !s.startsWith("anyOf"))
         .collect(Collectors.toList());
   }
-  
+
   public List<JsonSchema> descendents() {
     List<JsonSchema> schemaSet = new ArrayList<>();
     schemaSet.add(this);
