@@ -44,7 +44,7 @@ public class JsonFn extends SemanticFn {
     public int maxJoins = Integer.MAX_VALUE;
 
     @Option(gloss = "Allow join to apply on * *")
-    public boolean joinOnStarStar = true;
+    public boolean joinOnStarStar = false;
   }
 
   public static Options opts = new Options();
