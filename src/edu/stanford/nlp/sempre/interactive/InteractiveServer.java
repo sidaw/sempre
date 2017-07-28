@@ -196,7 +196,7 @@ public class InteractiveServer {
         List<Derivation> allCandidates = response.getExample().getPredDerivations();
         Derivation.sortByScore(allCandidates);
         if (allCandidates != null) {
-          if (allCandidates.size() >= InteractiveServer.opts.maxCandidates) {
+          if (allCandidates.size() > InteractiveServer.opts.maxCandidates) {
             response.lines.add(String.format("Exceeded max options: (current: %d / max: %d) ", allCandidates.size(),
                 InteractiveServer.opts.maxCandidates));
             allCandidates = allCandidates.subList(0, InteractiveServer.opts.maxCandidates);

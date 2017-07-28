@@ -127,7 +127,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
 
   o('JsonMaster.intOutputPath', './plot-out/'),
   o('InteractiveServer.numThreads', 8),
-  o('InteractiveServer.maxCandidates', 1000),
+  o('InteractiveServer.maxCandidates', 200),
   o('InteractiveServer.queryLogPath', './plot-out/query.jsonl'),
   o('InteractiveServer.responseLogPath', './plot-out/response.jsonl'),
   o('InteractiveServer.port', 8405),
