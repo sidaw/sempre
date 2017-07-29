@@ -153,7 +153,8 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Parser.callSetEvaluation', true),
 
   o('FeatureExtractor.featureComputers', 'FloatingFeatureComputer', 'interactive.VegaFeatureComputer'),
-  o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule', 'pathPattern'),
+  o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule',
+    'pathPattern', 'valueType'),
 
   o('Learner.maxTrainIters', 0),
 
