@@ -178,7 +178,7 @@ public class VegaResources {
       MapUtils.addToList(typeToValues, "boolean", new JsonValue(false).withSchemaType("boolean"));
       MapUtils.addToList(typeToValues, "number", new JsonValue(0).withSchemaType("number"));
       MapUtils.addToList(typeToValues, "number", new JsonValue(100).withSchemaType("number"));
-      MapUtils.addToList(typeToValues, "string", new JsonValue("randomteststring").withSchemaType("string"));
+      MapUtils.addToList(typeToValues, "string", new JsonValue("hello").withSchemaType("string"));
 
       Json.prettyWriteValueHard(new File(savePath.toString()+".json"),
           typeToValues.entrySet().stream().map(e -> {

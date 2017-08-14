@@ -106,7 +106,7 @@ public class JsonMaster extends Master {
       Example ex = exampleFromUtterance(utt, session);
       if ("random".equals(utt)) {
         VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
-        response.ex = randomizer.generate(100);
+        response.ex = randomizer.generate(50);
       } else {
         builder.parser.parse(builder.params, ex, false);
         stats.size(ex.predDerivations != null ? ex.predDerivations.size() : 0);

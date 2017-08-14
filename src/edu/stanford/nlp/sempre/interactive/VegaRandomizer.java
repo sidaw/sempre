@@ -50,13 +50,15 @@ public class VegaRandomizer {
   private Derivation createDeriv(List<String> path, JsonValue value) {
     NameValue fullPath = new NameValue("$." + String.join(".", path));
     Formula setFormula = new ActionFormula(ActionFormula.Mode.primitive,
-        Lists.newArrayList(new ValueFormula<NameValue>(new NameValue("set")),
+        Lists.newArrayList(
+            new ValueFormula<NameValue>(new NameValue("set")),
             new ValueFormula<NameValue>(fullPath),
             new ValueFormula<JsonValue>(value)));
     Derivation deriv = new Derivation.Builder()
         .formula(setFormula)
         .createDerivation();
-    deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
+    deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)",
+        String.join(" ", path),
         value.getJsonNode().toString(),
         VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaType())
         .collect(Collectors.toList()),
