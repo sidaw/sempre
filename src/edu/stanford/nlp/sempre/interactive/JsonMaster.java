@@ -104,13 +104,17 @@ public class JsonMaster extends Master {
 
       // Create the example
       Example ex = exampleFromUtterance(utt, session);
-      builder.parser.parse(builder.params, ex, false);
-
-      stats.size(ex.predDerivations != null ? ex.predDerivations.size() : 0);
-      stats.status(InteractiveUtils.getParseStatus(ex));
-      session.updateContext();
-      LogInfo.logs("parse stats: %s", response.stats);
-      response.ex = ex;
+      if ("random".equals(utt)) {
+        VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
+        response.ex = randomizer.generate(100);
+      } else {
+        builder.parser.parse(builder.params, ex, false);
+        stats.size(ex.predDerivations != null ? ex.predDerivations.size() : 0);
+        stats.status(InteractiveUtils.getParseStatus(ex));
+        session.updateContext();
+        LogInfo.logs("parse stats: %s", response.stats);
+        response.ex = ex;
+      }
 
     } else if (command.equals("random")) {
       /* Generate random derivations
@@ -120,7 +124,7 @@ public class JsonMaster extends Master {
       int amount = (int) args.get(1);
       session.context = new JsonContextValue(args.get(2));
       Example ex = exampleFromUtterance("", session);
-      VegaRandomizer randomizer = new VegaRandomizer(ex);
+      VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
       response.ex = randomizer.generate(amount);
 
     } else if (command.equals("accept")) {
