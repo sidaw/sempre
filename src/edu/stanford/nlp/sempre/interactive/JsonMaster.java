@@ -1,23 +1,15 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.google.common.base.Strings;
 
 import edu.stanford.nlp.sempre.Builder;
 import edu.stanford.nlp.sempre.Example;
-import edu.stanford.nlp.sempre.Formula;
-import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.JsonContextValue;
 import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Session;
-import fig.basic.IOUtils;
-import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
@@ -89,7 +81,7 @@ public class JsonMaster extends Master {
        * Usage:
        * - ["q", utterance (string)]
        *     The current context will be used.
-       * - ["q", utterance (string), context (object)] (deprecated)
+       * - ["q", utterance (string), context (object)]
        * - ["q", {
        *     "context": context (object),
        *     "fields": fields (array[string]),
@@ -119,6 +111,17 @@ public class JsonMaster extends Master {
       session.updateContext();
       LogInfo.logs("parse stats: %s", response.stats);
       response.ex = ex;
+
+    } else if (command.equals("random")) {
+      /* Generate random derivations
+       * Usage:
+       * - ["random", amount, context (object)]
+       */
+      int amount = (int) args.get(1);
+      session.context = new JsonContextValue(args.get(2));
+      Example ex = exampleFromUtterance("", session);
+      VegaRandomizer randomizer = new VegaRandomizer(ex);
+      response.ex = randomizer.generate(amount);
 
     } else if (command.equals("accept")) {
       /* Accept the user's selection.
