@@ -240,7 +240,7 @@ public class JsonFn extends SemanticFn {
           .collect(Collectors.toList()),
           value.getSchemaType());*/
       CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
-      deriv.canonicalUtterance = cuGenerator.getCanonicalUtterance();
+      deriv.canonicalUtterance = cuGenerator.getSimpleCanonicalUtterance();
       return deriv;
     }
 

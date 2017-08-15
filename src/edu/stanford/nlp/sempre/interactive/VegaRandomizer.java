@@ -63,7 +63,7 @@ public class VegaRandomizer {
           .collect(Collectors.toList()),
           value.getSchemaType());*/
       CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
-      deriv.canonicalUtterance = cuGenerator.getCanonicalUtterance();
+      deriv.canonicalUtterance = cuGenerator.getSimpleCanonicalUtterance();
     deriv.ensureExecuted(builder.executor, ex.context);
     return deriv;
   }
