@@ -234,11 +234,13 @@ public class JsonFn extends SemanticFn {
           .withCallable(callable)
           .formula(setFormula)
           .createDerivation();
-      deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
+      /*deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
           value.getJsonNode().toString(),
           VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaType())
           .collect(Collectors.toList()),
-          value.getSchemaType());
+          value.getSchemaType());*/
+      CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
+      deriv.canonicalUtterance = cuGenerator.getSimpleCanonicalUtterance();
       return deriv;
     }
 
