@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.beust.jcommander.internal.Lists;
 

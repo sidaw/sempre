@@ -2,26 +2,43 @@ package edu.stanford.nlp.sempre.interactive;
 
 import java.util.*;
 
-import edu.stanford.nlp.sempre.JsonContextValue;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import edu.stanford.nlp.sempre.ContextValue;
+import edu.stanford.nlp.sempre.Json;
 import fig.basic.LogInfo;
 
 /**
  * A wrapper around JsonContextValue. Contains more information specific to vega-lite.
  *
- * @author ppasupat
+ * @author sidaw, ppasupat
  */
-public class VegaJsonContextValue extends JsonContextValue {
+public class VegaJsonContextValue extends ContextValue {
+
+  Object json;
+
+  public Object getObject() {
+    return json;
+  }
+  public JsonNode getJsonNode() {
+    return Json.getMapper().convertValue(json, JsonNode.class);
+  }
 
   public VegaJsonContextValue(Object jsonObj) {
-    super(jsonObj);
+    super(null, null, new ArrayList<Exchange>(), null);
+    LogInfo.logs("JsonContextValue %s", Json.getMapper().convertValue(jsonObj, JsonNode.class));
+    json = jsonObj;
   }
+
   public VegaJsonContextValue(String jsonString) {
-    super(jsonString);
+    super(null, null, new ArrayList<Exchange>(), null);
+    LogInfo.logs("JsonContextValue %s", jsonString);
+    json = Json.readMapHard(jsonString);
   }
-  public static VegaJsonContextValue wrap(JsonContextValue context) {
-    if (context instanceof VegaJsonContextValue)
-      return (VegaJsonContextValue) context;
-    return new VegaJsonContextValue(context.getObject());
+
+  @Override
+  public String toString() {
+    return Json.writeValueAsStringHard(json);
   }
 
   // ============================================================
@@ -53,6 +70,7 @@ public class VegaJsonContextValue extends JsonContextValue {
     }
     return this;
   }
+
   public List<Field> getFields() {
     return fields;
   }
