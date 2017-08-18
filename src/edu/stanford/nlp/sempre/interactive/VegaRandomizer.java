@@ -55,15 +55,9 @@ public class VegaRandomizer {
             new ValueFormula<NameValue>(fullPath),
             new ValueFormula<JsonValue>(value)));
     Derivation deriv = new Derivation.Builder()
-        .formula(setFormula)
-        .createDerivation();
-    /*deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
-          value.getJsonNode().toString(),
-          VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaType())
-          .collect(Collectors.toList()),
-          value.getSchemaType());*/
-      CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
-      deriv.canonicalUtterance = cuGenerator.getSimpleCanonicalUtterance();
+        .formula(setFormula).createDerivation();
+    CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
+    deriv.canonicalUtterance = cuGenerator.getSimpleCanonicalUtterance();
     deriv.ensureExecuted(builder.executor, ex.context);
     return deriv;
   }
