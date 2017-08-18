@@ -67,7 +67,7 @@ public class Dataset {
   // ============================================================
 
   /** For JSON. */
-  public static class GroupInfo {
+  static class GroupInfo {
     @JsonProperty final String group;
     @JsonProperty final List<Example> examples;
     String path;  // Optional, used if this was read from a path.
