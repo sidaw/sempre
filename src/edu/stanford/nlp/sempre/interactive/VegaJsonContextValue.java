@@ -36,6 +36,14 @@ public class VegaJsonContextValue extends ContextValue {
     json = Json.readMapHard(jsonString);
   }
 
+  @SuppressWarnings("unchecked")
+  public static VegaJsonContextValue fromMap(Map<String, Object> kv) {
+    VegaJsonContextValue context = new VegaJsonContextValue(kv.get("context"));
+    if (kv.containsKey("schema"))
+      context.setFields((Map<String, Map<String, String>>) kv.get("schema"));
+    return context;
+  }
+
   @Override
   public String toString() {
     return Json.writeValueAsStringHard(json);

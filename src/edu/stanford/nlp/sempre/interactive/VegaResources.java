@@ -194,15 +194,9 @@ public class VegaResources {
 
   private void load(File path) {
     LogInfo.logs("Reading example template from %s", path);
-    String text;
-    try {
-      text = String.join("", IOUtils.readLines(path.getAbsolutePath()));
-      templates.add(text);
-      templatesMap.put(path.getPath(), text);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    String text = String.join("\n", IOUtils.readLinesHard(path.getAbsolutePath()));
+    templates.add(text);
+    templatesMap.put(path.getPath(), text);
   }
 
   public static List<JsonValue> getValues(List<String> path) {

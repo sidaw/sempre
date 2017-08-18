@@ -84,10 +84,14 @@ public class JsonMaster extends Master {
        *     "context": Vega-lite context (object),
        *     "schema": schema map (object),
        *   }]
+       *
+       * - If context is empty:
+       *     Parse the command for generating a new plot
+       * - If context is not empty:
+       *     Parse the command, either for modifying the plot or generating a new plot
        */
       String utt = (String) kv.get("utterance");
-      session.context = new VegaJsonContextValue(kv.get("context"))
-          .setFields((Map<String, Map<String, String>>) kv.get("schema"));
+      session.context = VegaJsonContextValue.fromMap(kv);
 
       // Create the example
       Example ex = exampleFromUtterance(utt, session);
@@ -113,10 +117,14 @@ public class JsonMaster extends Master {
        *     "context": Vega-lite context (object),
        *     "schema": schema map (object),
        *   }]
+       *
+       * - If context is empty:
+       *     Suggest possible plots based on the table fields
+       * - If context is not empty:
+       *     Suggest possible modifications to the current plot
        */
       int amount = (int) kv.get("amount");
-      session.context = new VegaJsonContextValue(kv.get("context"))
-          .setFields((Map<String, Map<String, String>>) kv.get("schema"));
+      session.context = VegaJsonContextValue.fromMap(kv);
       Example ex = exampleFromUtterance("", session);
       VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
       response.ex = randomizer.generate(amount);
@@ -139,11 +147,9 @@ public class JsonMaster extends Master {
        */
       String utt = (String) kv.get("utterance");
       Object targetValue = kv.get("targetValue");
-      Object context = kv.get("context");
       Example ex = exampleFromUtterance(utt, session);
       ex.targetValue = new JsonValue(targetValue);
-      ex.context = new VegaJsonContextValue(context)
-          .setFields((Map<String, Map<String, String>>) kv.get("schema"));
+      ex.context = VegaJsonContextValue.fromMap(kv);
       builder.parser.parse(builder.params, ex, true);
       learner.onlineLearnExample(ex);
 
