@@ -16,19 +16,20 @@ public class VegaLitePathMatcher {
   // Map from a key to all the paths containing that key
   private Map<String, List<List<String>>> index;
   private List<List<String>> paths;
-  
+
   public VegaLitePathMatcher(String filePath) throws IOException {
     // load paths from file
     Stream<String> stream = Files.lines(Paths.get(filePath));
     paths = stream.map(line -> Arrays.asList(line.split("\t"))).collect(Collectors.toList());
     buildIndex(paths);
+    stream.close();
   }
 
   public VegaLitePathMatcher(List<List<String>> paths) {
     this.paths = paths;
     buildIndex(paths);
   }
-  
+
   private void buildIndex(List<List<String>> paths) {
     // TODO Auto-generated method stub
     index = new HashMap<>();
@@ -44,7 +45,7 @@ public class VegaLitePathMatcher {
   public Set<String> pathKeys() {
     return index.keySet();
   }
-  
+
   public List<List<String>> getPaths() {
     return paths;
   }
@@ -72,7 +73,7 @@ public class VegaLitePathMatcher {
 
     return matches;
   }
-    
+
   /**
    * Given a list of keys, return all paths containing those keys in that order
    */

@@ -10,20 +10,7 @@ import org.testng.util.Strings;
 
 import com.google.common.collect.Lists;
 
-import edu.stanford.nlp.sempre.Builder;
-import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.Derivation;
-import edu.stanford.nlp.sempre.Example;
-import edu.stanford.nlp.sempre.Formula;
-import edu.stanford.nlp.sempre.Formulas;
-import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.JsonContextValue;
-import edu.stanford.nlp.sempre.Master;
-import edu.stanford.nlp.sempre.Params;
-import edu.stanford.nlp.sempre.Parser;
-import edu.stanford.nlp.sempre.Rule;
-import edu.stanford.nlp.sempre.RuleSource;
-import edu.stanford.nlp.sempre.Session;
+import edu.stanford.nlp.sempre.*;
 import fig.basic.IOUtils;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
@@ -52,7 +39,7 @@ public class InteractiveMaster extends Master {
     public int maxSequence = 20;
     @Option(gloss = "path to the citations")
     public int maxChars = 200;
-    
+
     @Option(gloss = "allow regular commands specified in Master")
     public boolean allowRegularCommands = false;
   }
@@ -256,10 +243,7 @@ public class InteractiveMaster extends Master {
       if (tree.children.size() == 1) {
         LogInfo.logs("%s", session.context);
       } else {
-        session.context = new JsonContextValue(tree.children.get(1).toString()); 
-//            ContextValue
-//            .fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
-//                tree.children.get(1).toString()));
+        session.context = new VegaJsonContextValue(tree.children.get(1).toString());
         response.stats.put("context_length", tree.children.get(1).toString().length());
       }
     } else {
@@ -276,7 +260,7 @@ public class InteractiveMaster extends Master {
     ex.preprocess();
     return ex;
   }
-  
+
   public static List<Rule> induceRulesHelper(String command, String head, String jsonDef, Parser parser, Params params,
       Session session, Ref<Response> refResponse) throws BadInteractionException {
     Example exHead = exampleFromUtterance(head, session);
@@ -286,9 +270,9 @@ public class InteractiveMaster extends Master {
       throw BadInteractionException.headIsEmpty(head);
     if (isNonsense(exHead))
       throw BadInteractionException.nonSenseDefinition(head);
-    
+
     InteractiveBeamParserState state = ((InteractiveBeamParser)parser).parseWithoutExecuting(params, exHead, false);
-    
+
     if (GrammarInducer.getParseStatus(exHead) == GrammarInducer.ParseStatus.Core)
       throw BadInteractionException.headIsCore(head);
 
@@ -303,7 +287,7 @@ public class InteractiveMaster extends Master {
       refResponse.value.ex = exHead;
       InteractiveUtils.addCatFormulaStats(bodyDeriv, refResponse);
     }
-    
+
     List<Rule> inducedRules = new ArrayList<>();
     GrammarInducer grammarInducer = new GrammarInducer(exHead.getTokens(), bodyDeriv, state.chartList);
     inducedRules.addAll(grammarInducer.getRules());
@@ -326,7 +310,7 @@ public class InteractiveMaster extends Master {
       }
       inducedRules.addAll(alignedRules);
     }
-    
+
     if (!Strings.isNullOrEmpty(InteractiveMaster.opts.intOutputPath) && inducedRules.size() > 0 && session.isWritingGrammar()) {
       DefinitionTree defTree = new DefinitionTree(ruleid, exHead.getTokens(), bodyDerivs, inducedRules);
       PrintWriter out = IOUtils
@@ -334,7 +318,7 @@ public class InteractiveMaster extends Master {
       out.println(defTree.toJson());
       out.close();
     }
-    
+
     exHead.predDerivations = Lists.newArrayList(bodyDeriv);
     return inducedRules;
   }

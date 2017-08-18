@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -13,11 +12,9 @@ import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.DerivationStream;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Formula;
-import edu.stanford.nlp.sempre.JsonContextValue;
 import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.MultipleDerivationStream;
 import edu.stanford.nlp.sempre.SemanticFn;
-import edu.stanford.nlp.sempre.SingleDerivationStream;
 import edu.stanford.nlp.sempre.ValueFormula;
 import fig.basic.LispTree;
 import fig.basic.Option;
@@ -55,7 +52,7 @@ public class VegaFn extends SemanticFn {
       });
     } else if (mode == Mode.Field) {
       return new VegaValueStream(ex, c, s -> {
-        JsonContextValue context = (JsonContextValue) ex.context;
+        VegaJsonContextValue context = (VegaJsonContextValue) ex.context;
         if (context.getJsonNode().has("fields")) {
           for(JsonNode field : context.getJsonNode().get("fields")) {
             if (s.equals(field.textValue()))
@@ -77,12 +74,12 @@ public class VegaFn extends SemanticFn {
     public VegaValueStream(Example ex, Callable c, Function<String, Set<String>> tokenChecker) {
       String child = c.childStringValue(0);
       types = tokenChecker.apply(child);
-      
+
       if (types != null && types.size() > 0)
         typeIterator = types.iterator();
       else
         typeIterator = Iterators.emptyIterator();
-      
+
       callable = c;
     }
 

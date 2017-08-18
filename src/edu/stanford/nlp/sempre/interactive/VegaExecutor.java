@@ -15,7 +15,6 @@ import edu.stanford.nlp.sempre.Executor;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.JsonContextValue;
 import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.ListValue;
 import edu.stanford.nlp.sempre.NameValue;
@@ -44,7 +43,7 @@ public class VegaExecutor extends Executor {
 
   private VegaEngine vegaEngine;
   private VegaResources vegaResource;
-  
+
   public VegaExecutor() {
     if (opts.compileVega)
       vegaEngine = new VegaEngine();
@@ -53,12 +52,12 @@ public class VegaExecutor extends Executor {
 
   @Override
   public Response execute(Formula formula, ContextValue context) {
-    JsonContextValue jsonContext; 
-    if (context instanceof JsonContextValue)
-      jsonContext = (JsonContextValue)context;
+    VegaJsonContextValue jsonContext;
+    if (context instanceof VegaJsonContextValue)
+      jsonContext = (VegaJsonContextValue)context;
     else
-      jsonContext = new JsonContextValue(Json.readMapHard((String)VegaResources.templates.get(0)));
-    
+      jsonContext = new VegaJsonContextValue(Json.readMapHard((String)VegaResources.templates.get(0)));
+
     formula = Formulas.betaReduction(formula);
     try {
       JsonNode result = execute((ActionFormula)formula, jsonContext);
@@ -72,7 +71,7 @@ public class VegaExecutor extends Executor {
       return new Response(ErrorValue.badJava(e.toString()));
     }
   }
-  
+
   private static Object toObject(Value value) {
     if (value instanceof NumberValue) {
       // Unfortunately, NumberValues don't make a distinction between ints and
@@ -101,9 +100,9 @@ public class VegaExecutor extends Executor {
   private String getString(Formula f) {
     return ((StringValue)((ValueFormula)f).value).value;
   }
-  
+
   @SuppressWarnings("rawtypes")
-  private JsonNode execute(ActionFormula f, JsonContextValue jsonContext) {
+  private JsonNode execute(ActionFormula f, VegaJsonContextValue jsonContext) {
     JsonNode result = null;
     if (f.mode == ActionFormula.Mode.primitive) {
       // use reflection to call primitive stuff
@@ -128,13 +127,13 @@ public class VegaExecutor extends Executor {
       LogInfo.logs("Before: %s", jsonContext);
       LogInfo.logs("After: %s", result);
     }
-    
+
     if (!opts.compileVega) return result;
 
     // Compile Vega-lite spec
     VegaResponse contextResponse = vegaEngine.compileVegaLite(jsonContext.getJsonNode());
     VegaResponse vr = vegaEngine.compileVegaLite(result, contextResponse);
-  
+
     if (opts.verbose >= 2) {
       LogInfo.logs("VegaContext: %s", contextResponse.vegaSpec);
       LogInfo.logs("Vega-lite spec: %s", result.toString());
@@ -143,9 +142,9 @@ public class VegaExecutor extends Executor {
       if (vr.image != null) {
         LogInfo.logs("Image: %s", vr.image);
       }
-    } else if (opts.verbose >= 1) 
+    } else if (opts.verbose >= 1)
       LogInfo.logs("Compiler message: %s", vr.message);
-    
+
     if (!vr.isGoodChange(contextResponse)) {
       if (vr.isClean()) {
         throw new RuntimeException("Output was unchanged");
@@ -155,14 +154,14 @@ public class VegaExecutor extends Executor {
     }
     return result;
   }
-  
+
   public static List<String> pathFormulaToList(ActionFormula pathFormula) {
     List<Formula> stringFormulas = pathFormula.mapToList(f -> {
       if (f instanceof ActionFormula && ((ActionFormula)f).mode == ActionFormula.Mode.sequential)
         return Lists.newArrayList();
       else return Lists.newArrayList(f);
     }, true);
-    
+
     List<String> path = stringFormulas.stream().map(f -> Formulas.getString(f)).collect(Collectors.toList());
     LogInfo.logs("PathPattern %s -> %s", pathFormula, path);
     return path;

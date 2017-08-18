@@ -6,7 +6,6 @@ import java.util.Map;
 import edu.stanford.nlp.sempre.Builder;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.JsonContextValue;
 import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Session;
@@ -72,6 +71,7 @@ public class JsonMaster extends Master {
   void handleCommand(Session session, String line, Response response) {
     List<Object> args = Json.readValueHard(line, List.class);
     String command = (String) args.get(0);
+    Map<String, Object> kv = (Map<String, Object>) args.get(1);
     QueryStats stats = new QueryStats(response, command);
 
     // Start of interactive commands
@@ -79,32 +79,20 @@ public class JsonMaster extends Master {
       /* Issue a query. This will create a new Example.
        *
        * Usage:
-       * - ["q", utterance (string)]
-       *     The current context will be used.
-       * - ["q", utterance (string), context (object)]
-       * - ["q", {
-       *     "context": context (object),
-       *     "fields": fields (array[string]),
-       *     "utterance": utterance (string)
+       *   ["q", {
+       *     "utterance": utterance (string),
+       *     "context": Vega-lite context (object),
+       *     "schema": schema map (object),
        *   }]
        */
-      String utt;
-      if (args.get(1) instanceof String) {
-        utt = (String) args.get(1);
-        if (args.size() > 2) {
-          session.context = new JsonContextValue(args.get(2));
-        }
-      } else {
-        Map<String, Object> kv = (Map<String, Object>) args.get(1);
-        utt = (String) kv.get("utterance");
-        session.context = new JsonContextValue(kv.get("context"));
-        // TODO: Store the fields somewhere
-        List<String> fields = (List<String>) kv.get("fields");
-      }
+      String utt = (String) kv.get("utterance");
+      session.context = new VegaJsonContextValue(kv.get("context"))
+          .setFields((Map<String, Map<String, String>>) kv.get("schema"));
 
       // Create the example
       Example ex = exampleFromUtterance(utt, session);
       if ("random".equals(utt)) {
+        // For debugging the "random" command from the interface
         VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
         response.ex = randomizer.generate(50);
       } else {
@@ -118,11 +106,17 @@ public class JsonMaster extends Master {
 
     } else if (command.equals("random")) {
       /* Generate random derivations
+       *
        * Usage:
-       * - ["random", amount, context (object)]
+       *   ["random", {
+       *     "amount": amount (int),
+       *     "context": Vega-lite context (object),
+       *     "schema": schema map (object),
+       *   }]
        */
-      int amount = (int) args.get(1);
-      session.context = new JsonContextValue(args.get(2));
+      int amount = (int) kv.get("amount");
+      session.context = new VegaJsonContextValue(kv.get("context"))
+          .setFields((Map<String, Map<String, String>>) kv.get("schema"));
       Example ex = exampleFromUtterance("", session);
       VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
       response.ex = randomizer.generate(amount);
@@ -131,38 +125,40 @@ public class JsonMaster extends Master {
       /* Accept the user's selection.
        *
        * Usage:
-       * - ["accept", {
-       *     "context": context (object),
+       *   ["accept", {
+       *     "type": type (string),
        *     "utterance": utterance (string),
-       *     "targetValue": targetValue (...)
+       *     "context": Vega-lite context (object),
+       *     "schema": schema map (object),
+       *     "targetValue": targetValue (...),
+       *     "targetFormula": targetFormula (...),
+       *     "issuedQuery": issuedQuery (string; only for type = label),
        *   }]
        *
        * Using lastExample seems unreliable, different tabs etc.
        */
-      Map<String, Object> kv = (Map<String, Object>) args.get(1);
       String utt = (String) kv.get("utterance");
       Object targetValue = kv.get("targetValue");
       Object context = kv.get("context");
       Example ex = exampleFromUtterance(utt, session);
       ex.targetValue = new JsonValue(targetValue);
-      ex.context = new JsonContextValue(context);
+      ex.context = new VegaJsonContextValue(context)
+          .setFields((Map<String, Map<String, String>>) kv.get("schema"));
       builder.parser.parse(builder.params, ex, true);
       learner.onlineLearnExample(ex);
 
-    } else if (command.equals("context")) {
-      /* Set the session's context.
+    } else if (command.equals("reject")) {
+      /* Reject a plot.
        *
        * Usage:
-       * - ["context"]
-       *     Returns the sessions's context
-       * - ["context", context (object)]
+       *   ["reject", {
+       *     "utterance": utterance (string),
+       *     "context": Vega-lite context (object),
+       *     "schema": schema map (object),
+       *     "targetValue": targetValue (...),
+       *   }]
        */
-      if (args.size() == 1) {
-        LogInfo.logs("%s", session.context);
-      } else {
-        session.context = new JsonContextValue(args.get(1));
-        response.stats.put("context_length", args.get(1).toString().length());
-      }
+      // TODO
 
     } else {
       LogInfo.log("Invalid command: " + args);
