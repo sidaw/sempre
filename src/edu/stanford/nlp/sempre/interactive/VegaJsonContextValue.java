@@ -9,7 +9,7 @@ import edu.stanford.nlp.sempre.Json;
 import fig.basic.LogInfo;
 
 /**
- * A wrapper around JsonContextValue. Contains more information specific to vega-lite.
+ * Vega-lite JSON definition for a plot.
  *
  * @author sidaw, ppasupat
  */
