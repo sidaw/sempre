@@ -67,6 +67,7 @@ public class VegaJsonContextValue extends ContextValue {
 
     public String getName() { return name; }
     public String getType() { return type; }
+    public String toString() { return name + "(" + type + ")"; }
   }
 
   List<Field> fields;

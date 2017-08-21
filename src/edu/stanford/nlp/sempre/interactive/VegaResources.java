@@ -36,7 +36,7 @@ import fig.basic.Pair;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VegaResources {
   public static class Options {
-    @Option(gloss = "File or directory containing example vega ") List<String> vegaSpecifications;
+    @Option(gloss = "File or directory containing example vega specs") List<String> vegaSpecifications;
     @Option(gloss = "File containing all valid VegaPaths") String allVegaJsonPaths;
     @Option(gloss = "File containing the vega schema") String vegaSchema;
     @Option(gloss = "File containing object values to try") String valueTemplates;
@@ -199,6 +199,7 @@ public class VegaResources {
       if (extracted != null)
         templatesWithPlaceholders.add(extracted);
     }
+    LogInfo.logs("Extracted %d templates with placeholders", templatesWithPlaceholders.size());
 
     LogInfo.end_track();
   }
@@ -238,13 +239,26 @@ public class VegaResources {
 
   private String extractTemplateWithPlaceholders(String json) {
     ObjectNode jsonNode = (ObjectNode) Json.readValueHard(json, JsonNode.class);
-    // Remove the data field
+    // Remove a few fields
     jsonNode.remove("data");
+    jsonNode.remove("description");
     // Check if the plot is a single plot
-
-
-
-    LogInfo.logs("extractTemplateWithPlaceholders: %s", jsonNode);
+    if (jsonNode.has("facet") || jsonNode.has("layer")
+        || jsonNode.has("hconcat") || jsonNode.has("vconcat")
+        || jsonNode.has("repeat") || jsonNode.has("resolve"))
+      return null;
+    // Check if there is no weird transformation
+    if (jsonNode.has("transform")) return null;
+    // Change the field names and field types to placeholders
+    int numPlaceholders = 0;
+    for (JsonNode encodingItem : jsonNode.get("encoding")) {
+      ObjectNode encodingItemO = (ObjectNode) encodingItem;
+      if (encodingItemO.has("field")) {
+        String type = encodingItem.has("type") ? encodingItem.get("type").asText() : "any";
+        encodingItemO.put("field", "@FIELD_" + (++numPlaceholders) + "_" + type + "@");
+      }
+    }
+    //LogInfo.logs("extractTemplateWithPlaceholders: %s", jsonNode);
     return jsonNode.toString();
   }
 
