@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.io.IOException;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,38 +16,47 @@ import fig.basic.LogInfo;
  */
 public class VegaJsonContextValue extends ContextValue {
 
-  Object json;
-
-  public Object getObject() {
-    return json;
-  }
-  public JsonNode getJsonNode() {
-    return Json.getMapper().convertValue(json, JsonNode.class);
-  }
+  final JsonNode jsonNode;
 
   public VegaJsonContextValue(Object jsonObj) {
     super(null, null, new ArrayList<Exchange>(), null);
-    LogInfo.logs("JsonContextValue %s", Json.getMapper().convertValue(jsonObj, JsonNode.class));
-    json = jsonObj;
+    jsonNode = Json.getMapper().convertValue(jsonObj, JsonNode.class);
+    LogInfo.logs("JsonContextValue %s", jsonNode);
   }
 
   public VegaJsonContextValue(String jsonString) {
     super(null, null, new ArrayList<Exchange>(), null);
+    try {
+      jsonNode = Json.getMapper().readTree(jsonString);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
     LogInfo.logs("JsonContextValue %s", jsonString);
-    json = Json.readMapHard(jsonString);
   }
 
   @SuppressWarnings("unchecked")
-  public static VegaJsonContextValue fromMap(Map<String, Object> kv) {
+  public static VegaJsonContextValue fromClientRequest(Map<String, Object> kv) {
     VegaJsonContextValue context = new VegaJsonContextValue(kv.get("context"));
     if (kv.containsKey("schema"))
       context.setFields((Map<String, Map<String, String>>) kv.get("schema"));
     return context;
   }
 
+  /**
+   * Get a fresh copy of the whole JSON.
+   */
+  public JsonNode getJsonNode() {
+    return jsonNode.deepCopy();
+  }
+
   @Override
   public String toString() {
-    return Json.writeValueAsStringHard(json);
+    return jsonNode.toString();
+  }
+
+  public boolean isInitialContext() {
+    return jsonNode.size() == 0 || jsonNode.has("initialContext");
   }
 
   // ============================================================

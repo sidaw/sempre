@@ -85,13 +85,13 @@ public class JsonMaster extends Master {
        *     "schema": schema map (object),
        *   }]
        *
-       * - If context is empty:
+       * - If context is an empty object or contains "initialContext" key:
        *     Parse the command for generating a new plot
-       * - If context is not empty:
+       * - Otherwise:
        *     Parse the command, either for modifying the plot or generating a new plot
        */
       String utt = (String) kv.get("utterance");
-      session.context = VegaJsonContextValue.fromMap(kv);
+      session.context = VegaJsonContextValue.fromClientRequest(kv);
 
       // Create the example
       Example ex = exampleFromUtterance(utt, session);
@@ -118,13 +118,13 @@ public class JsonMaster extends Master {
        *     "schema": schema map (object),
        *   }]
        *
-       * - If context is empty:
+       * - If context is an empty object or contains "initialContext" key:
        *     Suggest possible plots based on the table fields
-       * - If context is not empty:
+       * - Otherwise:
        *     Suggest possible modifications to the current plot
        */
       int amount = (int) kv.get("amount");
-      session.context = VegaJsonContextValue.fromMap(kv);
+      session.context = VegaJsonContextValue.fromClientRequest(kv);
       Example ex = exampleFromUtterance("", session);
       VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
       response.ex = randomizer.generate(amount);
@@ -149,7 +149,7 @@ public class JsonMaster extends Master {
       Object targetValue = kv.get("targetValue");
       Example ex = exampleFromUtterance(utt, session);
       ex.targetValue = new JsonValue(targetValue);
-      ex.context = VegaJsonContextValue.fromMap(kv);
+      ex.context = VegaJsonContextValue.fromClientRequest(kv);
       builder.parser.parse(builder.params, ex, true);
       learner.onlineLearnExample(ex);
 
