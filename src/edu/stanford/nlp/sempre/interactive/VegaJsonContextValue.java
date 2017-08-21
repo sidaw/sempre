@@ -1,6 +1,5 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import java.io.IOException;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,13 +25,8 @@ public class VegaJsonContextValue extends ContextValue {
 
   public VegaJsonContextValue(String jsonString) {
     super(null, null, new ArrayList<Exchange>(), null);
-    try {
-      jsonNode = Json.getMapper().readTree(jsonString);
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
-    LogInfo.logs("JsonContextValue %s", jsonString);
+    jsonNode = Json.readValueHard(jsonString, JsonNode.class);
+    LogInfo.logs("JsonContextValue %s", jsonNode);
   }
 
   @SuppressWarnings("unchecked")

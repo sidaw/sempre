@@ -16,6 +16,7 @@ import org.testng.util.Strings;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -52,6 +53,7 @@ public class VegaResources {
 
   public static ArrayList<String> templates;
   public static Map<String, String> templatesMap;
+  public static ArrayList<String> templatesWithPlaceholders;
 
   public static JsonSchema vegaSchema;
 
@@ -189,6 +191,15 @@ public class VegaResources {
     }
 
     LogInfo.logs("got %d paths, %d unique", allPaths.size(), Sets.newHashSet(allPaths).size());
+
+    // Extracting templates with placeholders for generating initial plots
+    templatesWithPlaceholders = new ArrayList<>();
+    for (String json : templates) {
+      String extracted = extractTemplateWithPlaceholders(json);
+      if (extracted != null)
+        templatesWithPlaceholders.add(extracted);
+    }
+
     LogInfo.end_track();
   }
 
@@ -224,5 +235,18 @@ public class VegaResources {
   public static Set<String> getColorSet() {
     return colorSet;
   }
+
+  private String extractTemplateWithPlaceholders(String json) {
+    ObjectNode jsonNode = (ObjectNode) Json.readValueHard(json, JsonNode.class);
+    // Remove the data field
+    jsonNode.remove("data");
+    // Check if the plot is a single plot
+
+
+
+    LogInfo.logs("extractTemplateWithPlaceholders: %s", jsonNode);
+    return jsonNode.toString();
+  }
+
 }
 

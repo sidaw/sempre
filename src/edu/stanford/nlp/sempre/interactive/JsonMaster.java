@@ -98,7 +98,7 @@ public class JsonMaster extends Master {
       if ("random".equals(utt)) {
         // For debugging the "random" command from the interface
         VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
-        response.ex = randomizer.generate(50);
+        response.ex = randomizer.generateModification(50);
       } else {
         builder.parser.parse(builder.params, ex, false);
         stats.size(ex.predDerivations != null ? ex.predDerivations.size() : 0);
@@ -124,10 +124,14 @@ public class JsonMaster extends Master {
        *     Suggest possible modifications to the current plot
        */
       int amount = (int) kv.get("amount");
-      session.context = VegaJsonContextValue.fromClientRequest(kv);
+      VegaJsonContextValue context = VegaJsonContextValue.fromClientRequest(kv);
+      session.context = context;
       Example ex = exampleFromUtterance("", session);
       VegaRandomizer randomizer = new VegaRandomizer(ex, builder);
-      response.ex = randomizer.generate(amount);
+      if (context.isInitialContext())
+        response.ex = randomizer.generateInitial(amount);
+      else
+        response.ex = randomizer.generateModification(amount);
 
     } else if (command.equals("accept")) {
       /* Accept the user's selection.
