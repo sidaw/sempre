@@ -142,6 +142,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('VegaResources.excludedPaths', 'items', 'vconcat', 'hconcat', 'layer', 'spec', 'repeat'),
   o('VegaResources.colorFile', "./#{$path}/css-color-names.json"),
   o('VegaResources.vegaSpecifications', "./#{$path}/templates/population", "./#{$path}/templates/cars", "./#{$path}/templates/stocks"),
+  o('VegaResources.initialTemplates', "./#{$path}/initial-templates.json"),
   selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 
   o('VegaEngine.verbose', 1),

@@ -3,12 +3,16 @@ package edu.stanford.nlp.sempre.interactive;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.interactive.VegaJsonContextValue.Field;
+import edu.stanford.nlp.sempre.interactive.VegaResources.InitialTemplate;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
@@ -45,63 +49,78 @@ public class VegaRandomizer {
   public Example generateInitial(int amount) {
     LogInfo.begin_track("VegaRandomizer.generateInitial");
     List<Derivation> derivations = new ArrayList<>();
-    List<String> templates = VegaResources.templatesWithPlaceholders;
+    List<InitialTemplate> initialTemplates = VegaResources.getInitialTemplates();
     int tries = 0;
     while (derivations.size() < amount && tries < opts.maxRandomTries) {
       tries++;
-      // Pick a template
-      String template = randomChoice(templates);
-      // Fill in placeholders
-      template = fillPlaceholders(template);
-      if (template == null) continue;
-      // Build the derivation
-      Derivation deriv = createInitialDeriv(template);
-      derivations.add(deriv);
-      LogInfo.logs("%s", deriv.value);
+      // Pick a initial template
+      InitialTemplate template = randomChoice(initialTemplates);
+      // Create a new plot spec
+      JsonNode spec = createSpecFromTemplate(template);
+      if (spec == null) continue;
+      LogInfo.logs("Spec: %s", spec);
+      derivations.add(createInitialDeriv(spec));
     }
     LogInfo.end_track();
     ex.predDerivations = derivations;
     return ex;
   }
 
-  static final Pattern PLACEHOLDER = Pattern.compile("@FIELD_\\d+_([^@]*)@");
-
   // Mapping from Vega type to compatible data type
   static final Map<String, List<String>> TYPE_MAP = new HashMap<>();
   static {
     TYPE_MAP.put("nominal", Arrays.asList("string"));
-    TYPE_MAP.put("ordinal", Arrays.asList("integer", "number", "date"));
+    TYPE_MAP.put("ordinal", Arrays.asList("string", "integer", "number", "date"));
     TYPE_MAP.put("quantitative", Arrays.asList("integer", "number"));
     TYPE_MAP.put("temporal", Arrays.asList("date"));
   }
 
-  private String fillPlaceholders(String template) {
-    List<Field> fields = new ArrayList<>(context.getFields());
-    //LogInfo.logs("%s | %s", fields, template);
-    while (template.contains("@FIELD")) {
-      Matcher matcher = PLACEHOLDER.matcher(template);
-      matcher.find();
-      String type = matcher.group(1);
-      List<Field> eligibleFields = new ArrayList<>();
-      for (Field field : fields) {
-        if (TYPE_MAP.get(type).contains(field.type))
-          eligibleFields.add(field);
+  private JsonNode createSpecFromTemplate(InitialTemplate template) {
+    ObjectMapper mapper = Json.getMapper();
+    ObjectNode node = mapper.createObjectNode();
+    node.put("$schema", "https://vega.github.io/schema/vega-lite/v2.json");
+    node.put("mark", template.mark);
+    ObjectNode allEncodings = mapper.createObjectNode();
+    node.put("encoding", allEncodings);
+    // Fill in the encoding
+    List<Field> fields = new ArrayList<>(context.fields);
+    for (Map.Entry<String, String> templateEncoding : template.encoding.entrySet()) {
+      ObjectNode encoding = mapper.createObjectNode();
+      String channel = templateEncoding.getKey(), vegaType = templateEncoding.getValue(), aggregate = null;
+      if (vegaType.contains("_")) {
+        String[] vegaTypeTokens = vegaType.split("_");
+        vegaType = vegaTypeTokens[0];
+        aggregate = vegaTypeTokens[1];
       }
-      //LogInfo.logs("type: %s --> fields: %s", type, eligibleFields);
-      Field selectedField = randomChoice(eligibleFields);
-      if (selectedField == null) return null;
-      template = matcher.replaceFirst(selectedField.name);
-      //LogInfo.logs("=> %s", template);
-      fields.remove(selectedField);
+      if ("count".equals(vegaType)) {
+        // The "count" encoding
+        encoding.put("aggregate", "count");
+        encoding.put("type", "quantitative");
+      } else {
+        // Find a suitable field to fill in
+        final List<String> allowedDataTypes = TYPE_MAP.get(vegaType);
+        List<Field> suitableFields = fields.stream()
+            .filter(x -> allowedDataTypes.contains(x.type)).collect(Collectors.toList());
+        if (suitableFields.isEmpty()) {
+          LogInfo.logs("Wah, no good field: [%s] %s -> %s", template.mark, template.encoding, context.fields);
+          return null;
+        }
+        Field field = randomChoice(suitableFields);
+        encoding.put("field", field.name);
+        encoding.put("type", vegaType);
+        if (aggregate != null)
+          encoding.put("aggregate", aggregate);
+        fields.remove(field);
+      }
+      allEncodings.put(channel, encoding);
     }
-    return template;
+    return node;
   }
 
-  private Derivation createInitialDeriv(String template) {
-    JsonNode jsonNode = Json.readValueHard(template, JsonNode.class);
+  private Derivation createInitialDeriv(JsonNode spec) {
     Derivation deriv = new Derivation.Builder()
-        .formula(new ValueFormula(new StringValue("init")))
-        .value(new JsonValue(jsonNode)).createDerivation();
+        .formula(new ValueFormula(new JsonValue(spec)))
+        .value(new JsonValue(spec)).createDerivation();
     return deriv;
   }
 

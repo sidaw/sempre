@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,8 +14,8 @@ import java.util.stream.Collectors;
 import org.testng.util.Strings;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -42,6 +41,7 @@ public class VegaResources {
     @Option(gloss = "File containing object values to try") String valueTemplates;
     @Option(gloss = "Path elements to exclude") Set<String> excludedPaths;
     @Option(gloss = "File containing all the colors") String colorFile;
+    @Option(gloss = "File containing initial plot templates") String initialTemplates;
   }
   public static Options opts = new Options();
   private final Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "vegaResource");
@@ -53,7 +53,6 @@ public class VegaResources {
 
   public static ArrayList<String> templates;
   public static Map<String, String> templatesMap;
-  public static ArrayList<String> templatesWithPlaceholders;
 
   public static JsonSchema vegaSchema;
 
@@ -62,6 +61,12 @@ public class VegaResources {
   private static Map<String, Set<List<String>>> enumValueToPaths;
 
   private static Set<String> colorSet;
+
+  static class InitialTemplate {
+    @JsonProperty("mark") public String mark;
+    @JsonProperty("encoding") public Map<String, String> encoding;
+  }
+  private static List<InitialTemplate> initialTemplates;
 
   public VegaResources() {
     try {
@@ -98,6 +103,14 @@ public class VegaResources {
       if (!Strings.isNullOrEmpty(opts.colorFile)) {
         colorSet = Json.readMapHard(String.join("\n", IOUtils.readLines(opts.colorFile))).keySet();
         LogInfo.logs("loaded %d colors from %s", colorSet.size(), opts.colorFile);
+      }
+
+      if (!Strings.isNullOrEmpty(opts.initialTemplates)) {
+        initialTemplates = new ArrayList<>();
+        for (JsonNode node : Json.readValueHard(String.join("\n", IOUtils.readLines(opts.initialTemplates)), JsonNode.class)) {
+          initialTemplates.add(Json.getMapper().treeToValue(node, InitialTemplate.class));
+        }
+        LogInfo.logs("Read %d initial templates", initialTemplates.size());
       }
 
     } catch (Exception ex) {
@@ -191,16 +204,6 @@ public class VegaResources {
     }
 
     LogInfo.logs("got %d paths, %d unique", allPaths.size(), Sets.newHashSet(allPaths).size());
-
-    // Extracting templates with placeholders for generating initial plots
-    templatesWithPlaceholders = new ArrayList<>();
-    for (String json : templates) {
-      String extracted = extractTemplateWithPlaceholders(json);
-      if (extracted != null)
-        templatesWithPlaceholders.add(extracted);
-    }
-    LogInfo.logs("Extracted %d templates with placeholders", templatesWithPlaceholders.size());
-
     LogInfo.end_track();
   }
 
@@ -237,30 +240,8 @@ public class VegaResources {
     return colorSet;
   }
 
-  private String extractTemplateWithPlaceholders(String json) {
-    ObjectNode jsonNode = (ObjectNode) Json.readValueHard(json, JsonNode.class);
-    // Remove a few fields
-    jsonNode.remove("data");
-    jsonNode.remove("description");
-    // Check if the plot is a single plot
-    if (jsonNode.has("facet") || jsonNode.has("layer")
-        || jsonNode.has("hconcat") || jsonNode.has("vconcat")
-        || jsonNode.has("repeat") || jsonNode.has("resolve"))
-      return null;
-    // Check if there is no weird transformation
-    if (jsonNode.has("transform")) return null;
-    // Change the field names and field types to placeholders
-    int numPlaceholders = 0;
-    for (JsonNode encodingItem : jsonNode.get("encoding")) {
-      ObjectNode encodingItemO = (ObjectNode) encodingItem;
-      if (encodingItemO.has("field")) {
-        String type = encodingItem.has("type") ? encodingItem.get("type").asText() : "any";
-        encodingItemO.put("field", "@FIELD_" + (++numPlaceholders) + "_" + type + "@");
-      }
-    }
-    //LogInfo.logs("extractTemplateWithPlaceholders: %s", jsonNode);
-    return jsonNode.toString();
+  public static List<InitialTemplate> getInitialTemplates() {
+    return initialTemplates;
   }
-
 }
 
