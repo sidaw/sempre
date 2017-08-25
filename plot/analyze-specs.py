@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Analyze the spec file and dump out the mark-encoding combinations.
+
+This is used to generates the initial-templates.json file,
+which is used by VegaRandomizer.
+"""
 
 import sys, os, shutil, re, argparse, json, glob
 from codecs import open
@@ -62,7 +67,8 @@ class Analyzer(object):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--indir', default='specs')    
-    parser.add_argument('-u', '--unique', action='store_true')
+    parser.add_argument('-u', '--unique', action='store_true',
+            help='discard duplicated combinations')
     args = parser.parse_args()
 
     if args.unique:
