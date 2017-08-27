@@ -176,7 +176,9 @@ public class VegaResources {
       // put in a few values for very general types
       MapUtils.addToList(typeToValues, "boolean", new JsonValue(true).withSchemaType("boolean"));
       MapUtils.addToList(typeToValues, "boolean", new JsonValue(false).withSchemaType("boolean"));
-      MapUtils.addToList(typeToValues, "number", new JsonValue(0).withSchemaType("number"));
+      // MapUtils.addToList(typeToValues, "number", new JsonValue(0).withSchemaType("number"));
+      // temporarily removing 0 based on Meghas experience on data collection
+      MapUtils.addToList(typeToValues, "number", new JsonValue(10).withSchemaType("number"));
       MapUtils.addToList(typeToValues, "number", new JsonValue(100).withSchemaType("number"));
       MapUtils.addToList(typeToValues, "string", new JsonValue("hello").withSchemaType("string"));
 
