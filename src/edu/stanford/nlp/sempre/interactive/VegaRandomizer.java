@@ -1,10 +1,18 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.beust.jcommander.internal.Lists;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.interactive.VegaJsonContextValue.Field;
+import edu.stanford.nlp.sempre.interactive.VegaResources.InitialTemplate;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
@@ -12,32 +20,128 @@ public class VegaRandomizer {
   public static class Options {
     @Option(gloss = "Random seed")
     public Random vegaRandomizerRandom = new Random(42);
+    @Option(gloss = "Maximum number of randomization tries")
+    public int maxRandomTries = 100;
   }
   public static Options opts = new Options();
 
   final Example ex;
   final Builder builder;
+  final VegaJsonContextValue context;
 
   public VegaRandomizer(Example ex, Builder builder) {
     this.ex = ex;
     this.builder = builder;
+    this.context = (VegaJsonContextValue) ex.context;
   }
+
+  /** Helper function for randomizing an item. */
+  private <T> T randomChoice (List<T> stuff) {
+    if (stuff.isEmpty()) return null;
+    int index = opts.vegaRandomizerRandom.nextInt(stuff.size());
+    return stuff.get(index);
+  }
+
+  // ============================================================
+  // Generate initial plots
+  // ============================================================
+
+  public Example generateInitial(int amount) {
+    LogInfo.begin_track("VegaRandomizer.generateInitial");
+    List<Derivation> derivations = new ArrayList<>();
+    List<InitialTemplate> initialTemplates = VegaResources.getInitialTemplates();
+    int tries = 0;
+    while (derivations.size() < amount && tries < opts.maxRandomTries) {
+      tries++;
+      // Pick a initial template
+      InitialTemplate template = randomChoice(initialTemplates);
+      // Create a new plot spec
+      JsonNode spec = createSpecFromTemplate(template);
+      if (spec == null) continue;
+      LogInfo.logs("Spec: %s", spec);
+      derivations.add(createInitialDeriv(spec));
+    }
+    LogInfo.end_track();
+    ex.predDerivations = derivations;
+    return ex;
+  }
+
+  // Mapping from Vega type to compatible data type
+  static final Map<String, List<String>> TYPE_MAP = new HashMap<>();
+  static {
+    TYPE_MAP.put("nominal", Arrays.asList("string"));
+    TYPE_MAP.put("ordinal", Arrays.asList("string", "integer", "number", "date"));
+    TYPE_MAP.put("quantitative", Arrays.asList("integer", "number"));
+    TYPE_MAP.put("temporal", Arrays.asList("date"));
+  }
+
+  private JsonNode createSpecFromTemplate(InitialTemplate template) {
+    ObjectMapper mapper = Json.getMapper();
+    ObjectNode node = mapper.createObjectNode();
+    node.put("$schema", "https://vega.github.io/schema/vega-lite/v2.json");
+    node.put("mark", template.mark);
+    ObjectNode allEncodings = mapper.createObjectNode();
+    node.put("encoding", allEncodings);
+    // Fill in the encoding
+    List<Field> fields = new ArrayList<>(context.fields);
+    for (Map.Entry<String, String> templateEncoding : template.encoding.entrySet()) {
+      ObjectNode encoding = mapper.createObjectNode();
+      String channel = templateEncoding.getKey(), vegaType = templateEncoding.getValue(), aggregate = null;
+      if (vegaType.contains("_")) {
+        String[] vegaTypeTokens = vegaType.split("_");
+        vegaType = vegaTypeTokens[0];
+        aggregate = vegaTypeTokens[1];
+      }
+      if ("count".equals(vegaType)) {
+        // The "count" encoding
+        encoding.put("aggregate", "count");
+        encoding.put("type", "quantitative");
+      } else {
+        // Find a suitable field to fill in
+        final List<String> allowedDataTypes = TYPE_MAP.get(vegaType);
+        List<Field> suitableFields = fields.stream()
+            .filter(x -> allowedDataTypes.contains(x.type)).collect(Collectors.toList());
+        if (suitableFields.isEmpty()) {
+          LogInfo.logs("Wah, no good field: [%s] %s -> %s", template.mark, template.encoding, context.fields);
+          return null;
+        }
+        Field field = randomChoice(suitableFields);
+        encoding.put("field", field.name);
+        encoding.put("type", vegaType);
+        if (aggregate != null)
+          encoding.put("aggregate", aggregate);
+        fields.remove(field);
+      }
+      allEncodings.put(channel, encoding);
+    }
+    return node;
+  }
+
+  private Derivation createInitialDeriv(JsonNode spec) {
+    Derivation deriv = new Derivation.Builder()
+        .formula(new ValueFormula(new JsonValue(spec)))
+        .value(new JsonValue(spec)).createDerivation();
+    return deriv;
+  }
+
+  // ============================================================
+  // Generate modifications to the current plot
+  // ============================================================
 
   /**
    * Generate derivations for the example.
    */
-  public Example generate(int amount) {
-    LogInfo.begin_track("VegaRandomizer.generate");
+  public Example generateModification(int amount) {
+    LogInfo.begin_track("VegaRandomizer.generateModification");
     List<Derivation> derivations = new ArrayList<>();
-    // Generate the paths
     List<List<String>> paths = VegaResources.allPathsMatcher.match(null);
     while (derivations.size() < amount) {
-      int pathIndex = opts.vegaRandomizerRandom.nextInt(paths.size());
-      List<String> path = paths.get(pathIndex);
-      List<JsonValue> values = VegaResources.getValues(path);
-      if (values.isEmpty()) continue;
-      int valueIndex = opts.vegaRandomizerRandom.nextInt(values.size());
-      Derivation deriv = createDeriv(path, values.get(valueIndex));
+      // Pick a path and value
+      List<String> path = randomChoice(paths);
+      JsonValue value = randomChoice(VegaResources.getValues(path));
+      if (value == null) continue;
+      // Build the derivation
+      Derivation deriv = createModificationDeriv(path, value);
       derivations.add(deriv);
       LogInfo.logs("%s", deriv);
     }
@@ -46,7 +150,7 @@ public class VegaRandomizer {
     return ex;
   }
 
-  private Derivation createDeriv(List<String> path, JsonValue value) {
+  private Derivation createModificationDeriv(List<String> path, JsonValue value) {
     NameValue fullPath = new NameValue("$." + String.join(".", path));
     Formula setFormula = new ActionFormula(ActionFormula.Mode.primitive,
         Lists.newArrayList(
@@ -57,7 +161,7 @@ public class VegaRandomizer {
         .formula(setFormula).createDerivation();
     CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
     deriv.canonicalUtterance = cuGenerator.getSimpleCanonicalUtterance();
-    deriv.ensureExecuted(builder.executor, ex.context);
+    deriv.ensureExecuted(builder.executor, context);
     return deriv;
   }
 

@@ -15,38 +15,42 @@ import fig.basic.LogInfo;
  */
 public class VegaJsonContextValue extends ContextValue {
 
-  Object json;
-
-  public Object getObject() {
-    return json;
-  }
-  public JsonNode getJsonNode() {
-    return Json.getMapper().convertValue(json, JsonNode.class);
-  }
+  final JsonNode jsonNode;
 
   public VegaJsonContextValue(Object jsonObj) {
     super(null, null, new ArrayList<Exchange>(), null);
-    LogInfo.logs("JsonContextValue %s", Json.getMapper().convertValue(jsonObj, JsonNode.class));
-    json = jsonObj;
+    jsonNode = Json.getMapper().convertValue(jsonObj, JsonNode.class);
+    LogInfo.logs("JsonContextValue %s", jsonNode);
   }
 
   public VegaJsonContextValue(String jsonString) {
     super(null, null, new ArrayList<Exchange>(), null);
-    LogInfo.logs("JsonContextValue %s", jsonString);
-    json = Json.readMapHard(jsonString);
+    jsonNode = Json.readValueHard(jsonString, JsonNode.class);
+    LogInfo.logs("JsonContextValue %s", jsonNode);
   }
 
   @SuppressWarnings("unchecked")
-  public static VegaJsonContextValue fromMap(Map<String, Object> kv) {
+  public static VegaJsonContextValue fromClientRequest(Map<String, Object> kv) {
     VegaJsonContextValue context = new VegaJsonContextValue(kv.get("context"));
     if (kv.containsKey("schema"))
       context.setFields((Map<String, Map<String, String>>) kv.get("schema"));
     return context;
   }
 
+  /**
+   * Get a fresh copy of the whole JSON.
+   */
+  public JsonNode getJsonNode() {
+    return jsonNode.deepCopy();
+  }
+
   @Override
   public String toString() {
-    return Json.writeValueAsStringHard(json);
+    return jsonNode.toString();
+  }
+
+  public boolean isInitialContext() {
+    return jsonNode.size() == 0 || jsonNode.has("initialContext");
   }
 
   // ============================================================
@@ -63,6 +67,7 @@ public class VegaJsonContextValue extends ContextValue {
 
     public String getName() { return name; }
     public String getType() { return type; }
+    public String toString() { return name + "(" + type + ")"; }
   }
 
   List<Field> fields;
