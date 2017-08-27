@@ -1,6 +1,8 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -67,32 +69,44 @@ public class VegaFn extends SemanticFn {
 
   // takes a token determine what kind of value it can take
   static class VegaValueStream extends MultipleDerivationStream {
+    private String curString;
+    private Iterator<String> strIterator;
     private Set<String> types;
     private Iterator<String> typeIterator;
     private Callable callable;
+    private Function<String, Set<String>> tokenChecker;
 
     public VegaValueStream(Example ex, Callable c, Function<String, Set<String>> tokenChecker) {
+      List<String> strings = new ArrayList<String>();
       String child = c.childStringValue(0);
-      types = tokenChecker.apply(child);
+      strings.add(child);
+      if (child.matches(".*[s?!.,]"))
+        strings.add(child.substring(0, child.length() - 1));
+      strIterator = strings.iterator();
+      callable = c;
+      this.tokenChecker = tokenChecker;
+      advanceStr();
+    }
 
+    private void advanceStr() {
+      curString = strIterator.next();
+      types = tokenChecker.apply(curString);
       if (types != null && types.size() > 0)
         typeIterator = types.iterator();
       else
         typeIterator = Iterators.emptyIterator();
-
-      callable = c;
     }
 
     @Override
     public Derivation createDerivation() {
       String type;
-      if (typeIterator.hasNext())
-        type = typeIterator.next();
-      else return null;
-
-      JsonValue value = new JsonValue(callable.childStringValue(0))
-          .withSchemaType(type);
-
+      while (!typeIterator.hasNext()) {
+        if (!strIterator.hasNext())
+          return null;
+        advanceStr();
+      }
+      type = typeIterator.next();
+      JsonValue value = new JsonValue(curString).withSchemaType(type);
       Formula formula = new ValueFormula<JsonValue>(value);
       return new Derivation.Builder()
           .withCallable(callable)
