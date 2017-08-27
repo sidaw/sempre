@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,6 +14,7 @@ import java.util.stream.Collectors;
 import org.testng.util.Strings;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -35,12 +35,13 @@ import fig.basic.Pair;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VegaResources {
   public static class Options {
-    @Option(gloss = "File or directory containing example vega ") List<String> vegaSpecifications;
+    @Option(gloss = "File or directory containing example vega specs") List<String> vegaSpecifications;
     @Option(gloss = "File containing all valid VegaPaths") String allVegaJsonPaths;
     @Option(gloss = "File containing the vega schema") String vegaSchema;
     @Option(gloss = "File containing object values to try") String valueTemplates;
     @Option(gloss = "Path elements to exclude") Set<String> excludedPaths;
     @Option(gloss = "File containing all the colors") String colorFile;
+    @Option(gloss = "File containing initial plot templates") String initialTemplates;
   }
   public static Options opts = new Options();
   private final Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "vegaResource");
@@ -60,6 +61,12 @@ public class VegaResources {
   private static Map<String, Set<List<String>>> enumValueToPaths;
 
   private static Set<String> colorSet;
+
+  static class InitialTemplate {
+    @JsonProperty("mark") public String mark;
+    @JsonProperty("encoding") public Map<String, String> encoding;
+  }
+  private static List<InitialTemplate> initialTemplates;
 
   public VegaResources() {
     try {
@@ -96,6 +103,14 @@ public class VegaResources {
       if (!Strings.isNullOrEmpty(opts.colorFile)) {
         colorSet = Json.readMapHard(String.join("\n", IOUtils.readLines(opts.colorFile))).keySet();
         LogInfo.logs("loaded %d colors from %s", colorSet.size(), opts.colorFile);
+      }
+
+      if (!Strings.isNullOrEmpty(opts.initialTemplates)) {
+        initialTemplates = new ArrayList<>();
+        for (JsonNode node : Json.readValueHard(String.join("\n", IOUtils.readLines(opts.initialTemplates)), JsonNode.class)) {
+          initialTemplates.add(Json.getMapper().treeToValue(node, InitialTemplate.class));
+        }
+        LogInfo.logs("Read %d initial templates", initialTemplates.size());
       }
 
     } catch (Exception ex) {
@@ -225,6 +240,10 @@ public class VegaResources {
 
   public static Set<String> getColorSet() {
     return colorSet;
+  }
+
+  public static List<InitialTemplate> getInitialTemplates() {
+    return initialTemplates;
   }
 }
 
