@@ -172,9 +172,6 @@ public class VegaResources {
           ex.printStackTrace();
         }
       }
-      LogInfo.logs("typeToValues['boolean'] = %s", typeToValues.get("boolean"));
-      LogInfo.logs("typeToValues['number'] = %s", typeToValues.get("number"));
-      LogInfo.logs("typeToValues['string'] = %s", typeToValues.get("string"));
 
       // put in a few values for very general types
       MapUtils.addToList(typeToValues, "boolean", new JsonValue(true).withSchemaType("boolean"));
