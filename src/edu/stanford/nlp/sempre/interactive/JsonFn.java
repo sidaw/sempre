@@ -284,17 +284,12 @@ public class JsonFn extends SemanticFn {
   }
 
   // takes a token and check if it can be a path
-  static class JsonValueStream extends MultipleDerivationStream {
+  static class JsonValueStream extends SingleDerivationStream {
     Callable callable;
     int currIndex = 0;
-    List<String> strings = new ArrayList<String>();
 
     public JsonValueStream(Example ex, Callable c) {
       callable = c;
-      String string = callable.childStringValue(0);
-      strings.add(string);
-      if (string.matches(".*[s?!.,]"))
-        strings.add(string.substring(0, string.length() - 1));
     }
 
     private Double parseNumber(String string) {
@@ -313,9 +308,12 @@ public class JsonFn extends SemanticFn {
       else return null;
     }
 
-    private Derivation makeDerivationForString(String string) {
-      // cant just use getNodeType, because 100 and true are also strings
+    @Override
+    public Derivation createDerivation() {
       JsonValue value;
+      String string = callable.childStringValue(0);
+
+      // cant just use getNodeType, because 100 and true are also strings
       if (parseNumber(string) != null)
         value = new JsonValue(parseNumber(string)).withSchemaType("number");
       else if (parseBoolean(string) != null) {
@@ -329,15 +327,8 @@ public class JsonFn extends SemanticFn {
           .formula(formula)
           .createDerivation();
     }
-
-    @Override
-    public Derivation createDerivation() {
-      if (currIndex >= strings.size()) return null;
-      Derivation deriv = makeDerivationForString(strings.get(currIndex));
-      currIndex++;
-      return deriv;
-    }
   }
+
   static class ConstantValueStream extends MultipleDerivationStream {
     List<JsonValue> values = new ArrayList<JsonValue>();
     int index = 0;
