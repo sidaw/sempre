@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -49,7 +50,7 @@ public class JsonFn extends SemanticFn {
 
   public static Options opts = new Options();
   Formula arg1, arg2;
-  enum Mode {PathElement, JsonValue, Template, Join};
+  enum Mode {PathElement, JsonValue, ConstantValue, Template, Join};
   Mode mode;
   DerivationStream stream;
 
@@ -67,6 +68,8 @@ public class JsonFn extends SemanticFn {
       return new IsPathStream(ex, c);
     } else if (mode == Mode.JsonValue) {
       return new JsonValueStream(ex, c);
+    } else if (mode == Mode.ConstantValue) {
+      return new ConstantValueStream(ex, c);
     } else if (mode == Mode.Join) {
       return new JoinStream(ex, c);
     } else if (mode == Mode.Template) {
@@ -249,6 +252,7 @@ public class JsonFn extends SemanticFn {
       while (iterator.hasNext()) {
         Pair<List<String>, JsonValue> next = iterator.next();
         if (checkType(next.getFirst(), next.getSecond())) {
+          //LogInfo.logs("JsonFn yield %s %s", next.getFirst(), next.getSecond());
           return derivFromPathValue(next.getFirst(), next.getSecond());
         }
       }
@@ -317,6 +321,31 @@ public class JsonFn extends SemanticFn {
       } else {
         value = new JsonValue(string).withSchemaType("string");
       }
+      Formula formula = new ValueFormula<JsonValue>(value);
+      return new Derivation.Builder()
+          .withCallable(callable)
+          .formula(formula)
+          .createDerivation();
+    }
+  }
+
+  static class ConstantValueStream extends MultipleDerivationStream {
+    List<JsonValue> values = new ArrayList<JsonValue>();
+    int index = 0;
+    Callable callable;
+
+    public ConstantValueStream(Example ex, Callable c) {
+      callable = c;
+      values.add(new JsonValue(false).withSchemaType("boolean"));
+      values.add(new JsonValue(true).withSchemaType("boolean"));
+      values.add(new JsonValue(0.0).withSchemaType("number"));
+    }
+
+    public Derivation createDerivation() {
+      if (index >= values.size())
+        return null;
+      JsonValue value = values.get(index);
+      index++;
       Formula formula = new ValueFormula<JsonValue>(value);
       return new Derivation.Builder()
           .withCallable(callable)

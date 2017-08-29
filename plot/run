@@ -121,7 +121,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Params.l1Reg', 'nonlazy'),
   o('Params.l1RegCoeff', 0.0001),
 
-  o('Params.initStepSize', 0.1),
+  o('Params.initStepSize', 0.5),
   o('Params.adaptiveStepSize', true),
   #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
 
@@ -153,10 +153,11 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Dataset.datasetReader', "interactive.JsonlDatasetReader"),
   o('Dataset.inPaths', "train:./plot-data/sampledata.jsonl"),
   o('Parser.callSetEvaluation', true),
+  o('Learner.numParallelThreads', 8),
 
   o('FeatureExtractor.featureComputers', 'FloatingFeatureComputer', 'interactive.VegaFeatureComputer'),
   o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule',
-    'pathPattern', 'valueType'),
+    'pathPattern', 'valueType', 'lexPathPattern', 'lexValueType'),
 
   o('Learner.maxTrainIters', 0),
 

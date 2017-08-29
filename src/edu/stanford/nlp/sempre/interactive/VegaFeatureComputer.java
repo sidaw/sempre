@@ -86,24 +86,36 @@ public class VegaFeatureComputer implements FeatureComputer {
   }
 
   private void extractRuleFeatures(Example ex, Derivation deriv) {
-    if (FeatureExtractor.containsDomain("valueType")) {
-      // Add an indicator for each JSON type
-      if (deriv.formula instanceof ValueFormula) {
-        Value v = ((ValueFormula) deriv.formula).value;
-        if (v instanceof JsonValue) {
-          deriv.addFeature("valueType", ((JsonValue) v).getSchemaType());
+    // Indicators for each JSON type
+    if (deriv.formula instanceof ValueFormula) {
+      Value v = ((ValueFormula) deriv.formula).value;
+      if (v instanceof JsonValue) {
+        String schemaType = ((JsonValue) v).getSchemaType();
+        if (FeatureExtractor.containsDomain("valueType")) {
+          deriv.addFeature("valueType", schemaType);
+        }
+        if (FeatureExtractor.containsDomain("lexValueType")) {
+          for (String lemma: ex.getLemmaTokens())
+            deriv.addFeature("lexValueType", "lemma=" + lemma + ",valueType=" + schemaType);
         }
       }
     }
-    if (FeatureExtractor.containsDomain("pathPattern")){
-      // Add an indicator for each JSON key
-      if (deriv.rule != Rule.nullRule && deriv.rule.lhs.equals("$Action")
-          && deriv.rule.rhs.get(0).equals("$PathPattern")) {
-        // Note: doing it here because "*" expansion doesn't happen until after we join
-        // If we change that, should look for lhs == "$PathPattern" instead
-        // But this lets us hold onto everything until we type-check
-        LispTree tree = deriv.formula.toLispTree();
-        deriv.addFeature("pathPattern", tree.child(2).value);
+
+    // Indicators for each JSON key
+    if (deriv.rule != Rule.nullRule && deriv.rule.lhs.equals("$Action")
+        && deriv.rule.rhs.get(0).equals("$PathPattern")) {
+      // Note: doing it here because "*" expansion doesn't happen until after we join
+      // If we change that, should look for lhs == "$PathPattern" instead
+      // But this lets us hold onto everything until we type-check
+      LispTree tree = deriv.formula.toLispTree();
+      String path = tree.child(2).value;
+      if (FeatureExtractor.containsDomain("pathPattern")){
+        deriv.addFeature("pathPattern", path);
+      }
+      if (FeatureExtractor.containsDomain("lexPathPattern")) {
+        for (String lemma: ex.getLemmaTokens())
+          deriv.addFeature("lexPathPattern", "lemma=" + lemma + ",path=" + path);
+
       }
     }
   }

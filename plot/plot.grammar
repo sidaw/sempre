@@ -2,6 +2,7 @@
 ## domain specific
 
 (rule $Regular ($TOKEN) (FilterTokenFn nottoken anypath anyvalue))
+(rule $Regular ($LEMMA_TOKEN) (FilterTokenFn notlemma anypath anyvalue))
 (rule $Regular ($PHRASE) (FilterSpanLengthFn 2 2))
 (rule $Value ($Regular) (interactive.JsonFn JsonValue))
 (rule $Value ($Regular) (interactive.VegaFn Enum))
@@ -18,6 +19,7 @@
 # generate candidates from the paths, should be floating
 (rule $PathPattern (anypath) (ConstantFn *) (floating 1))
 (rule $Value (anyvalue) (ConstantFn *) (floating 1))
+(rule $Value (anyvalue) (interactive.JsonFn ConstantValue) (floating 1))
 
 (rule $Action ($PathPattern $Value) (interactive.JsonFn Join) (floating 1))
 
