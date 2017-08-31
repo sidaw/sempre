@@ -74,6 +74,7 @@ public class VegaRandomizer {
     TYPE_MAP.put("quantitative", Arrays.asList("integer", "number"));
     TYPE_MAP.put("temporal", Arrays.asList("date"));
   }
+  static final int MAX_NOMINAL_UNIQUE_COUNT = 30;
 
   private JsonNode createSpecFromTemplate(InitialTemplate template) {
     ObjectMapper mapper = Json.getMapper();
@@ -99,8 +100,13 @@ public class VegaRandomizer {
       } else {
         // Find a suitable field to fill in
         final List<String> allowedDataTypes = TYPE_MAP.get(vegaType);
+        final boolean isDiscrete = "nominal".equals(vegaType) || "ordinal".equals(vegaType);
         List<Field> suitableFields = fields.stream()
-            .filter(x -> allowedDataTypes.contains(x.type)).collect(Collectors.toList());
+            .filter(x -> allowedDataTypes.contains(x.type) && (
+                // If the vega type is discrete, don't use a data field with too many unique values
+                // Otherwise the graph will render slowly and everything will be tiny
+                !isDiscrete || x.uniqueCount <= MAX_NOMINAL_UNIQUE_COUNT
+                )).collect(Collectors.toList());
         if (suitableFields.isEmpty()) {
           LogInfo.logs("Wah, no good field: [%s] %s -> %s", template.mark, template.encoding, context.fields);
           return null;

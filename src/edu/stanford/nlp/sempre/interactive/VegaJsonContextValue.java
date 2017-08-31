@@ -33,7 +33,7 @@ public class VegaJsonContextValue extends ContextValue {
   public static VegaJsonContextValue fromClientRequest(Map<String, Object> kv) {
     VegaJsonContextValue context = new VegaJsonContextValue(kv.get("context"));
     if (kv.containsKey("schema"))
-      context.setFields((Map<String, Map<String, String>>) kv.get("schema"));
+      context.setFields((Map<String, Map<String, Object>>) kv.get("schema"));
     return context;
   }
 
@@ -58,25 +58,38 @@ public class VegaJsonContextValue extends ContextValue {
   // ============================================================
 
   public static class Field {
-    String name, type;
+    final String name, type;
+    final int uniqueCount, allCount;
 
-    public Field(String name, String type) {
+    public Field(String name, String type, int uniqueCount, int allCount) {
       this.name = name;
       this.type = type;
+      this.uniqueCount = uniqueCount;
+      this.allCount = allCount;
+    }
+
+    public Field(Map<String, Object> schemaItem) {
+      this.name = (String) schemaItem.get("name");
+      this.type = (String) schemaItem.get("type");
+      this.uniqueCount = schemaItem.containsKey("uniqueCount") ? (int) schemaItem.get("uniqueCount") : -1;
+      this.allCount = schemaItem.containsKey("allCount") ? (int) schemaItem.get("allCount") : -1;
     }
 
     public String getName() { return name; }
     public String getType() { return type; }
+    public int getAllCount() { return allCount; }
+    public int getUniqueCount() { return uniqueCount; }
+    public double getCountRatio() { return uniqueCount * 1. / allCount; }
     public String toString() { return name + "(" + type + ")"; }
   }
 
   List<Field> fields;
 
-  public VegaJsonContextValue setFields(Map<String, Map<String, String>> schema) {
+  public VegaJsonContextValue setFields(Map<String, Map<String, Object>> schema) {
     fields = new ArrayList<>();
-    for (Map<String, String> schemaItem : schema.values()) {
+    for (Map<String, Object> schemaItem : schema.values()) {
       if ("_id".equals(schemaItem.get("name"))) continue;     // Ignore dummy field
-      fields.add(new Field(schemaItem.get("name"), schemaItem.get("type")));
+      fields.add(new Field(schemaItem));
     }
     for (Field f : fields) {
       LogInfo.logs("Field %s (%s)", f.name, f.type);
