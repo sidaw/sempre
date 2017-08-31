@@ -102,17 +102,22 @@ public class VegaRandomizer {
         final List<String> allowedDataTypes = TYPE_MAP.get(vegaType);
         final boolean isDiscrete = "nominal".equals(vegaType) || "ordinal".equals(vegaType);
         List<Field> suitableFields = fields.stream()
-            .filter(x -> allowedDataTypes.contains(x.type) && (
+            .filter(x -> allowedDataTypes.contains(x.type)
                 // If the vega type is discrete, don't use a data field with too many unique values
                 // Otherwise the graph will render slowly and everything will be tiny
-                !isDiscrete || x.uniqueCount <= MAX_NOMINAL_UNIQUE_COUNT
-                )).collect(Collectors.toList());
+                && (!isDiscrete || x.uniqueCount <= MAX_NOMINAL_UNIQUE_COUNT)
+                ).collect(Collectors.toList());
         if (suitableFields.isEmpty()) {
           LogInfo.logs("Wah, no good field: [%s] %s -> %s", template.mark, template.encoding, context.fields);
           return null;
         }
         Field field = randomChoice(suitableFields);
         encoding.put("field", field.name);
+        if (field.probablyYears && "quantitative".equals(vegaType)) {
+          // Hack: make the years spread out by making it ordinal
+          vegaType = "ordinal";
+          aggregate = null;
+        }
         encoding.put("type", vegaType);
         if (aggregate != null)
           encoding.put("aggregate", aggregate);

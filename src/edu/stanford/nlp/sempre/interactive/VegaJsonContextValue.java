@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Json;
 import fig.basic.LogInfo;
+import fig.basic.MapUtils;
 
 /**
  * Vega-lite JSON definition for a plot.
@@ -60,19 +61,14 @@ public class VegaJsonContextValue extends ContextValue {
   public static class Field {
     final String name, type;
     final int uniqueCount, allCount;
-
-    public Field(String name, String type, int uniqueCount, int allCount) {
-      this.name = name;
-      this.type = type;
-      this.uniqueCount = uniqueCount;
-      this.allCount = allCount;
-    }
+    final boolean probablyYears;
 
     public Field(Map<String, Object> schemaItem) {
       this.name = (String) schemaItem.get("name");
       this.type = (String) schemaItem.get("type");
-      this.uniqueCount = schemaItem.containsKey("uniqueCount") ? (int) schemaItem.get("uniqueCount") : -1;
-      this.allCount = schemaItem.containsKey("allCount") ? (int) schemaItem.get("allCount") : -1;
+      this.uniqueCount = (int) MapUtils.get(schemaItem, "uniqueCount", -1);
+      this.allCount = (int) MapUtils.get(schemaItem, "allCount", -1);
+      this.probablyYears = (boolean) MapUtils.get(schemaItem, "probablyYears", false);
     }
 
     public String getName() { return name; }
