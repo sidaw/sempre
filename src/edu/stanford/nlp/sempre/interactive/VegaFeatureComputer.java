@@ -109,13 +109,20 @@ public class VegaFeatureComputer implements FeatureComputer {
       // But this lets us hold onto everything until we type-check
       LispTree tree = deriv.formula.toLispTree();
       String path = tree.child(2).value;
+      String[] pathTokens = path.split("[.]");
       if (FeatureExtractor.containsDomain("pathPattern")){
-        deriv.addFeature("pathPattern", path);
+        deriv.addFeature("pathPattern", "path=" + path);
+        for (String token: pathTokens) {
+          deriv.addFeature("pathPattern", "token=" + token);
+        }
       }
       if (FeatureExtractor.containsDomain("lexPathPattern")) {
-        for (String lemma: ex.getLemmaTokens())
+        for (String lemma: ex.getLemmaTokens()) {
           deriv.addFeature("lexPathPattern", "lemma=" + lemma + ",path=" + path);
-
+          for (String token: pathTokens) {
+            deriv.addFeature("lexPathPattern", "lemma=" + lemma + ",token=" + token);
+          }
+        }
       }
     }
   }
