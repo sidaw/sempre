@@ -1,11 +1,8 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -130,7 +127,7 @@ public class VegaRandomizer {
 
   private Derivation createInitialDeriv(JsonNode spec) {
     Derivation deriv = new Derivation.Builder()
-        .formula(new ValueFormula(new JsonValue(spec)))
+        .formula(new ValueFormula<JsonValue>(new JsonValue(spec)))
         .value(new JsonValue(spec)).createDerivation();
     return deriv;
   }
@@ -164,7 +161,7 @@ public class VegaRandomizer {
   private Derivation createModificationDeriv(List<String> path, JsonValue value) {
     NameValue fullPath = new NameValue("$." + String.join(".", path));
     Formula setFormula = new ActionFormula(ActionFormula.Mode.primitive,
-        Lists.newArrayList(
+        Arrays.asList(
             new ValueFormula<NameValue>(new NameValue("set")),
             new ValueFormula<NameValue>(fullPath),
             new ValueFormula<JsonValue>(value)));
