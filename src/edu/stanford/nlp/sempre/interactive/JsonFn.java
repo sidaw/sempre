@@ -50,7 +50,7 @@ public class JsonFn extends SemanticFn {
 
   public static Options opts = new Options();
   Formula arg1, arg2;
-  enum Mode {PathElement, JsonValue, ConstantValue, Template, Join};
+  enum Mode {PathElement, JsonValue, ConstantValue, AnyPath, Template, Join};
   Mode mode;
   DerivationStream stream;
 
@@ -70,6 +70,8 @@ public class JsonFn extends SemanticFn {
       return new JsonValueStream(ex, c);
     } else if (mode == Mode.ConstantValue) {
       return new ConstantValueStream(ex, c);
+    } else if (mode == Mode.AnyPath) {
+      return new AnyPathStream(ex, c);
     } else if (mode == Mode.Join) {
       return new JoinStream(ex, c);
     } else if (mode == Mode.Template) {
@@ -347,6 +349,30 @@ public class JsonFn extends SemanticFn {
       JsonValue value = values.get(index);
       index++;
       Formula formula = new ValueFormula<JsonValue>(value);
+      return new Derivation.Builder()
+          .withCallable(callable)
+          .formula(formula)
+          .createDerivation();
+    }
+  }
+
+  // Generate all possible paths
+  static class AnyPathStream extends MultipleDerivationStream {
+    List<NameValue> paths = new ArrayList<NameValue>();
+    int index = 0;
+    Callable callable;
+
+    public AnyPathStream(Example ex, Callable c) {
+      callable = c;
+      // TODO: Add all paths to paths
+    }
+
+    public Derivation createDerivation() {
+      if (index >= paths.size())
+        return null;
+      NameValue path = paths.get(index);
+      index++;
+      Formula formula = new ValueFormula<NameValue>(path);
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(formula)
