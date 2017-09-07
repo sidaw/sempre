@@ -136,6 +136,12 @@ public class VegaRandomizer {
   // Generate modifications to the current plot
   // ============================================================
 
+  private static final List<JsonValue> smallNumbers = new ArrayList<>();
+  static {
+    for (int i = 1; i <= 50; i++)
+      smallNumbers.add(new JsonValue(i).withSchemaType("number"));
+  }
+
   /**
    * Generate derivations for the example.
    */
@@ -146,7 +152,13 @@ public class VegaRandomizer {
     while (derivations.size() < amount) {
       // Pick a path and value
       List<String> path = randomChoice(paths);
-      JsonValue value = randomChoice(VegaResources.getValues(path));
+      List<JsonValue> possibleValues = VegaResources.getValues(path);
+      for (JsonSchema schema : VegaResources.vegaSchema.schemas(path)) {
+        String type = schema.schemaType();
+        if ("number".equals(type))
+          possibleValues.addAll(smallNumbers);
+      }
+      JsonValue value = randomChoice(possibleValues);
       if (value == null) continue;
       // Build the derivation
       Derivation deriv = createModificationDeriv(path, value);
