@@ -21,17 +21,17 @@ public class VegaLitePathMatcher {
     // load paths from file
     Stream<String> stream = Files.lines(Paths.get(filePath));
     paths = stream.map(line -> Arrays.asList(line.split("\t"))).collect(Collectors.toList());
-    buildIndex(paths);
+    buildIndex();
     stream.close();
   }
 
   public VegaLitePathMatcher(List<List<String>> paths) {
     this.paths = paths;
-    buildIndex(paths);
+    buildIndex();
   }
 
-  private void buildIndex(List<List<String>> paths) {
-    // TODO Auto-generated method stub
+  private void buildIndex() {
+    paths = paths.stream().filter(p -> !p.isEmpty()).collect(Collectors.toList());
     index = new HashMap<>();
     for (List<String> path : paths) {
       for (String key : path) {
