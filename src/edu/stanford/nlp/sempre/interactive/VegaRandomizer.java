@@ -1,11 +1,8 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -130,7 +127,7 @@ public class VegaRandomizer {
 
   private Derivation createInitialDeriv(JsonNode spec) {
     Derivation deriv = new Derivation.Builder()
-        .formula(new ValueFormula(new JsonValue(spec)))
+        .formula(new ValueFormula<JsonValue>(new JsonValue(spec)))
         .value(new JsonValue(spec)).createDerivation();
     return deriv;
   }
@@ -138,6 +135,12 @@ public class VegaRandomizer {
   // ============================================================
   // Generate modifications to the current plot
   // ============================================================
+
+  private static final List<JsonValue> smallNumbers = new ArrayList<>();
+  static {
+    for (int i = 1; i <= 50; i++)
+      smallNumbers.add(new JsonValue(i).withSchemaType("number"));
+  }
 
   /**
    * Generate derivations for the example.
@@ -149,7 +152,13 @@ public class VegaRandomizer {
     while (derivations.size() < amount) {
       // Pick a path and value
       List<String> path = randomChoice(paths);
-      JsonValue value = randomChoice(VegaResources.getValues(path));
+      List<JsonValue> possibleValues = VegaResources.getValues(path);
+      for (JsonSchema schema : VegaResources.vegaSchema.schemas(path)) {
+        String type = schema.schemaType();
+        if ("number".equals(type))
+          possibleValues.addAll(smallNumbers);
+      }
+      JsonValue value = randomChoice(possibleValues);
       if (value == null) continue;
       // Build the derivation
       Derivation deriv = createModificationDeriv(path, value);
@@ -164,7 +173,7 @@ public class VegaRandomizer {
   private Derivation createModificationDeriv(List<String> path, JsonValue value) {
     NameValue fullPath = new NameValue("$." + String.join(".", path));
     Formula setFormula = new ActionFormula(ActionFormula.Mode.primitive,
-        Lists.newArrayList(
+        Arrays.asList(
             new ValueFormula<NameValue>(new NameValue("set")),
             new ValueFormula<NameValue>(fullPath),
             new ValueFormula<JsonValue>(value)));
