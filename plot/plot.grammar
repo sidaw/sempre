@@ -23,5 +23,12 @@
 
 (rule $Action ($PathPattern $Value) (interactive.JsonFn Join) (floating 1))
 
+(when doublestar
+  (rule $DSPathPattern (anypath) (interactive.JsonFn AnyPath) (floating 1))
+  # use $DSValue instead of $Value to prevent too many duplicates
+  (rule $DSValue (anyvalue) (ConstantFn *) (floating 1))
+  (rule $Action ($DSPathPattern $DSValue) (interactive.JsonFn Join) (floating 1))
+)
+
 (rule $Action (new $FileName) (lambda v (: new (var v))) (anchored 1))
 (rule $FileName ($TOKEN) (interactive.JsonFn Template))

@@ -148,7 +148,7 @@ public class Learner {
     params.update(counts);
     LogInfo.end_track();
   }
-  
+
   public void onlineLearnExampleByFormula(Example ex, List<Formula> formulas) {
     HashMap<String, Double> counts = new HashMap<>();
     for (Derivation deriv : ex.predDerivations)
