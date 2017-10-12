@@ -104,6 +104,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
+  o('Grammar.tags', 'doublestar'),
 
   o('LanguageAnalyzer.lowerCaseTokens', false),
 
