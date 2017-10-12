@@ -254,7 +254,7 @@ public abstract class ParserState {
     for (Derivation deriv : predDerivations) {
       deriv.ensureExecuted(parser.executor, ex.context);
       if (ex.targetValue != null)
-        deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
+        deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value, ex.context);
       if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;
     }
     LogInfo.end_track();
