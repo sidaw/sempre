@@ -102,8 +102,9 @@ public class VegaFeatureComputer implements FeatureComputer {
     }
 
     // Indicators for each JSON key
-    if (deriv.rule != Rule.nullRule && deriv.rule.lhs.equals("$Action")
-        && deriv.rule.rhs.get(0).equals("$PathPattern")) {
+    if (deriv.rule != Rule.nullRule && deriv.rule.lhs.equals("$Action") &&
+        (deriv.rule.rhs.get(0).equals("$PathPattern") ||
+         deriv.rule.rhs.get(0).equals("$DSPathPattern"))) {
       // Note: doing it here because "*" expansion doesn't happen until after we join
       // If we change that, should look for lhs == "$PathPattern" instead
       // But this lets us hold onto everything until we type-check

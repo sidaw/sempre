@@ -6,5 +6,5 @@ package edu.stanford.nlp.sempre;
  */
 public interface ValueEvaluator {
   // Return a number [0, 1] that denotes how well we're doing.
-  double getCompatibility(Value target, Value pred);
+  double getCompatibility(Value target, Value pred, ContextValue context);
 }
