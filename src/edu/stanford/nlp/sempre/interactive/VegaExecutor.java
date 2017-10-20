@@ -163,7 +163,8 @@ public class VegaExecutor extends Executor {
     }, true);
 
     List<String> path = stringFormulas.stream().map(f -> Formulas.getString(f)).collect(Collectors.toList());
-    LogInfo.logs("PathPattern %s -> %s", pathFormula, path);
+    if (opts.verbose >= 2)
+      LogInfo.logs("PathPattern %s -> %s", pathFormula, path);
     return path;
   }
 }

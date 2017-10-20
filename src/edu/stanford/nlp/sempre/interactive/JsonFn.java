@@ -43,7 +43,7 @@ public class JsonFn extends SemanticFn {
     @Option(gloss = "verbosity")
     public int verbose = 0;
 
-    @Option(gloss = "verbosity")
+    @Option(gloss = "max number of joins")
     public int maxJoins = Integer.MAX_VALUE;
 
     @Option(gloss = "Allow join to apply on * *")
@@ -166,12 +166,14 @@ public class JsonFn extends SemanticFn {
       if (!opts.joinOnStarStar) {
         // If (join * *) is disallowed ...
         if ("*".equals(Formulas.getString(pathFormula)) && "*".equals(Formulas.getString(valueFormula))) {
-          LogInfo.logs("JoinStream * * : Skipped");
+          if (opts.verbose > 1)
+            LogInfo.logs("JoinStream * * : Skipped");
           iterator = Collections.emptyIterator();
           return;
         }
       }
-      LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
+      if (opts.verbose > 1)
+        LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
       if (pathFormula instanceof ValueFormula) {
         pathPattern = "*".equals(Formulas.getString(pathFormula))? Lists.newArrayList() : Lists.newArrayList(Formulas.getString(pathFormula));
       } else if (pathFormula instanceof ActionFormula) {
@@ -225,7 +227,8 @@ public class JsonFn extends SemanticFn {
           if (valueType.equals("color")) {
            // LogInfo.logs("checking color %s for %s", value, schema.schemaType());
             if (schemaType.endsWith("Color.string")) {
-              LogInfo.logs("checked color %s for %s", value, schemaType);
+              if (opts.verbose > 1)
+                LogInfo.logs("checked color %s for %s", value, schemaType);
               return true;
             }
           }
