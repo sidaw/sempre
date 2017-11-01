@@ -146,7 +146,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('VegaResources.initialTemplates', "./#{$path}/initial-templates.json"),
   selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 
-  o('VegaEngine.verbose', 1),
+  o('VegaEngine.verbose', 0),
   o('VegaExecutor.compileVega', false),
   o('JsonFn.maxJoins', 10000), # hack.
 
@@ -155,6 +155,8 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Dataset.inPaths', "train:./plot-data/sampledata.jsonl"),
   o('Parser.callSetEvaluation', true),
   o('Learner.numParallelThreads', 8),
+  o('Builder.valueEvaluator', 'interactive.VegaValueEvaluator'),
+  o('Parser.accuracyTopK', 10),
 
   o('FeatureExtractor.featureComputers', 'FloatingFeatureComputer', 'interactive.VegaFeatureComputer'),
   o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule',
