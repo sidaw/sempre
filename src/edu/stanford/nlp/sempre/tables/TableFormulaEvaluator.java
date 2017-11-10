@@ -108,7 +108,7 @@ public class TableFormulaEvaluator extends TableValueEvaluator {
       else
         return getCompatibilityAnnotationStrict(targetEx, deriv.formula);
     } else {
-      return opts.fallBackToValueEvaluator ? getCompatibility(targetEx.targetValue, deriv.value) : 0;
+      return opts.fallBackToValueEvaluator ? getCompatibility(targetEx.targetValue, deriv.value, targetEx.context) : 0;
     }
   }
 

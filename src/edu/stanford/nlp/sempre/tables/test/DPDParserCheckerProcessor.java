@@ -99,7 +99,7 @@ public class DPDParserCheckerProcessor implements ExampleProcessor {
       LogInfo.logs("  canonicalized: %s", TableFormulaCanonicalizer.canonicalizeFormula(formula));
       LogInfo.logs("TRUE: %s", ex.targetValue);
       LogInfo.logs("PRED: %s", pred);
-      result = builder.valueEvaluator.getCompatibility(ex.targetValue, pred);
+      result = builder.valueEvaluator.getCompatibility(ex.targetValue, pred, ex.context);
       if (result != 1) {
         LogInfo.warnings("TRUE != PRED. %s Either targetValue or %s is wrong.", ex.id, prefix);
       }

@@ -76,7 +76,7 @@ public class AlteredTablesExecutor implements Runnable {
         Value rawValue = builder.executor.execute(ex.targetFormula, ex.context).value;
         if (rawValue instanceof ListValue)
           rawValue = ((TableKnowledgeGraph) ex.context.graph).getListValueWithOriginalStrings((ListValue) rawValue);
-        if (builder.valueEvaluator.getCompatibility(ex.targetValue, rawValue) == 1)
+        if (builder.valueEvaluator.getCompatibility(ex.targetValue, rawValue, ex.context) == 1)
           idToAnnotated.put(ex.id, ex);
         else
           LogInfo.warnings("Wrong annotation [%s] expected %s; got %s", ex.id, ex.targetValue, rawValue);
@@ -195,7 +195,7 @@ public class AlteredTablesExecutor implements Runnable {
     if (target == null || target instanceof ErrorValue) return false;
     double result = 0;
     try {
-      result = builder.valueEvaluator.getCompatibility(target, pred);
+      result = builder.valueEvaluator.getCompatibility(target, pred, ex.context);
     } catch (Exception e) {
       LogInfo.logs("%s", e);
       e.printStackTrace();
