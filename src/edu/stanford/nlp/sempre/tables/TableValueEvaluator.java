@@ -28,7 +28,7 @@ public class TableValueEvaluator implements ValueEvaluator {
   }
   public static Options opts = new Options();
 
-  public double getCompatibility(Value target, Value pred) {
+  public double getCompatibility(Value target, Value pred, ContextValue context) {
     List<Value> targetList = ((ListValue) target).values;
     if (!(pred instanceof ListValue)) return 0;
     List<Value> predList = ((ListValue) pred).values;

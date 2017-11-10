@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre.geo880;
 
 import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.tables.StringNormalizationUtils;
 import fig.basic.LogInfo;
 
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public class Geo880ValueEvaluator implements ValueEvaluator {
 
-  public double getCompatibility(Value target, Value pred) {
+  public double getCompatibility(Value target, Value pred, ContextValue context) {
     List<Value> targetList = ((ListValue) target).values;
     if (!(pred instanceof ListValue)) return 0;
     List<Value> predList = ((ListValue) pred).values;

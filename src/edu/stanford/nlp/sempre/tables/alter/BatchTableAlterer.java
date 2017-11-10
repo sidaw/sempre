@@ -116,7 +116,7 @@ public class BatchTableAlterer implements Runnable {
         Value rawValue = builder.executor.execute(ex.targetFormula, ex.context).value;
         if (rawValue instanceof ListValue)
           rawValue = ((TableKnowledgeGraph) ex.context.graph).getListValueWithOriginalStrings((ListValue) rawValue);
-        if (builder.valueEvaluator.getCompatibility(ex.targetValue, rawValue) == 1)
+        if (builder.valueEvaluator.getCompatibility(ex.targetValue, rawValue, ex.context) == 1)
           idToAnnotated.put(ex.id, ex);
         else
           LogInfo.warnings("Wrong annotation [%s] expected %s; got %s", ex.id, ex.targetValue, rawValue);
@@ -522,7 +522,7 @@ public class BatchTableAlterer implements Runnable {
       target = new ListValue(Collections.singletonList(target));
     if (!(pred instanceof ListValue))
       pred = new ListValue(Collections.singletonList(pred));
-    return builder.valueEvaluator.getCompatibility(target, pred) == 1;
+    return builder.valueEvaluator.getCompatibility(target, pred, null) == 1;
   }
 
 }
