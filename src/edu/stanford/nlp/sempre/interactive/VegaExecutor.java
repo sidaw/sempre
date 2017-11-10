@@ -120,6 +120,11 @@ public class VegaExecutor extends Executor {
         Formula filename = f.args.get(1);
         String key = Formulas.getString(filename);
         return JsonUtils.toJsonNode(Json.readMapHard(VegaResources.templatesMap.get(key)));
+      } else if (id.equals("init")) {
+        Formula mark = f.args.get(1);
+        for (int i = 2; i < f.args.size(); i++) {
+          Formula encoding = f.args.get(i);
+        }
       }
     }
     if (opts.verbose >= 1) {

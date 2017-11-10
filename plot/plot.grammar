@@ -32,3 +32,13 @@
 
 (rule $Action (new $FileName) (lambda v (: new (var v))) (anchored 1))
 (rule $FileName ($TOKEN) (interactive.JsonFn Template))
+
+################################
+# Initial Plot Generation
+# Inspired by Voyager 2 suggestion algorithm
+
+(when init-plot
+
+
+
+)
