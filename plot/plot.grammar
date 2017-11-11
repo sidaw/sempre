@@ -35,10 +35,28 @@
 
 ################################
 # Initial Plot Generation
-# Inspired by Voyager 2 suggestion algorithm
 
 (when init-plot
 
+  (rule $InitChannel ($Regular) (interactive.VegaFn Channel))
+  (rule $InitChannel (anyvalue) (ConstantFn *) (floating 1))
+  (rule $InitField ($Regular) (interactive.VegaFn Field))
+  (rule $InitField (anyvalue) (ConstantFn *) (floating 1))
+  (rule $InitMark ($Regular) (interactive.VegaFn Mark))
+  (rule $InitMark (anyvalue) (interactive.JsonInitFn AnyMark) (floating 1))
 
+  (rule $InitChannelDef ($InitChannel $InitField)
+        (interactive.JsonInitFn NormalChannel) (floating 1))
+  (rule $InitChannelDef ($InitField)
+        (interactive.JsonInitFn AggregateChannel) (floating 1))
+  (rule $InitChannelDef (anyvalue)
+        (interactive.JsonInitFn CountChannel) (floating 1))
+
+  (rule $InitChannelDefs ($InitChannelDef) (IdentityFn) (floating 1))
+  (rule $InitChannelDefs ($InitChannelDefs $InitChannelDef)
+        (interactive.JsonInitFn Combine) (floating 1))
+
+  (rule $ROOT ($InitMark $InitChannelDefs)
+        (interactive.JsonInitFn Concretize) (floating 1))
 
 )

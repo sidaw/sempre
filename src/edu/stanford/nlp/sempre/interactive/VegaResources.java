@@ -99,6 +99,11 @@ public class VegaResources {
       Json.prettyWriteValueHard(new File(savePath.toString()+".enums.json"),
           enumValueToTypes.keySet().stream().collect(Collectors.toList())
       );
+      Json.prettyWriteValueHard(new File(savePath.toString()+".enums-kv.json"),
+          enumValueToTypes.entrySet().stream().map(e -> {
+            return Lists.newArrayList(e.getKey(), e.getValue().stream().collect(Collectors.toList()));
+          }).collect(Collectors.toList())
+      );
 
       if (!Strings.isNullOrEmpty(opts.colorFile)) {
         colorSet = Json.readMapHard(String.join("\n", IOUtils.readLines(opts.colorFile))).keySet();

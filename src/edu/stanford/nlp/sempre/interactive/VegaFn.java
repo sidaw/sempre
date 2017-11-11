@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Function;
@@ -30,7 +31,7 @@ public class VegaFn extends SemanticFn {
   }
 
   public static Options opts = new Options();
-  enum Mode {Enum, Field, Color};
+  enum Mode {Enum, Field, Color, Channel, Mark};
   Mode mode;
 
   @Override
@@ -38,6 +39,10 @@ public class VegaFn extends SemanticFn {
     super.init(tree);
     mode = Mode.valueOf(tree.child(1).toString());
   }
+
+  static final Set<String> CHANNELS = Sets.newHashSet("x", "y", "color", "opacity", "shape", "size", "row", "column");
+  static final Set<String> MARKS = Sets.newHashSet("area", "bar", "circle", "line", "point", "rect", "rule", "square", "text", "tick");
+
 
   @Override
   public DerivationStream call(final Example ex, final Callable c) {
@@ -58,6 +63,22 @@ public class VegaFn extends SemanticFn {
             if (s.equals(field.textValue()))
               return Sets.newHashSet("field");
           }
+        }
+        return null;
+      });
+    } else if (mode == Mode.Channel) {
+      // TODO: Remove this hack
+      return new VegaValueStream(ex, c, s -> {
+        if (CHANNELS.contains(s)) {
+          return Sets.newHashSet("string");
+        }
+        return null;
+      });
+    } else if (mode == Mode.Mark) {
+      // TODO: Remove this hack
+      return new VegaValueStream(ex, c, s -> {
+        if (MARKS.contains(s)) {
+          return Sets.newHashSet("string");
         }
         return null;
       });

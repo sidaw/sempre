@@ -28,6 +28,6 @@ public class ValueFormula<T extends Value> extends PrimitiveFormula {
   }
 
   public int computeHashCode() {
-    return value.hashCode();
+    return value == null ? 0 : value.hashCode();
   }
 }
