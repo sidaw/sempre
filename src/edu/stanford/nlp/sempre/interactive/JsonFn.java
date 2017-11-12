@@ -70,42 +70,14 @@ public class JsonFn extends SemanticFn {
       return new IsPathStream(ex, c);
     } else if (mode == Mode.JsonValue) {
       return new JsonValueStream(ex, c);
-    } else if (mode == Mode.ConstantValue) {
-      return new ConstantValueStream(ex, c);
     } else if (mode == Mode.AnyPath) {
       return new AnyPathStream(ex, c);
     } else if (mode == Mode.AnyPathElement) {
       return new AnyPathElementStream(ex, c);
     } else if (mode == Mode.Join) {
       return new JoinStream(ex, c);
-    } else if (mode == Mode.Template) {
-      return new TemplateStream(c);
     }
     return null;
-  }
-
-  static class TemplateStream extends MultipleDerivationStream {
-    Callable callable;
-    int currIndex = 0;
-    private Iterator<Entry<String, String>> templatesIterator;
-
-    public TemplateStream(Callable c) {
-      callable = c;
-      this.templatesIterator = VegaResources.templatesMap.entrySet().stream()
-          .filter(s -> s.getKey().contains(c.childStringValue(0))).iterator();
-    }
-
-    @Override
-    public Derivation createDerivation() {
-      if (!templatesIterator.hasNext()) return null;
-
-      Formula formula = new ValueFormula<>(new NameValue(templatesIterator.next().getKey()));
-      // change to using just the name of the template
-      return new Derivation.Builder()
-          .withCallable(callable)
-          .formula(formula)
-          .createDerivation();
-    }
   }
 
   static class JoinStream extends MultipleDerivationStream {
@@ -153,10 +125,6 @@ public class JsonFn extends SemanticFn {
         nextPath();
         return currentValue;
       }
-    }
-
-    private Iterator<JsonValue> getValue(List<String> path, List<JsonValue> values) {
-      return null;
     }
 
     public JoinStream(Example ex, Callable c) {
@@ -335,31 +303,6 @@ public class JsonFn extends SemanticFn {
       } else {
         value = new JsonValue(string).withSchemaType("string");
       }
-      Formula formula = new ValueFormula<JsonValue>(value);
-      return new Derivation.Builder()
-          .withCallable(callable)
-          .formula(formula)
-          .createDerivation();
-    }
-  }
-
-  static class ConstantValueStream extends MultipleDerivationStream {
-    List<JsonValue> values = new ArrayList<JsonValue>();
-    int index = 0;
-    Callable callable;
-
-    public ConstantValueStream(Example ex, Callable c) {
-      callable = c;
-      values.add(new JsonValue(false).withSchemaType("boolean"));
-      values.add(new JsonValue(true).withSchemaType("boolean"));
-      values.add(new JsonValue(0.0).withSchemaType("number"));
-    }
-
-    public Derivation createDerivation() {
-      if (index >= values.size())
-        return null;
-      JsonValue value = values.get(index);
-      index++;
       Formula formula = new ValueFormula<JsonValue>(value);
       return new Derivation.Builder()
           .withCallable(callable)

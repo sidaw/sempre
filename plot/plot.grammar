@@ -9,18 +9,18 @@
 (rule $Value ($Regular) (interactive.VegaFn Field))
 (rule $Value ($Regular) (interactive.VegaFn Color))
 
-(rule $PathPattern ($Regular) (SimpleLexiconFn (type PATH)) (anchored 1)) 
-(rule $PathToken ($Regular) (interactive.JsonFn PathElement)) 
+(rule $PathPattern ($Regular) (SimpleLexiconFn (type PATH)) (anchored 1))
+(rule $PathToken ($Regular) (interactive.JsonFn PathElement))
 
 (rule $PathPattern ($PathPattern $PathToken) (lambda p1 (lambda p2 (:s (var p1) (var p2)))))
-(rule $PathPattern ($PathToken) (IdentityFn)) 
+(rule $PathPattern ($PathToken) (IdentityFn))
 #generate candidates from lexicon
 
 # generate candidates from the paths, should be floating
 (rule $PathPattern (anypath) (ConstantFn *) (floating 1))
 (rule $Value (anyvalue) (ConstantFn *) (floating 1))
-(rule $Value (anyvalue) (interactive.JsonFn ConstantValue) (floating 1))
 
+# handles the other 3 cases except doublestar
 (rule $Action ($PathPattern $Value) (interactive.JsonFn Join) (floating 1))
 
 (when doublestar
@@ -29,6 +29,3 @@
   (rule $DSValue (anyvalue) (ConstantFn *) (floating 1))
   (rule $Action ($DSPathPattern $DSValue) (interactive.JsonFn Join) (floating 1))
 )
-
-(rule $Action (new $FileName) (lambda v (: new (var v))) (anchored 1))
-(rule $FileName ($TOKEN) (interactive.JsonFn Template))
