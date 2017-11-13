@@ -309,6 +309,31 @@ public class JsonFn extends SemanticFn {
     }
   }
 
+  static class ConstantValueStream extends MultipleDerivationStream {
+    List<JsonValue> values = new ArrayList<JsonValue>();
+    int index = 0;
+    Callable callable;
+
+    public ConstantValueStream(Example ex, Callable c) {
+      callable = c;
+      values.add(new JsonValue(false).withSchemaType("boolean"));
+      values.add(new JsonValue(true).withSchemaType("boolean"));
+      values.add(new JsonValue(0.0).withSchemaType("number"));
+    }
+
+    public Derivation createDerivation() {
+      if (index >= values.size())
+        return null;
+      JsonValue value = values.get(index);
+      index++;
+      Formula formula = new ValueFormula<JsonValue>(value);
+      return new Derivation.Builder()
+        .withCallable(callable)
+        .formula(formula)
+        .createDerivation();
+    }
+  }
+
   // Generate all possible full paths
   static class AnyPathStream extends MultipleDerivationStream {
     static List<NameValue> paths = null;

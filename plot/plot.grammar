@@ -20,6 +20,9 @@
 (rule $PathPattern (anypath) (ConstantFn *) (floating 1))
 (rule $Value (anyvalue) (ConstantFn *) (floating 1))
 
+# this seems worse than using getValue from VegaResources
+#(rule $Value (anyvalue) (interactive.JsonFn ConstantValue) (floating 1))
+
 # handles the other 3 cases except doublestar
 (rule $Action ($PathPattern $Value) (interactive.JsonFn Join) (floating 1))
 
