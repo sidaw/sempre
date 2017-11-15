@@ -57,7 +57,9 @@
   (rule $InitChannelDefs ($InitChannelDefs $InitChannelDef)
         (interactive.JsonInitFn Combine) (floating 1))
 
-  (rule $ROOT ($InitMark $InitChannelDefs)
+  (rule $InitConcreteChannelDefs ($InitChannelDefs)
         (interactive.JsonInitFn Concretize) (floating 1))
+  (rule $ROOT ($InitMark $InitConcreteChannelDefs)
+        (lambda m (lambda ccds (: init (var m) (var ccds)))) (floating 1))
 
 )

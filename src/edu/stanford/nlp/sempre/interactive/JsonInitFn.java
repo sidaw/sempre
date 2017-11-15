@@ -82,6 +82,7 @@ public class JsonInitFn extends SemanticFn {
   static final ValueFormula<NameValue> NORMAL_CHANNEL = new ValueFormula<>(new NameValue("c_nrm"));
   static final ValueFormula<NameValue> AGGREGATE_CHANNEL = new ValueFormula<>(new NameValue("c_agg"));
   static final ValueFormula<NameValue> COUNT_CHANNEL = new ValueFormula<>(new NameValue("c_cnt"));
+  static final ValueFormula<NameValue> STAR = new ValueFormula<>(new NameValue("*"));
 
   static class NormalChannelStream extends SingleDerivationStream {
     Callable callable;
@@ -134,7 +135,7 @@ public class JsonInitFn extends SemanticFn {
     public Derivation createDerivation() {
       Formula channel = callable.child(0).formula;
       Formula formula = new ActionFormula(ActionFormula.Mode.primitive,
-          Arrays.asList(COUNT_CHANNEL, channel));
+          Arrays.asList(COUNT_CHANNEL, channel, STAR));
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(formula)
@@ -160,11 +161,41 @@ public class JsonInitFn extends SemanticFn {
       assert oldList.mode == ActionFormula.Mode.sequential;
       List<Formula> combined = new ArrayList<>(oldList.args);
       combined.add(newEntry);
+      if (!checkChannelDefs(combined)) return null;
       Formula newList = new ActionFormula(ActionFormula.Mode.sequential, combined);
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(newList)
           .createDerivation();
+    }
+
+    /**
+     * Check the following conditions:
+     * - Maximum length = 4
+     * - Only one aggregate or count can be present, and must be the last entry
+     * - Fields must not be repeated
+     * - Channels must not be repeated
+     */
+    private boolean checkChannelDefs(List<Formula> combined) {
+      if (combined.size() > 4) return false;
+      List<Value> usedChannels = new ArrayList<>(), usedFields = new ArrayList<>();
+      for (int i = 0; i < combined.size(); i++) {
+        ActionFormula channelDef = (ActionFormula) combined.get(i);
+        Formula type = channelDef.args.get(0);
+        if (!type.equals(NORMAL_CHANNEL) && i != combined.size() - 1)
+          return false;
+        Value channel = ((ValueFormula<?>) channelDef.args.get(1)).value,
+                field = ((ValueFormula<?>) channelDef.args.get(2)).value;
+        if (!channel.equals(STAR.value)) {
+          if (usedChannels.contains(channel)) return false;
+          usedChannels.add(channel);
+        }
+        if (!field.equals(STAR.value)) {
+          if (usedFields.contains(field)) return false;
+          usedFields.add(field);
+        }
+      }
+      return true;
     }
   }
 
@@ -174,29 +205,35 @@ public class JsonInitFn extends SemanticFn {
 
   static final ValueFormula<NameValue> INIT = new ValueFormula<>(new NameValue("init"));
 
-  static class ConcretizeStream extends SingleDerivationStream {
-  //static class ConcretizeStream extends MultipleDerivationStream {
+  static class ConcretizeStream extends MultipleDerivationStream {
     Example ex;
     Callable callable;
+    List<Formula> concretizations = new ArrayList<>();
+    Iterator<Formula> itr;
 
     public ConcretizeStream(Example ex, Callable c) {
       this.ex = ex;
       callable = c;
+      ActionFormula channelDefs = (ActionFormula) callable.child(0).formula;
+      assert channelDefs.mode == ActionFormula.Mode.sequential;
+      initConcretizations(channelDefs.args);
+      itr = concretizations.iterator();
     }
 
     @Override
     public Derivation createDerivation() {
-      ValueFormula mark = (ValueFormula) callable.child(0).formula;
-      ActionFormula channelDefs = (ActionFormula) callable.child(1).formula;
-      assert channelDefs.mode == ActionFormula.Mode.sequential;
-      List<Formula> entries = new ArrayList<>(channelDefs.args);
-      Formula newList = new ActionFormula(ActionFormula.Mode.primitive,
-          Arrays.asList(INIT, mark, channelDefs));
+      if (!itr.hasNext()) return null;
       return new Derivation.Builder()
           .withCallable(callable)
-          .formula(newList)
+          .formula(itr.next())
           .createDerivation();
     }
+
+    private void initConcretizations(List<Formula> abstractChannelDefs) {
+      // TODO: Add the possible concretizations
+      concretizations.add(new ActionFormula(ActionFormula.Mode.sequential, abstractChannelDefs));
+    }
+
   }
 
 }
