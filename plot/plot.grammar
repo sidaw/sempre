@@ -52,7 +52,8 @@
   (rule $InitChannelDef ($InitChannel)
         (interactive.JsonInitFn CountChannel) (floating 1))
 
-  (rule $InitChannelDefs ($InitChannelDef) (IdentityFn) (floating 1))
+  (rule $InitChannelDefs ($InitChannelDef)
+        (lambda d (:s (var d))) (floating 1))
   (rule $InitChannelDefs ($InitChannelDefs $InitChannelDef)
         (interactive.JsonInitFn Combine) (floating 1))
 

@@ -112,6 +112,8 @@ public class JsonInitFn extends SemanticFn {
     @Override
     public Derivation createDerivation() {
       Formula channel = callable.child(0).formula, field = callable.child(1).formula;
+      // Check if field can be aggregated
+      // TODO
       Formula formula = new ActionFormula(ActionFormula.Mode.primitive,
           Arrays.asList(AGGREGATE_CHANNEL, channel, field));
       return new Derivation.Builder()
@@ -153,7 +155,16 @@ public class JsonInitFn extends SemanticFn {
 
     @Override
     public Derivation createDerivation() {
-      return null;
+      ActionFormula oldList = (ActionFormula) callable.child(0).formula,
+                   newEntry = (ActionFormula) callable.child(1).formula;
+      assert oldList.mode == ActionFormula.Mode.sequential;
+      List<Formula> combined = new ArrayList<>(oldList.args);
+      combined.add(newEntry);
+      Formula newList = new ActionFormula(ActionFormula.Mode.sequential, combined);
+      return new Derivation.Builder()
+          .withCallable(callable)
+          .formula(newList)
+          .createDerivation();
     }
   }
 
@@ -161,7 +172,10 @@ public class JsonInitFn extends SemanticFn {
   // Concretize
   // ============================================================
 
-  static class ConcretizeStream extends MultipleDerivationStream {
+  static final ValueFormula<NameValue> INIT = new ValueFormula<>(new NameValue("init"));
+
+  static class ConcretizeStream extends SingleDerivationStream {
+  //static class ConcretizeStream extends MultipleDerivationStream {
     Example ex;
     Callable callable;
 
@@ -172,7 +186,16 @@ public class JsonInitFn extends SemanticFn {
 
     @Override
     public Derivation createDerivation() {
-      return null;
+      ValueFormula mark = (ValueFormula) callable.child(0).formula;
+      ActionFormula channelDefs = (ActionFormula) callable.child(1).formula;
+      assert channelDefs.mode == ActionFormula.Mode.sequential;
+      List<Formula> entries = new ArrayList<>(channelDefs.args);
+      Formula newList = new ActionFormula(ActionFormula.Mode.primitive,
+          Arrays.asList(INIT, mark, channelDefs));
+      return new Derivation.Builder()
+          .withCallable(callable)
+          .formula(newList)
+          .createDerivation();
     }
   }
 
