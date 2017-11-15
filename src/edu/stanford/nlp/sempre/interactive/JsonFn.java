@@ -336,17 +336,18 @@ public class JsonFn extends SemanticFn {
 
   // Generate all possible full paths
   static class AnyPathStream extends MultipleDerivationStream {
-    static List<NameValue> paths = null;
+    static List<NameValue> paths = new ArrayList<>();
     int index = 0;
     Callable callable;
 
     public AnyPathStream(Example ex, Callable c) {
       callable = c;
-      if (paths == null) {
-        // Only initialize once
-        paths = new ArrayList<>();
-        for (List<String> path : VegaResources.allPathsMatcher.getPaths()) {
-          paths.add(new NameValue("$." + String.join(".", path)));
+      synchronized (paths) {
+        if (paths.isEmpty()) {
+          // Only initialize once
+          for (List<String> path : VegaResources.allPathsMatcher.getPaths()) {
+            paths.add(new NameValue("$." + String.join(".", path)));
+          }
         }
       }
     }

@@ -42,7 +42,7 @@ public class JsonInitFn extends SemanticFn {
       case Combine:
         return new CombineStream(ex, c);
       case Concretize:
-        //return new ConcretizeStream(ex, c);
+        return new ConcretizeStream(ex, c);
       default:
         throw new RuntimeException("Unrecognized mode: " + mode);
     }
