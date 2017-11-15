@@ -125,6 +125,7 @@ public class VegaExecutor extends Executor {
         for (int i = 2; i < f.args.size(); i++) {
           Formula encoding = f.args.get(i);
         }
+        // TODO: Return a new graph!
       }
     }
     if (opts.verbose >= 1) {

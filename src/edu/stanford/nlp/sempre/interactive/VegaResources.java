@@ -62,6 +62,9 @@ public class VegaResources {
 
   private static Set<String> colorSet;
 
+  public static final Set<String> CHANNELS = Sets.newHashSet("x", "y", "color", "opacity", "shape", "size", "row", "column");
+  public static final Set<String> MARKS = Sets.newHashSet("area", "bar", "circle", "line", "point", "rect", "rule", "square", "text", "tick");
+
   static class InitialTemplate {
     @JsonProperty("mark") public String mark;
     @JsonProperty("encoding") public Map<String, String> encoding;

@@ -47,9 +47,9 @@
 
   (rule $InitChannelDef ($InitChannel $InitField)
         (interactive.JsonInitFn NormalChannel) (floating 1))
-  (rule $InitChannelDef ($InitField)
+  (rule $InitChannelDef ($InitChannel $InitField)
         (interactive.JsonInitFn AggregateChannel) (floating 1))
-  (rule $InitChannelDef (anyvalue)
+  (rule $InitChannelDef ($InitChannel)
         (interactive.JsonInitFn CountChannel) (floating 1))
 
   (rule $InitChannelDefs ($InitChannelDef) (IdentityFn) (floating 1))

@@ -86,7 +86,6 @@ public class JsonFn extends SemanticFn {
 
   static class TemplateStream extends MultipleDerivationStream {
     Callable callable;
-    int currIndex = 0;
     private Iterator<Entry<String, String>> templatesIterator;
 
     public TemplateStream(Callable c) {
