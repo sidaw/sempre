@@ -27,6 +27,9 @@ import fig.basic.MapUtils;
 import fig.basic.Option;
 import fig.basic.Pair;
 
+import java.util.concurrent.ThreadLocalRandom;
+
+
 /**
  * Vega-specific code that loads the schema, colors, and generate paths and type maps
  * @author sidaw
@@ -35,28 +38,22 @@ import fig.basic.Pair;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VegaResources {
   public static class Options {
-    @Option(gloss = "File or directory containing example vega specs") List<String> vegaSpecifications;
-    @Option(gloss = "File containing all valid VegaPaths") String allVegaJsonPaths;
     @Option(gloss = "File containing the vega schema") String vegaSchema;
-    @Option(gloss = "File containing object values to try") String valueTemplates;
     @Option(gloss = "Path elements to exclude") Set<String> excludedPaths;
     @Option(gloss = "File containing all the colors") String colorFile;
     @Option(gloss = "File containing initial plot templates") String initialTemplates;
+    @Option int verbose = 0;
   }
   public static Options opts = new Options();
   private final Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "vegaResource");
-
 
   public static VegaLitePathMatcher allPathsMatcher;
   private static List<List<String>> filteredPaths;
   private static List<JsonSchema> descendents;
 
-  public static ArrayList<String> templates;
-  public static Map<String, String> templatesMap;
-
   public static JsonSchema vegaSchema;
 
-  private static Map<String, List<JsonValue>> typeToValues;
+  private static Map<String, List<JsonValue>> typeToValues = new HashMap<>();
   private static Map<String, Set<String>> enumValueToTypes;
   private static Map<String, Set<List<String>>> enumValueToPaths;
 
@@ -83,20 +80,14 @@ public class VegaResources {
       descendents = allDescendents.stream().filter(s -> s.node().has("type")).collect(Collectors.toList());
       LogInfo.logs("Got %d descendents, %d typed", allDescendents.size(), descendents.size());
 
-      if (opts.vegaSpecifications != null) {
-        LogInfo.begin_track("Loading examples from %s", opts.vegaSpecifications);
-        processVegaTemplates();
-        LogInfo.end_track();
-      }
-
-      filteredPaths = allSimplePaths();
+      filteredPaths = allSimplePaths(descendents);
       LogInfo.logs("Got %d distinct simple path not containing %s", filteredPaths.size(), opts.excludedPaths);
       allPathsMatcher = new VegaLitePathMatcher(filteredPaths);
       Json.prettyWriteValueHard(new File(savePath.toString()+".path_elements.json"),
           filteredPaths.stream().flatMap(List::stream)
           .collect(Collectors.toSet()).stream().collect(Collectors.toList()) );
 
-      // generate valueToTypes and valueToSet
+      // generate valueToTypes and valueToSet, for enum types
       generateValueMaps();
       LogInfo.logs("gathering valueToTypes: %d distinct enum values", enumValueToTypes.size());
       Json.prettyWriteValueHard(new File(savePath.toString()+".enums.json"),
@@ -127,7 +118,7 @@ public class VegaResources {
     }
   }
 
-  private List<List<String>> allSimplePaths() {
+  private List<List<String>> allSimplePaths(List<JsonSchema> descendents) {
     Set<List<String>> simplePaths = descendents.stream().map(s -> s.simplePath()).collect(Collectors.toSet());
     LogInfo.logs("Got %d distinct simple paths", simplePaths.size());
 
@@ -151,98 +142,33 @@ public class VegaResources {
     }
   }
 
-
-  private void processVegaTemplates() {
-    LogInfo.begin_track("processVegaTemplates");
-    templates = new ArrayList<>();
-    templatesMap = new HashMap<String,String>();
-    for (String path : opts.vegaSpecifications) {
-      File file = new File(path);
-      if (file.isFile() && file.getName().endsWith(".json"))
-        load(file);
-      else {
-        for (final File fileEntry : file.listFiles()) {
-          if (fileEntry.getName().endsWith(".json")) {
-            load(fileEntry);
-          }
-        }
-      }
-    }
-
-    List<String> allPaths = new ArrayList<>();
-    List<Pair<List<String>, JsonNode>> allPathValues = new ArrayList<>();
-
-    for (String json : templates) {
-      allPathValues.addAll(JsonUtils.allPathValues(JsonUtils.toJsonNode(Json.readMapHard(json))));
-    }
-
-    {
-      typeToValues = new HashMap<>();
-      PrintWriter writer = IOUtils.openOutHard(savePath.toString());
-      for (Pair<List<String>, JsonNode> pathValue: allPathValues) {
-        List<String> path = pathValue.getFirst();
-        JsonNode value = pathValue.getSecond();
-        try {
-          for (JsonSchema schema: vegaSchema.schemas(path)) {
-            String type = schema.schemaType();
-            if (type.equals("null") || type.equals("number") || type.equals("string")
-                || type.endsWith(".string") || type.equals("boolean") || type.equals("array")) continue;
-            MapUtils.addToList(typeToValues, type, new JsonValue(value).withSchemaType(type));
-            writer.println( schema.schemaType() + "\t" + path + "\t" + value);
-          }
-        } catch (RuntimeException ex) {
-          LogInfo.logs("VegaResource %s %s", path, ex);
-          ex.printStackTrace();
-        }
-      }
-
-      // put in a few values for very general types
-      MapUtils.addToList(typeToValues, "boolean", new JsonValue(true).withSchemaType("boolean"));
-      MapUtils.addToList(typeToValues, "boolean", new JsonValue(false).withSchemaType("boolean"));
-      // MapUtils.addToList(typeToValues, "number", new JsonValue(0).withSchemaType("number"));
-      // temporarily removing 0 based on Meghas experience on data collection
-      MapUtils.addToList(typeToValues, "number", new JsonValue(10).withSchemaType("number"));
-      MapUtils.addToList(typeToValues, "number", new JsonValue(100).withSchemaType("number"));
-      MapUtils.addToList(typeToValues, "string", new JsonValue("hello").withSchemaType("string"));
-
-      Json.prettyWriteValueHard(new File(savePath.toString()+".json"),
-          typeToValues.entrySet().stream().map(e -> {
-            return Lists.newArrayList(e.getKey(),
-                e.getValue().stream().map(jv -> jv.getJsonNode()).collect(Collectors.toList()));
-          }).collect(Collectors.toList()) );
-      writer.close();
-    }
-
-    LogInfo.logs("got %d paths, %d unique", allPaths.size(), Sets.newHashSet(allPaths).size());
-    LogInfo.end_track();
-  }
-
-  private void load(File path) {
-    LogInfo.logs("Reading example template from %s", path);
-    String text = String.join("\n", IOUtils.readLinesHard(path.getAbsolutePath()));
-    templates.add(text);
-    templatesMap.put(path.getPath(), text);
-  }
-
   public static List<JsonValue> getValues(List<String> path) {
     List<JsonSchema> schemas = vegaSchema.schemas(path);
     List<JsonValue> values = new ArrayList<>();
     for (JsonSchema schema : schemas) {
       String type = schema.schemaType();
-      if (!type.equals(JsonSchema.NOTYPE) && typeToValues.containsKey(type))
-        values.addAll(typeToValues.get(schema.schemaType()));
+      if (opts.verbose > 0)
+        LogInfo.logs("getValues %s %s", type, path.toString());
+      if (type.equals(JsonSchema.NOTYPE))
+        return values;
+      else if (type.endsWith("enum")) {
+        for (String v : schema.enums())
+          values.add(new JsonValue(v).withSchemaType(type));
+      } else if (type.equals("boolean")) {
+        values.add(new JsonValue(true).withSchemaType("boolean"));
+        values.add(new JsonValue(false).withSchemaType("boolean"));
+      } else if (type.equals("number")) {
+        values.add(new JsonValue(ThreadLocalRandom.current().nextInt(0, 100)).withSchemaType("number"));
+        values.add(new JsonValue(0.1 * ThreadLocalRandom.current().nextInt(1, 10)).withSchemaType("number"));
+      } else if (type.equals("string")) {
+        values.add(new JsonValue("X").withSchemaType("string"));
+      }
     }
-    // LogInfo.logs("VegaResources.getValues %s %s", path, values);
     return values;
   }
 
   public static Set<String> getEnumTypes(String value) {
     if (enumValueToTypes.containsKey(value)) return enumValueToTypes.get(value);
-    return null;
-  }
-
-  public static Set<List<String>> getEnumPaths(String value) {
-    if (enumValueToPaths.containsKey(value)) return enumValueToPaths.get(value);
     return null;
   }
 
@@ -254,4 +180,3 @@ public class VegaResources {
     return initialTemplates;
   }
 }
-

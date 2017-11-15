@@ -56,8 +56,8 @@ public class VegaExecutor extends Executor {
     if (context instanceof VegaJsonContextValue)
       jsonContext = (VegaJsonContextValue)context;
     else
-      jsonContext = new VegaJsonContextValue(Json.readMapHard((String)VegaResources.templates.get(0)));
-
+      throw new RuntimeException("VegaExecutor only allows VegaJsonContextValue");
+      
     formula = Formulas.betaReduction(formula);
     try {
       JsonNode result = execute((ActionFormula)formula, jsonContext);
@@ -116,16 +116,14 @@ public class VegaExecutor extends Executor {
         ObjectNode objNode = (ObjectNode) jsonContext.getJsonNode();
         JsonUtils.setPathValue(objNode, fullpath, ((JsonValue)value).getJsonNode());
         result = objNode;
-      } else if (id.equals("new")) {
-        Formula filename = f.args.get(1);
-        String key = Formulas.getString(filename);
-        return JsonUtils.toJsonNode(Json.readMapHard(VegaResources.templatesMap.get(key)));
       } else if (id.equals("init")) {
         Formula mark = f.args.get(1);
         for (int i = 2; i < f.args.size(); i++) {
           Formula encoding = f.args.get(i);
         }
         // TODO: Return a new graph!
+      } else {
+        throw new RuntimeException("VegaExecutor: formula not implemented: " + f);
       }
     }
     if (opts.verbose >= 1) {

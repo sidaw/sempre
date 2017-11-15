@@ -70,41 +70,14 @@ public class JsonFn extends SemanticFn {
       return new IsPathStream(ex, c);
     } else if (mode == Mode.JsonValue) {
       return new JsonValueStream(ex, c);
-    } else if (mode == Mode.ConstantValue) {
-      return new ConstantValueStream(ex, c);
     } else if (mode == Mode.AnyPath) {
       return new AnyPathStream(ex, c);
     } else if (mode == Mode.AnyPathElement) {
       return new AnyPathElementStream(ex, c);
     } else if (mode == Mode.Join) {
       return new JoinStream(ex, c);
-    } else if (mode == Mode.Template) {
-      return new TemplateStream(c);
     }
     return null;
-  }
-
-  static class TemplateStream extends MultipleDerivationStream {
-    Callable callable;
-    private Iterator<Entry<String, String>> templatesIterator;
-
-    public TemplateStream(Callable c) {
-      callable = c;
-      this.templatesIterator = VegaResources.templatesMap.entrySet().stream()
-          .filter(s -> s.getKey().contains(c.childStringValue(0))).iterator();
-    }
-
-    @Override
-    public Derivation createDerivation() {
-      if (!templatesIterator.hasNext()) return null;
-
-      Formula formula = new ValueFormula<>(new NameValue(templatesIterator.next().getKey()));
-      // change to using just the name of the template
-      return new Derivation.Builder()
-          .withCallable(callable)
-          .formula(formula)
-          .createDerivation();
-    }
   }
 
   static class JoinStream extends MultipleDerivationStream {
@@ -154,14 +127,13 @@ public class JsonFn extends SemanticFn {
       }
     }
 
-    private Iterator<JsonValue> getValue(List<String> path, List<JsonValue> values) {
-      return null;
-    }
-
     public JoinStream(Example ex, Callable c) {
       callable = c;
       Formula pathFormula = c.child(0).formula;
       Formula valueFormula = c.child(1).formula;
+      if (opts.verbose > 1)
+        LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
+
       if (!opts.joinOnStarStar) {
         // If (join * *) is disallowed ...
         if ("*".equals(Formulas.getString(pathFormula)) && "*".equals(Formulas.getString(valueFormula))) {
@@ -171,8 +143,8 @@ public class JsonFn extends SemanticFn {
           return;
         }
       }
-      if (opts.verbose > 1)
-        LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
+
+      List<List<String>> matchedPaths;
       if (pathFormula instanceof ValueFormula) {
         pathPattern = "*".equals(Formulas.getString(pathFormula))? Lists.newArrayList() : Lists.newArrayList(Formulas.getString(pathFormula));
       } else if (pathFormula instanceof ActionFormula) {
@@ -180,27 +152,18 @@ public class JsonFn extends SemanticFn {
       } else {
         throw new RuntimeException("unsuppported path formula: " + pathFormula);
       }
-      List<List<String>> matchedPaths;
-      if (pathPattern.stream().allMatch(p -> p.startsWith("$."))) {
-        // pathPattern contains full paths
-        matchedPaths = pathPattern.stream().map(p -> Arrays.asList(p.replaceAll("^\\$\\.", "").split("\\."))).collect(Collectors.toList());
-      } else {
-        matchedPaths = VegaResources.allPathsMatcher.match(pathPattern);
-      }
+      matchedPaths = VegaResources.allPathsMatcher.match(pathPattern);
 
-      // all the different ways of getting values
       Function<List<String>, Iterator<JsonValue>> pathToValue;
       if (valueFormula instanceof ValueFormula) {
         Value v = ((ValueFormula)valueFormula).value;
-
         if ("*".equals(Formulas.getString(valueFormula))) {
-          // LogInfo.logs("JoinStream.anyvalue %s", v);
           pathToValue = p -> new HashSet<>(VegaResources.getValues(p)).iterator();
         } else {
           pathToValue = p -> Iterators.singletonIterator((JsonValue)v);
         }
       } else {
-        pathToValue = p -> Collections.emptyIterator();
+        throw new RuntimeException("Invalid valueFormula: " + valueFormula);
       }
 
       if (opts.verbose > 0) {
@@ -215,7 +178,8 @@ public class JsonFn extends SemanticFn {
       String stringValue = value.getJsonNode().asText();
       for (JsonSchema schema : pathSchemas) {
         String valueType = value.getSchemaType(), schemaTypes = schema.schemaType();
-        //LogInfo.logs("schema: %s | schemaType: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType);
+        if (opts.verbose > 1)
+          LogInfo.logs("schema: %s | schemaType: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType);
         for (String schemaType : schemaTypes.split(";")) {
           if (valueType.equals(schemaType))
             return true;
@@ -224,8 +188,11 @@ public class JsonFn extends SemanticFn {
           if (schemaType.endsWith("enum") && schema.enums().contains(stringValue))
             return true;
           if (valueType.equals("color")) {
-           // LogInfo.logs("checking color %s for %s", value, schema.schemaType());
-            if (schemaType.endsWith("Color.string")) {
+            // LogInfo.logs("checking color %s for %s", value, schema.schemaType());
+            // hack for checking color
+            if (schemaType.endsWith(".string") && schemaType.contains("color")
+              || schemaType.contains("Color") || schemaType.contains("fill")
+              || schemaType.contains("stroke") || schemaType.contains("background")) {
               if (opts.verbose > 1)
                 LogInfo.logs("checked color %s for %s", value, schemaType);
               return true;
@@ -361,9 +328,9 @@ public class JsonFn extends SemanticFn {
       index++;
       Formula formula = new ValueFormula<JsonValue>(value);
       return new Derivation.Builder()
-          .withCallable(callable)
-          .formula(formula)
-          .createDerivation();
+        .withCallable(callable)
+        .formula(formula)
+        .createDerivation();
     }
   }
 
