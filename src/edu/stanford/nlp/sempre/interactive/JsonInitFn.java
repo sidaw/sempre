@@ -2,7 +2,11 @@ package edu.stanford.nlp.sempre.interactive;
 
 import java.util.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.util.Pair;
 import fig.basic.LispTree;
 import fig.basic.Option;
 
@@ -208,15 +212,21 @@ public class JsonInitFn extends SemanticFn {
   static class ConcretizeStream extends MultipleDerivationStream {
     Example ex;
     Callable callable;
+    List<Formula> abstractChannelDefs;
+    List<Pair<String, JsonNode>> concreteChannelDefs;
     List<Formula> concretizations = new ArrayList<>();
     Iterator<Formula> itr;
 
     public ConcretizeStream(Example ex, Callable c) {
       this.ex = ex;
       callable = c;
-      ActionFormula channelDefs = (ActionFormula) callable.child(0).formula;
-      assert channelDefs.mode == ActionFormula.Mode.sequential;
-      initConcretizations(channelDefs.args);
+      ActionFormula child = (ActionFormula) callable.child(0).formula;
+      assert child.mode == ActionFormula.Mode.sequential;
+      abstractChannelDefs = child.args;
+      concreteChannelDefs = new ArrayList<>();
+      for (int i = 0; i < abstractChannelDefs.size(); i++)
+        concreteChannelDefs.add(null);
+      initConcretizations(0);
       itr = concretizations.iterator();
     }
 
@@ -229,9 +239,26 @@ public class JsonInitFn extends SemanticFn {
           .createDerivation();
     }
 
-    private void initConcretizations(List<Formula> abstractChannelDefs) {
-      // TODO: Add the possible concretizations
-      concretizations.add(new ActionFormula(ActionFormula.Mode.sequential, abstractChannelDefs));
+    // Depth first search
+    private void initConcretizations(int index) {
+      if (index == abstractChannelDefs.size()) {
+        ObjectNode node = Json.getMapper().createObjectNode();
+        for (Pair<String, JsonNode> kv : concreteChannelDefs) {
+          node.put(kv.first, kv.second);
+        }
+        concretizations.add(new ValueFormula<>(new JsonValue(node)));
+        return;
+      }
+      ActionFormula abstractChannelDef = (ActionFormula) abstractChannelDefs.get(index);
+      Formula type = abstractChannelDef.args.get(0);
+      Value channel = ((ValueFormula<?>) abstractChannelDef.args.get(1)).value,
+              field = ((ValueFormula<?>) abstractChannelDef.args.get(2)).value;
+      if (type.equals(NORMAL_CHANNEL)) {
+        ObjectNode node = Json.getMapper().createObjectNode();
+        node.put("field", "a");
+        concreteChannelDefs.set(index, new Pair<>("x", node));
+        initConcretizations(index + 1);
+      }
     }
 
   }

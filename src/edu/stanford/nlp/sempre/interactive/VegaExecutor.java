@@ -57,7 +57,7 @@ public class VegaExecutor extends Executor {
       jsonContext = (VegaJsonContextValue)context;
     else
       throw new RuntimeException("VegaExecutor only allows VegaJsonContextValue");
-      
+
     formula = Formulas.betaReduction(formula);
     try {
       JsonNode result = execute((ActionFormula)formula, jsonContext);
@@ -103,6 +103,7 @@ public class VegaExecutor extends Executor {
 
   @SuppressWarnings("rawtypes")
   private JsonNode execute(ActionFormula f, VegaJsonContextValue jsonContext) {
+    System.out.println(f);
     JsonNode result = null;
     if (f.mode == ActionFormula.Mode.primitive) {
       // use reflection to call primitive stuff
@@ -117,11 +118,14 @@ public class VegaExecutor extends Executor {
         JsonUtils.setPathValue(objNode, fullpath, ((JsonValue)value).getJsonNode());
         result = objNode;
       } else if (id.equals("init")) {
-        Formula mark = f.args.get(1);
-        for (int i = 2; i < f.args.size(); i++) {
-          Formula encoding = f.args.get(i);
-        }
-        // TODO: Return a new graph!
+        JsonNode mark = ((JsonValue) ((ValueFormula) f.args.get(1)).value).getJsonNode();
+        JsonNode encoding = ((JsonValue) ((ValueFormula) f.args.get(2)).value).getJsonNode();
+        ObjectNode objNode = Json.getMapper().createObjectNode();
+        objNode.put("$schema", "https://vega.github.io/schema/vega-lite/v2.json");
+        objNode.put("mark", mark);
+        objNode.put("encoding", encoding);
+        System.out.println(objNode.toString());
+        result = objNode;
       } else {
         throw new RuntimeException("VegaExecutor: formula not implemented: " + f);
       }
