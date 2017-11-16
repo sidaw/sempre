@@ -153,6 +153,10 @@ public class JsonInitFn extends SemanticFn {
       this.fieldName = def.has("field") ? def.get("field").textValue() : "*";
       this.def = def;
     }
+
+    public String defValue(String key) {
+      return def.has(key) ? def.get(key).textValue() : null;
+    }
   }
 
   static final Map<String, List<String>> DATA_TYPE_TO_SPEC_TYPES = new HashMap<>();
@@ -357,6 +361,14 @@ public class JsonInitFn extends SemanticFn {
       if (("area".equals(mark) || "line".equals(mark))
           && !(channelNames.contains("x") && channelNames.contains("y")))
         return false;
+      // Count can only appear when all other fields are ordinal
+      boolean hasCount = false, hasNonOrdinal = false;
+      for (Formula c : channelDefs) {
+        ChannelDefFormula channelDef = (ChannelDefFormula) c;
+        if ("count".equals(channelDef.defValue("aggregate"))) hasCount = true;
+        if (!"ordinal".equals(channelDef.defValue("type"))) hasNonOrdinal = true;
+      }
+      if (hasCount && hasNonOrdinal) return false;
       // TODO: Add more constraints
       return true;
     }
