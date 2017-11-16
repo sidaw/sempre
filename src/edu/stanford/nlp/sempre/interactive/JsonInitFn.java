@@ -361,14 +361,15 @@ public class JsonInitFn extends SemanticFn {
       if (("area".equals(mark) || "line".equals(mark))
           && !(channelNames.contains("x") && channelNames.contains("y")))
         return false;
-      // Count can only appear when all other fields are ordinal
-      boolean hasCount = false, hasNonOrdinal = false;
+      // Count can only appear when all other fields are ordinal / nominal
+      boolean hasCount = false, hasNonDiscrete = false;
       for (Formula c : channelDefs) {
         ChannelDefFormula channelDef = (ChannelDefFormula) c;
         if ("count".equals(channelDef.defValue("aggregate"))) hasCount = true;
-        if (!"ordinal".equals(channelDef.defValue("type"))) hasNonOrdinal = true;
+        String type = channelDef.defValue("type");
+        if (!("ordinal".equals(type) || "nominal".equals(type))) hasNonDiscrete = true;
       }
-      if (hasCount && hasNonOrdinal) return false;
+      if (hasCount && hasNonDiscrete) return false;
       // TODO: Add more constraints
       return true;
     }
