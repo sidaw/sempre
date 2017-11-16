@@ -2,7 +2,6 @@ package edu.stanford.nlp.sempre.interactive;
 
 import java.util.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.stanford.nlp.sempre.*;
@@ -53,6 +52,16 @@ public class JsonInitFn extends SemanticFn {
       default:
         throw new RuntimeException("Unrecognized mode: " + mode);
     }
+  }
+
+  static String formulaToString(Formula f) {
+    Value v = ((ValueFormula<?>) f).value;
+    if (v instanceof NameValue) {
+      return ((NameValue) v).id;
+    } else if (v instanceof JsonValue) {
+      return ((JsonValue) v).getJsonNode().textValue();
+    }
+    throw new RuntimeException("Cannot convert " + f + " to string");
   }
 
   // ============================================================
@@ -134,6 +143,18 @@ public class JsonInitFn extends SemanticFn {
 
   static final Formula CHANNEL = new ValueFormula<NameValue>(new NameValue("channel"));
 
+  public static class ChannelDefFormula extends ActionFormula {
+    String channelName, fieldName;
+    ObjectNode def;
+
+    public ChannelDefFormula(Formula channel, String channelName, ObjectNode def) {
+      super(ActionFormula.Mode.primitive, Arrays.asList(CHANNEL, channel, new ValueFormula<JsonValue>(new JsonValue(def))));
+      this.channelName = channelName;
+      this.fieldName = def.has("field") ? def.get("field").textValue() : "*";
+      this.def = def;
+    }
+  }
+
   static final Map<String, List<String>> DATA_TYPE_TO_SPEC_TYPES = new HashMap<>();
   static {
     DATA_TYPE_TO_SPEC_TYPES.put("string", Arrays.asList("nominal", "ordinal"));
@@ -175,9 +196,7 @@ public class JsonInitFn extends SemanticFn {
         if (checkCountChannel(channelName)) {
           ObjectNode obj = Json.getMapper().createObjectNode();
           obj.put("type", "quantitative").put("aggregate", "count");
-          Formula channelValue = new ValueFormula<JsonValue>(new JsonValue(obj));
-          formulas.add(new ActionFormula(ActionFormula.Mode.primitive,
-              Arrays.asList(CHANNEL, channelFormula, channelValue)));
+          formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
         }
       } else {
         VegaJsonContextValue.Field field = context.getField(fieldName);
@@ -186,37 +205,19 @@ public class JsonInitFn extends SemanticFn {
           if (checkNormalChannel(channelName, specType)) {
             ObjectNode obj = Json.getMapper().createObjectNode();
             obj.put("field", fieldName).put("type", specType);
-            Formula channelValue = new ValueFormula<JsonValue>(new JsonValue(obj));
-            formulas.add(new ActionFormula(ActionFormula.Mode.primitive,
-                Arrays.asList(CHANNEL, channelFormula, channelValue)));
+            formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
           }
           // AGGREGATE channel
           if (checkAggregateChannel(channelName, specType)) {
             for (String aggregateType : VegaResources.AGGREGATES) {
               ObjectNode obj = Json.getMapper().createObjectNode();
               obj.put("field", fieldName).put("type", specType).put("aggregate", aggregateType);
-              Formula channelValue = new ValueFormula<JsonValue>(new JsonValue(obj));
-              formulas.add(new ActionFormula(ActionFormula.Mode.primitive,
-                  Arrays.asList(CHANNEL, channelFormula, channelValue)));
+              formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
             }
           }
         }
       }
       return formulas;
-    }
-
-    // ==============
-    // Helper methods
-    // ==============
-
-    private String formulaToString(Formula f) {
-      Value v = ((ValueFormula<?>) f).value;
-      if (v instanceof NameValue) {
-        return ((NameValue) v).id;
-      } else if (v instanceof JsonValue) {
-        return ((JsonValue) v).getJsonNode().textValue();
-      }
-      throw new RuntimeException("Cannot convert " + f + " to string");
     }
 
     private boolean checkCountChannel(String channelName) {
@@ -257,47 +258,55 @@ public class JsonInitFn extends SemanticFn {
     @Override
     public Derivation createDerivation() {
       List<Formula> channelDefs = new ArrayList<>();
-      Formula newChannelDef;
+      ChannelDefFormula newChannelDef;
       if (callable.getChildren().size() == 1) {
-        newChannelDef = callable.child(0).formula;
+        newChannelDef = (ChannelDefFormula) callable.child(0).formula;
       } else {
         ActionFormula oldChannelDefs = (ActionFormula) (callable.child(0).formula);
         assert oldChannelDefs.mode == ActionFormula.Mode.sequential;
         channelDefs.addAll(oldChannelDefs.args);
-        newChannelDef = callable.child(1).formula;
+        newChannelDef = (ChannelDefFormula) callable.child(1).formula;
       }
       if (!check(channelDefs, newChannelDef)) return null;
       // Create a derivation
       channelDefs.add(newChannelDef);
       ActionFormula combined = new ActionFormula(ActionFormula.Mode.sequential, channelDefs);
-      System.out.println(combined);
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(combined)
           .createDerivation();
     }
 
-    private boolean check(List<Formula> channelDefs, Formula newChannelDef) {
-      if (channelDefs.size() > 1) return false;
+    private boolean check(List<Formula> channelDefs, ChannelDefFormula newChannelDef) {
+      // Prevent too many encodings
+      if (channelDefs.size() >= 3) return false;
       // Must not repeat a field or a channel
-      String newChannel = getChannel(newChannelDef), newField = getField(newChannelDef);
-      for (Formula channelDef : channelDefs) {
-        if (newChannel.equals(getChannel(channelDef)) || newField.equals(getField(channelDef)))
+      for (Formula c : channelDefs) {
+        ChannelDefFormula oldChannelDef = (ChannelDefFormula) c;
+        if (newChannelDef.channelName.equals(oldChannelDef.channelName) ||
+            newChannelDef.fieldName.equals(oldChannelDef.fieldName)) {
           return false;
+        }
+      }
+      // Cannot have more than one non-normal channels
+      if (newChannelDef.def.has("aggregate")) {
+        for (Formula c : channelDefs) {
+          ChannelDefFormula oldChannelDef = (ChannelDefFormula) c;
+          if (oldChannelDef.def.has("aggregate")) return false;
+        }
+      }
+      // If x or y is not filled, don't use other channels yet
+      if (!("x".equals(newChannelDef.channelName) || "y".equals(newChannelDef.channelName))) {
+        boolean hasX = false, hasY = false;
+        for (Formula c : channelDefs) {
+          ChannelDefFormula oldChannelDef = (ChannelDefFormula) c;
+          if ("x".equals(oldChannelDef.channelName)) hasX = true;
+          else if ("y".equals(oldChannelDef.channelName)) hasY = true;
+        }
+        if (!(hasX && hasY)) return false;
       }
       // TODO: Add more constraints
       return true;
-    }
-
-    private String getChannel(Formula channelDef) {
-      ValueFormula<?> formula = (ValueFormula<?>) ((ActionFormula) channelDef).args.get(1);
-      return ((JsonValue) formula.value).getJsonNode().textValue();
-    }
-
-    private String getField(Formula channelDef) {
-      ValueFormula<?> formula = (ValueFormula<?>) ((ActionFormula) channelDef).args.get(2);
-      JsonNode field = ((JsonValue) formula.value).getJsonNode().get("field");
-      return field == null ? "*" : field.textValue();
     }
 
   }
@@ -318,13 +327,38 @@ public class JsonInitFn extends SemanticFn {
     @Override
     public Derivation createDerivation() {
       Formula mark = callable.child(0).formula, channelDefs = callable.child(1).formula;
-      // TODO: Add more constraints
+      if (!check(formulaToString(mark), ((ActionFormula) channelDefs).args)) return null;
       ActionFormula finalized = new ActionFormula(ActionFormula.Mode.primitive,
           Arrays.asList(INIT, mark, channelDefs));
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(finalized)
           .createDerivation();
+    }
+
+    private boolean check(String mark, List<Formula> channelDefs) {
+      List<String> channelNames = new ArrayList<>();
+      // Some channels only go with certain marks
+      for (Formula c : channelDefs) {
+        ChannelDefFormula channelDef = (ChannelDefFormula) c;
+        String channelName = channelDef.channelName;
+        channelNames.add(channelName);
+        if (("x2".equals(channelName) || "y2".equals(channelName))
+            && !("rule".equals(mark) || "bar".equals(mark) || "rect".equals(mark) || "area".equals(mark)))
+          return false;
+        if ("shape".equals(channelName) && !("point".equals(mark)))
+          return false;
+        if ("text".equals(channelName) && !("text".equals(mark)))
+          return false;
+      }
+      // Must have the required channels
+      if (!(channelNames.contains("x") || channelNames.contains("y")))
+        return false;
+      if (("area".equals(mark) || "line".equals(mark))
+          && !(channelNames.contains("x") && channelNames.contains("y")))
+        return false;
+      // TODO: Add more constraints
+      return true;
     }
   }
 
