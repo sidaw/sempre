@@ -56,7 +56,7 @@
   (rule $InitMark ($Regular) (interactive.VegaFn Mark))
   (rule $InitMark (anyvalue) (interactive.JsonInitFn AnyMark) (floating 1))
 
-  (rule $ROOT ($InitMark $InitConcreteChannelDefs)
+  (rule $ROOT ($InitMark $InitChannelDefs)
         (interactive.JsonInitFn Finalize) (floating 1))
 
 )

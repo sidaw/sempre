@@ -132,6 +132,8 @@ public class JsonInitFn extends SemanticFn {
   // Channel creation
   // ============================================================
 
+  static final Formula CHANNEL = new ValueFormula<NameValue>(new NameValue("channel"));
+
   static final Map<String, List<String>> DATA_TYPE_TO_SPEC_TYPES = new HashMap<>();
   static {
     DATA_TYPE_TO_SPEC_TYPES.put("string", Arrays.asList("nominal", "ordinal"));
@@ -168,13 +170,15 @@ public class JsonInitFn extends SemanticFn {
       Formula channelFormula = callable.child(0).formula;
       String channelName = formulaToString(channelFormula),
                fieldName = formulaToString(callable.child(1).formula);
-      if ("*".equals(fieldName) && checkCountChannel(channelName)) {
+      if ("*".equals(fieldName)) {
         // COUNT channel
-        ObjectNode obj = Json.getMapper().createObjectNode();
-        obj.put("type", "quantitative").put("aggregate", "count");
-        Formula channelValue = new ValueFormula<JsonValue>(new JsonValue(obj));
-        formulas.add(new ActionFormula(ActionFormula.Mode.primitive,
-            Arrays.asList(channelFormula, channelValue)));
+        if (checkCountChannel(channelName)) {
+          ObjectNode obj = Json.getMapper().createObjectNode();
+          obj.put("type", "quantitative").put("aggregate", "count");
+          Formula channelValue = new ValueFormula<JsonValue>(new JsonValue(obj));
+          formulas.add(new ActionFormula(ActionFormula.Mode.primitive,
+              Arrays.asList(CHANNEL, channelFormula, channelValue)));
+        }
       } else {
         VegaJsonContextValue.Field field = context.getField(fieldName);
         for (String specType : DATA_TYPE_TO_SPEC_TYPES.get(field.type)) {
@@ -184,7 +188,7 @@ public class JsonInitFn extends SemanticFn {
             obj.put("field", fieldName).put("type", specType);
             Formula channelValue = new ValueFormula<JsonValue>(new JsonValue(obj));
             formulas.add(new ActionFormula(ActionFormula.Mode.primitive,
-                Arrays.asList(channelFormula, channelValue)));
+                Arrays.asList(CHANNEL, channelFormula, channelValue)));
           }
           // AGGREGATE channel
           if (checkAggregateChannel(channelName, specType)) {
@@ -193,13 +197,17 @@ public class JsonInitFn extends SemanticFn {
               obj.put("field", fieldName).put("type", specType).put("aggregate", aggregateType);
               Formula channelValue = new ValueFormula<JsonValue>(new JsonValue(obj));
               formulas.add(new ActionFormula(ActionFormula.Mode.primitive,
-                  Arrays.asList(channelFormula, channelValue)));
+                  Arrays.asList(CHANNEL, channelFormula, channelValue)));
             }
           }
         }
       }
       return formulas;
     }
+
+    // ==============
+    // Helper methods
+    // ==============
 
     private String formulaToString(Formula f) {
       Value v = ((ValueFormula<?>) f).value;
@@ -237,27 +245,61 @@ public class JsonInitFn extends SemanticFn {
   // Combine
   // ============================================================
 
-  static class CombineDefsStream extends MultipleDerivationStream {
+  static class CombineDefsStream extends SingleDerivationStream {
     Callable callable;
-    Iterator<Formula> itr;
+    VegaJsonContextValue context;
 
     public CombineDefsStream(Example ex, Callable c) {
       callable = c;
-      itr = generate().iterator();
+      context = (VegaJsonContextValue) ex.context;
     }
 
     @Override
     public Derivation createDerivation() {
-      if (!itr.hasNext()) return null;
+      List<Formula> channelDefs = new ArrayList<>();
+      Formula newChannelDef;
+      if (callable.getChildren().size() == 1) {
+        newChannelDef = callable.child(0).formula;
+      } else {
+        ActionFormula oldChannelDefs = (ActionFormula) (callable.child(0).formula);
+        assert oldChannelDefs.mode == ActionFormula.Mode.sequential;
+        channelDefs.addAll(oldChannelDefs.args);
+        newChannelDef = callable.child(1).formula;
+      }
+      if (!check(channelDefs, newChannelDef)) return null;
+      // Create a derivation
+      channelDefs.add(newChannelDef);
+      ActionFormula combined = new ActionFormula(ActionFormula.Mode.sequential, channelDefs);
+      System.out.println(combined);
       return new Derivation.Builder()
           .withCallable(callable)
-          .formula(itr.next())
+          .formula(combined)
           .createDerivation();
     }
 
-    private List<Formula> generate() {
-      return new ArrayList<>();
+    private boolean check(List<Formula> channelDefs, Formula newChannelDef) {
+      if (channelDefs.size() > 1) return false;
+      // Must not repeat a field or a channel
+      String newChannel = getChannel(newChannelDef), newField = getField(newChannelDef);
+      for (Formula channelDef : channelDefs) {
+        if (newChannel.equals(getChannel(channelDef)) || newField.equals(getField(channelDef)))
+          return false;
+      }
+      // TODO: Add more constraints
+      return true;
     }
+
+    private String getChannel(Formula channelDef) {
+      ValueFormula<?> formula = (ValueFormula<?>) ((ActionFormula) channelDef).args.get(1);
+      return ((JsonValue) formula.value).getJsonNode().textValue();
+    }
+
+    private String getField(Formula channelDef) {
+      ValueFormula<?> formula = (ValueFormula<?>) ((ActionFormula) channelDef).args.get(2);
+      JsonNode field = ((JsonValue) formula.value).getJsonNode().get("field");
+      return field == null ? "*" : field.textValue();
+    }
+
   }
 
   // ============================================================
@@ -266,26 +308,23 @@ public class JsonInitFn extends SemanticFn {
 
   static final ValueFormula<NameValue> INIT = new ValueFormula<>(new NameValue("init"));
 
-  static class FinalizeStream extends MultipleDerivationStream {
+  static class FinalizeStream extends SingleDerivationStream {
     Callable callable;
-    Iterator<Formula> itr;
 
     public FinalizeStream(Example ex, Callable c) {
       callable = c;
-      itr = generate().iterator();
     }
 
     @Override
     public Derivation createDerivation() {
-      if (!itr.hasNext()) return null;
+      Formula mark = callable.child(0).formula, channelDefs = callable.child(1).formula;
+      // TODO: Add more constraints
+      ActionFormula finalized = new ActionFormula(ActionFormula.Mode.primitive,
+          Arrays.asList(INIT, mark, channelDefs));
       return new Derivation.Builder()
           .withCallable(callable)
-          .formula(itr.next())
+          .formula(finalized)
           .createDerivation();
-    }
-
-    private List<Formula> generate() {
-      return new ArrayList<>();
     }
   }
 

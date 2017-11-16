@@ -103,7 +103,6 @@ public class VegaExecutor extends Executor {
 
   @SuppressWarnings("rawtypes")
   private JsonNode execute(ActionFormula f, VegaJsonContextValue jsonContext) {
-    System.out.println(f);
     JsonNode result = null;
     if (f.mode == ActionFormula.Mode.primitive) {
       // use reflection to call primitive stuff
@@ -119,12 +118,20 @@ public class VegaExecutor extends Executor {
         result = objNode;
       } else if (id.equals("init")) {
         JsonNode mark = ((JsonValue) ((ValueFormula) f.args.get(1)).value).getJsonNode();
-        JsonNode encoding = ((JsonValue) ((ValueFormula) f.args.get(2)).value).getJsonNode();
+        ActionFormula channelDefs = ((ActionFormula) f.args.get(2));
+        assert channelDefs.mode == ActionFormula.Mode.sequential;
+        ObjectNode encoding = Json.getMapper().createObjectNode();
+        for (Formula channelDef : channelDefs.args) {
+          ValueFormula<?> formula = (ValueFormula<?>) ((ActionFormula) channelDef).args.get(1);
+          String channelKey = ((JsonValue) formula.value).getJsonNode().textValue();
+          formula = (ValueFormula<?>) ((ActionFormula) channelDef).args.get(2);
+          encoding.set(channelKey, ((JsonValue) formula.value).getJsonNode());
+        }
         ObjectNode objNode = Json.getMapper().createObjectNode();
         objNode.put("$schema", "https://vega.github.io/schema/vega-lite/v2.json");
         objNode.put("mark", mark);
         objNode.put("encoding", encoding);
-        System.out.println(objNode.toString());
+        System.out.println("YAY " + f + " ==> " + objNode.toString());
         result = objNode;
       } else {
         throw new RuntimeException("VegaExecutor: formula not implemented: " + f);
