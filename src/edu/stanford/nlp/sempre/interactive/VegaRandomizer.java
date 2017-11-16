@@ -154,7 +154,7 @@ public class VegaRandomizer {
       List<String> path = randomChoice(paths);
       List<JsonValue> possibleValues = VegaResources.getValues(path);
       for (JsonSchema schema : VegaResources.vegaSchema.schemas(path)) {
-        String type = schema.schemaType();
+        String type = schema.schemaTypes().get(0);
         if ("number".equals(type))
           possibleValues.addAll(smallNumbers);
       }
