@@ -79,22 +79,27 @@ public class VegaJsonContextValue extends ContextValue {
     public String toString() { return name + "(" + type + ")"; }
   }
 
-  List<Field> fields;
+  protected Map<String, Field> fields;
 
   public VegaJsonContextValue setFields(Map<String, Map<String, Object>> schema) {
-    fields = new ArrayList<>();
+    fields = new HashMap<>();
     for (Map<String, Object> schemaItem : schema.values()) {
       if ("_id".equals(schemaItem.get("name"))) continue;     // Ignore dummy field
-      fields.add(new Field(schemaItem));
+      Field field = new Field(schemaItem);
+      fields.put(field.name, field);
     }
-    for (Field f : fields) {
+    for (Field f : fields.values()) {
       LogInfo.logs("Field %s (%s)", f.name, f.type);
     }
     return this;
   }
 
-  public List<Field> getFields() {
-    return fields;
+  public Collection<Field> getFields() {
+    return fields.values();
+  }
+
+  public Field getField(String name) {
+    return fields.get(name);
   }
 
 }

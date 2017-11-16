@@ -81,7 +81,7 @@ public class VegaRandomizer {
     ObjectNode allEncodings = mapper.createObjectNode();
     node.put("encoding", allEncodings);
     // Fill in the encoding
-    List<Field> fields = new ArrayList<>(context.fields);
+    List<Field> fields = new ArrayList<>(context.getFields());
     for (Map.Entry<String, String> templateEncoding : template.encoding.entrySet()) {
       ObjectNode encoding = mapper.createObjectNode();
       String channel = templateEncoding.getKey(), vegaType = templateEncoding.getValue(), aggregate = null;

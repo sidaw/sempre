@@ -39,27 +39,24 @@
 (when init-plot
 
   (rule $InitChannel ($Regular) (interactive.VegaFn Channel))
-  (rule $InitChannel (anyvalue) (ConstantFn *) (floating 1))
+  (rule $InitChannel (anyvalue) (interactive.JsonInitFn AnyChannel) (floating 1))
+
   (rule $InitField ($Regular) (interactive.VegaFn Field))
+  (rule $InitField (anyvalue) (interactive.JsonInitFn AnyField) (floating 1))
   (rule $InitField (anyvalue) (ConstantFn *) (floating 1))
+
+  (rule $InitChannelDef ($InitChannel $InitField)
+        (interactive.JsonInitFn ChannelDef) (floating 1))
+
+  (rule $InitChannelDefs ($InitChannelDef)
+        (interactive.JsonInitFn CombineDefs) (floating 1))
+  (rule $InitChannelDefs ($InitChannelDefs $InitChannelDef)
+        (interactive.JsonInitFn CombineDefs) (floating 1))
+
   (rule $InitMark ($Regular) (interactive.VegaFn Mark))
   (rule $InitMark (anyvalue) (interactive.JsonInitFn AnyMark) (floating 1))
 
-  (rule $InitChannelDef ($InitChannel $InitField)
-        (interactive.JsonInitFn NormalChannel) (floating 1))
-  (rule $InitChannelDef ($InitChannel $InitField)
-        (interactive.JsonInitFn AggregateChannel) (floating 1))
-  (rule $InitChannelDef ($InitChannel)
-        (interactive.JsonInitFn CountChannel) (floating 1))
-
-  (rule $InitChannelDefs ($InitChannelDef)
-        (lambda d (:s (var d))) (floating 1))
-  (rule $InitChannelDefs ($InitChannelDefs $InitChannelDef)
-        (interactive.JsonInitFn Combine) (floating 1))
-
-  (rule $InitConcreteChannelDefs ($InitChannelDefs)
-        (interactive.JsonInitFn Concretize) (floating 1))
   (rule $ROOT ($InitMark $InitConcreteChannelDefs)
-        (lambda m (lambda ccds (: init (var m) (var ccds)))) (floating 1))
+        (interactive.JsonInitFn Finalize) (floating 1))
 
 )
