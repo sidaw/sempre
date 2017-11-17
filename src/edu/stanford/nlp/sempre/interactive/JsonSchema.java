@@ -2,13 +2,12 @@ package edu.stanford.nlp.sempre.interactive;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 
+import com.google.common.collect.Lists;
 import fig.basic.LogInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 public class JsonSchema implements Comparable<JsonSchema> {
 
   public static final String NOTYPE = "notype";
-  
+
   public static class RefResolver {
     private JsonNode rootNode;
 
@@ -91,7 +90,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
   }
 
   public String toString() {
-    return String.format("%s\npath: %s\ntype: %s", name(), schemaPath(), schemaType());
+    return String.format("%s\npath: %s\ntype: %s", name(), schemaPath(), schemaTypes());
   }
 
   @Override
@@ -123,9 +122,9 @@ public class JsonSchema implements Comparable<JsonSchema> {
     }
     return node.get("type").asText();
   }
-  
-  
-  private List<String> simplePath(List<String> path) {
+
+
+  private List<String> simplePathWithDef(List<String> path) {
     if (path.size() == 0) return new ArrayList<>();
     int lastInd = path.size() - 1;
     for (; lastInd > 0; lastInd--) {
@@ -137,31 +136,34 @@ public class JsonSchema implements Comparable<JsonSchema> {
         .map(s -> s.replace("#/definitions/", "#/"))
         .collect(Collectors.toList());
   }
-  
+
   // include enum types, definitions for object items
-  public String schemaType() {
+  public List<String> schemaTypes() {
     if (!node.has("type")) {
-      return NOTYPE;
+      throw new RuntimeException("type of " + schemaPath + " is an empty string.");
+      //return NOTYPE;
     }
+    if (node.get("type").isArray()) {
+      // several fields can be either boolean, string or something else. we are assuming these are basic types
+      List<String> types = new ArrayList<>();
+      for (JsonNode child : node.get("type")) {
+        types.add(child.asText());
+      }
+      return types;
+    }
+    List<String> simplePath = simplePathWithDef(schemaPath);
+    String lastPath = simplePath.get(simplePath.size() - 1);
     String type = node.get("type").asText();
-    // object types is the last object definition
-    if (type.equals("object")) {
-      return String.join(".", simplePath(schemaPath));
+    if (type.isEmpty()) {
+      throw new RuntimeException("type of " + simplePath + " is an empty string.");
     }
+
     // enum types are always strings
     if (type.equals("string") && node.has("enum")) {
-      return String.join(".", simplePath(schemaPath)) + ".enum";
+      return Lists.newArrayList("enum");
     }
-    // extension types are also strings?
-    if (type.equals("string") && node.has("enum")) {
-      return String.join(".", simplePath(schemaPath)) + ".enum";
-    }
-    // string types is the immediate field before
-    String prev = schemaPath.get(schemaPath.size()-1);
-    if (type.equals("string") && !prev.startsWith("anyOf[")) {
-      return schemaPath.get(schemaPath.size()-1) + ".string";
-    }
-    return node.get("type").asText();
+
+    return Lists.newArrayList(type);
   }
 
   public List<String> enums() {
@@ -250,7 +252,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
     newPath.addAll(Arrays.asList(extend));
     return newPath;
   }
-  
+
   private Set<JsonSchema> children() {
     Set<JsonSchema> schemaSet = new HashSet<>();
 
@@ -269,8 +271,6 @@ public class JsonSchema implements Comparable<JsonSchema> {
         JsonNode refNode = resolver.resolve(ref);
         List<String> newSchemaPath = extendPath(schemaPath, ref);
         schemaSet.add(new JsonSchema(refNode, name, newSchemaPath, resolver));
-      } else {
-        LogInfo.logs("Excluded due to loop %s: %s", this.schemaPath, ref);
       }
     } else if (node.has("properties")) {
       Iterator<Entry<String, JsonNode>> fieldIterator = node.get("properties").fields();
@@ -282,13 +282,13 @@ public class JsonSchema implements Comparable<JsonSchema> {
     }
     return schemaSet;
   }
-  
+
   public List<String> simplePath() {
     return this.schemaPath.stream().filter(s ->
     !s.equals("properties") && !s.equals("items") && !s.startsWith("#/") && !s.startsWith("anyOf"))
         .collect(Collectors.toList());
   }
-  
+
   public List<JsonSchema> descendents() {
     List<JsonSchema> schemaSet = new ArrayList<>();
     schemaSet.add(this);

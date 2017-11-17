@@ -33,10 +33,13 @@ import org.testng.util.Strings;
  */
 public class JsonUtils  {
   
-  public static List<Pair<List<String>, JsonNode>> allPathValues(JsonNode node) {
+  public static List<Pair<List<String>, JsonNode>> allPathValues(JsonNode node, boolean leavesOnly) {
     List<Pair<List<String>, JsonNode>> allPaths = new ArrayList<>();
-    getPaths(node, new ArrayList<>(), allPaths);
+    getPaths(node, new ArrayList<>(), allPaths, leavesOnly);
     return allPaths;
+  }
+  public static List<Pair<List<String>, JsonNode>> allPathValues(JsonNode node) {
+    return allPathValues(node, false);
   }
   
   private static List<String> extendPath(List<String> path, String... extend) {
@@ -45,9 +48,12 @@ public class JsonUtils  {
     return newPath;
   }
 
-  private static void getPaths(JsonNode node, List<String> path, List<Pair<List<String>, JsonNode>> paths) {
-    paths.add(new Pair<>(path, node));
+  private static void getPaths(JsonNode node, List<String> path, List<Pair<List<String>, JsonNode>> paths, boolean leavesOnly) {
+    if (!leavesOnly)
+      paths.add(new Pair<>(path, node));
     if (node.isValueNode()) {
+      if (leavesOnly)
+        paths.add(new Pair<>(path, node));
       return;
     } else if (node.isArray()) {
       for (int i = 0; node.has(i); i++) {
@@ -58,9 +64,13 @@ public class JsonUtils  {
       Iterator<String> names = node.fieldNames();
       while (names.hasNext()) {
         String childName = names.next();
-        getPaths(node.get(childName), extendPath(path, childName), paths);
+        getPaths(node.get(childName), extendPath(path, childName), paths, leavesOnly);
       }
     }
+  }
+
+  private static void getPaths(JsonNode node, List<String> path, List<Pair<List<String>, JsonNode>> paths) {
+    getPaths(node, path, paths, false);
   }
 
   public static JsonNode toJsonNode(Object jsonobj) {
@@ -88,5 +98,24 @@ public class JsonUtils  {
       }
     }
     node.put(lastPath, value);
+  }
+
+  public static JsonNode getPathValue(JsonNode context, String path) {
+    List<String> jsonPath = Arrays.asList(path.split("\\."));
+    List<String> objectPath = jsonPath.subList(1, jsonPath.size());
+    return getPathValue(context, jsonPath);
+  }
+
+  public static JsonNode getPathValue(JsonNode context, List<String> objectPath) {
+    JsonNode node = context;
+    for (String name : objectPath) {
+      if (node == null) return null;
+      if (name.endsWith("]")) {
+        node = node.get(Integer.parseInt(name.substring(1, name.length() - 1)));
+      } else {
+        node = node.get(name);
+      }
+    }
+    return node;
   }
 }

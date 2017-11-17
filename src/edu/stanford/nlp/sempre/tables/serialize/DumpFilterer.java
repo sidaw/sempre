@@ -20,7 +20,7 @@ public class DumpFilterer implements Runnable {
   public static void main(String[] args) {
     Execution.run(args, "DumpFiltererMain", new DumpFilterer(), Master.getOptionsParser());
   }
-  
+
   Builder builder;
 
   @Override
@@ -71,7 +71,7 @@ public class DumpFilterer implements Runnable {
           throw new RuntimeException("Invalid tree: " + tree);
         Formula formula = Formulas.fromLispTree(tree.child(1).child(1));
         Value value = builder.executor.execute(formula, ex.context).value;
-        double compatibility = builder.valueEvaluator.getCompatibility(ex.targetValue, value);
+        double compatibility = builder.valueEvaluator.getCompatibility(ex.targetValue, value, ex.context);
         if (compatibility == 1.0) {
           writer.println(tree);
           outLines++;

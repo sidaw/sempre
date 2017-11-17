@@ -104,6 +104,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
+  o('Grammar.tags', 'doublestar'),
 
   o('LanguageAnalyzer.lowerCaseTokens', false),
 
@@ -121,13 +122,13 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Params.l1Reg', 'nonlazy'),
   o('Params.l1RegCoeff', 0.0001),
 
-  o('Params.initStepSize', 0.1),
+  o('Params.initStepSize', 0.5),
   o('Params.adaptiveStepSize', true),
   #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
 
   o('JsonMaster.intOutputPath', './plot-out/'),
   o('InteractiveServer.numThreads', 8),
-  o('InteractiveServer.maxCandidates', 200),
+  o('InteractiveServer.maxCandidates', 100),
   o('InteractiveServer.queryLogPath', './plot-out/query.jsonl'),
   o('InteractiveServer.responseLogPath', './plot-out/response.jsonl'),
   o('InteractiveServer.port', 8405),
@@ -141,19 +142,25 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('VegaResources.vegaSchema', "./#{$path}/vega-lite-v2.json"),
   o('VegaResources.excludedPaths', 'items', 'vconcat', 'hconcat', 'layer', 'spec', 'repeat'),
   o('VegaResources.colorFile', "./#{$path}/css-color-names.json"),
-  o('VegaResources.vegaSpecifications', "./#{$path}/templates/population", "./#{$path}/templates/car", "./#{$path}/templates/stocks"),
-  selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
+  # o('VegaResources.vegaSpecifications', "./#{$path}/templates/population", "./#{$path}/templates/cars", "./#{$path}/templates/stocks"),
+  o('VegaResources.initialTemplates', "./#{$path}/initial-templates.json"),
+  # selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 
-  o('VegaEngine.verbose', 1),
+  o('VegaEngine.verbose', 0),
   o('VegaExecutor.compileVega', false),
   o('JsonFn.maxJoins', 10000), # hack.
 
   # learning stuff
+  o('Dataset.datasetReader', "interactive.JsonlDatasetReader"),
   o('Dataset.inPaths', "train:./plot-data/sampledata.jsonl"),
   o('Parser.callSetEvaluation', true),
+  o('Learner.numParallelThreads', 8),
+  o('Builder.valueEvaluator', 'interactive.VegaValueEvaluator'),
+  o('Parser.accuracyTopK', 10),
 
   o('FeatureExtractor.featureComputers', 'FloatingFeatureComputer', 'interactive.VegaFeatureComputer'),
-  o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule', 'pathPattern'),
+  o('FeatureExtractor.featureDomains', 'rule', 'span', 'bigram', 'floatSkip', 'floatRule',
+    'pathPattern', 'valueType', 'lexPathPattern', 'lexValueType'),
 
   o('Learner.maxTrainIters', 0),
 

@@ -18,7 +18,7 @@ public class FreebaseValueEvaluator implements ValueEvaluator {
   }
   public static final Options opts = new Options();
 
-  public double getCompatibility(Value target, Value pred) {
+  public double getCompatibility(Value target, Value pred, ContextValue context) {
     double f1 = getF1(target, pred);
     return opts.useF1 ? f1 : (f1 == 1 ? 1 : 0);
   }

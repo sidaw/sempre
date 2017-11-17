@@ -833,7 +833,7 @@ class DPDParserState extends ParserState {
     Map<Value, Metadata> denotationToMetadata = firstPassCells.get(cell);
     if (denotationToMetadata == null) return;
     for (Value denotation : denotationToMetadata.keySet()) {
-      double compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, denotation);
+      double compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, denotation, ex.context);
       if (compatibility != 1) continue;
       if (Parser.opts.verbose >= 2)
         LogInfo.logs("[%f] %s", compatibility, denotationToMetadata.get(denotation).derivations.get(0));

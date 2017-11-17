@@ -1,12 +1,12 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -40,13 +40,16 @@ public class JsonFn extends SemanticFn {
     @Option(gloss = "verbosity")
     public int verbose = 0;
 
-    @Option(gloss = "verbosity")
+    @Option(gloss = "max number of joins")
     public int maxJoins = Integer.MAX_VALUE;
+
+    @Option(gloss = "Allow join to apply on * *")
+    public boolean joinOnStarStar = false;
   }
 
   public static Options opts = new Options();
   Formula arg1, arg2;
-  enum Mode {PathElement, JsonValue, Template, Join};
+  enum Mode {PathElement, JsonValue, ConstantValue, AnyPath, AnyPathElement, Template, Join};
   Mode mode;
   DerivationStream stream;
 
@@ -64,36 +67,14 @@ public class JsonFn extends SemanticFn {
       return new IsPathStream(ex, c);
     } else if (mode == Mode.JsonValue) {
       return new JsonValueStream(ex, c);
+    } else if (mode == Mode.AnyPath) {
+      return new AnyPathStream(ex, c);
+    } else if (mode == Mode.AnyPathElement) {
+      return new AnyPathElementStream(ex, c);
     } else if (mode == Mode.Join) {
       return new JoinStream(ex, c);
-    } else if (mode == Mode.Template) {
-      return new TemplateStream(c);
     }
     return null;
-  }
-
-  static class TemplateStream extends MultipleDerivationStream {
-    Callable callable;
-    int currIndex = 0;
-    private Iterator<Entry<String, String>> templatesIterator;
-
-    public TemplateStream(Callable c) {
-      callable = c;
-      this.templatesIterator = VegaResources.templatesMap.entrySet().stream()
-          .filter(s -> s.getKey().contains(c.childStringValue(0))).iterator();
-    }
-
-    @Override
-    public Derivation createDerivation() {
-      if (!templatesIterator.hasNext()) return null;
-
-      Formula formula = new ValueFormula<>(new NameValue(templatesIterator.next().getKey()));
-      // change to using just the name of the template
-      return new Derivation.Builder()
-          .withCallable(callable)
-          .formula(formula)
-          .createDerivation();
-    }
   }
 
   static class JoinStream extends MultipleDerivationStream {
@@ -143,15 +124,24 @@ public class JsonFn extends SemanticFn {
       }
     }
 
-    private Iterator<JsonValue> getValue(List<String> path, List<JsonValue> values) {
-      return null;
-    }
-
     public JoinStream(Example ex, Callable c) {
       callable = c;
       Formula pathFormula = c.child(0).formula;
       Formula valueFormula = c.child(1).formula;
-      // LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
+      if (opts.verbose > 1)
+        LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
+
+      if (!opts.joinOnStarStar) {
+        // If (join * *) is disallowed ...
+        if ("*".equals(Formulas.getString(pathFormula)) && "*".equals(Formulas.getString(valueFormula))) {
+          if (opts.verbose > 1)
+            LogInfo.logs("JoinStream * * : Skipped");
+          iterator = Collections.emptyIterator();
+          return;
+        }
+      }
+
+      List<List<String>> matchedPaths;
       if (pathFormula instanceof ValueFormula) {
         pathPattern = "*".equals(Formulas.getString(pathFormula))? Lists.newArrayList() : Lists.newArrayList(Formulas.getString(pathFormula));
       } else if (pathFormula instanceof ActionFormula) {
@@ -159,55 +149,24 @@ public class JsonFn extends SemanticFn {
       } else {
         throw new RuntimeException("unsuppported path formula: " + pathFormula);
       }
+      matchedPaths = VegaResources.allPathsMatcher.match(pathPattern);
 
-      // all the different ways of getting values
       Function<List<String>, Iterator<JsonValue>> pathToValue;
       if (valueFormula instanceof ValueFormula) {
         Value v = ((ValueFormula)valueFormula).value;
-
         if ("*".equals(Formulas.getString(valueFormula))) {
-          // LogInfo.logs("JoinStream.anyvalue %s", v);
-          pathToValue = p -> VegaResources.getValues(p).iterator();
+          pathToValue = p -> new HashSet<>(VegaResources.getValues(p)).iterator();
         } else {
           pathToValue = p -> Iterators.singletonIterator((JsonValue)v);
         }
       } else {
-        pathToValue = p -> Collections.emptyIterator();
+        throw new RuntimeException("Invalid valueFormula: " + valueFormula);
       }
 
       if (opts.verbose > 0) {
-        List<List<String>> currentpaths = VegaResources.allPathsMatcher.match(pathPattern);
-        LogInfo.logs("JsonFn Path %s, size %s", currentpaths, currentpaths.size());
+        LogInfo.logs("JsonFn Path %s, size %s", matchedPaths, matchedPaths.size());
       }
-      iterator = new EnumeratePathsIterator(VegaResources.allPathsMatcher.match(pathPattern).iterator(),
-          pathToValue);
-    }
-
-    private boolean checkType(List<String> path, JsonValue value) {
-      JsonSchema jsonSchema = VegaResources.vegaSchema;
-      List<JsonSchema> pathSchemas = jsonSchema.schemas(path);
-      String stringValue = value.getJsonNode().asText();
-      for (JsonSchema schema : pathSchemas) {
-        if (value.getSchemaType().equals(schema.schemaType()))
-          return true;
-        if (value.getSchemaType().equals("string") && schema.schemaType().endsWith("string"))
-          return true;
-        if (schema.schemaType().endsWith("enum") && schema.enums().contains(stringValue))
-          return true;
-        if (value.getSchemaType().equals("color")) {
-         // LogInfo.logs("checking color %s for %s", value, schema.schemaType());
-          if (schema.schemaType().endsWith("Color.string")) {
-            LogInfo.logs("checked color %s for %s", value, schema.schemaType());
-            return true;
-          }
-        }
-        if (value.getSchemaType().equals("field") && schema.schemaType().endsWith("field.string"))
-          return true;
-
-        if (schema.schemaType().equals(JsonSchema.NOTYPE))
-          throw new RuntimeException("JsonFn: schema has no type: " + schema);
-      }
-      return false;
+      iterator = new EnumeratePathsIterator(matchedPaths.iterator(), pathToValue);
     }
 
     private Derivation derivFromPathValue(List<String> path, JsonValue value) {
@@ -220,11 +179,13 @@ public class JsonFn extends SemanticFn {
           .withCallable(callable)
           .formula(setFormula)
           .createDerivation();
-      deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
+      /*deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
           value.getJsonNode().toString(),
-          VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaType())
+          VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaTypes())
           .collect(Collectors.toList()),
-          value.getSchemaType());
+          value.getSchemaType());*/
+      CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
+      deriv.canonicalUtterance = cuGenerator.getSimpleCanonicalUtterance();
       return deriv;
     }
 
@@ -232,7 +193,8 @@ public class JsonFn extends SemanticFn {
     public Derivation createDerivation() {
       while (iterator.hasNext()) {
         Pair<List<String>, JsonValue> next = iterator.next();
-        if (checkType(next.getFirst(), next.getSecond())) {
+        if (VegaResources.checkType(next.getFirst(), next.getSecond())) {
+          //LogInfo.logs("JsonFn yield %s %s", next.getFirst(), next.getSecond());
           return derivFromPathValue(next.getFirst(), next.getSecond());
         }
       }
@@ -247,7 +209,7 @@ public class JsonFn extends SemanticFn {
     int currIndex = 0;
 
     public IsPathStream(Example ex, Callable c) {
-      callable = c;      
+      callable = c;
       keys = VegaResources.allPathsMatcher.pathKeys();
     }
 
@@ -263,13 +225,13 @@ public class JsonFn extends SemanticFn {
     }
   }
 
-  // takes a token and check if it can be a path
+  // takes a token and check if it can be a value
   static class JsonValueStream extends SingleDerivationStream {
     Callable callable;
     int currIndex = 0;
 
     public JsonValueStream(Example ex, Callable c) {
-      callable = c;      
+      callable = c;
     }
 
     private Double parseNumber(String string) {
@@ -302,6 +264,92 @@ public class JsonFn extends SemanticFn {
         value = new JsonValue(string).withSchemaType("string");
       }
       Formula formula = new ValueFormula<JsonValue>(value);
+      return new Derivation.Builder()
+          .withCallable(callable)
+          .formula(formula)
+          .createDerivation();
+    }
+  }
+
+  static class ConstantValueStream extends MultipleDerivationStream {
+    List<JsonValue> values = new ArrayList<JsonValue>();
+    int index = 0;
+    Callable callable;
+
+    public ConstantValueStream(Example ex, Callable c) {
+      callable = c;
+      values.add(new JsonValue(false).withSchemaType("boolean"));
+      values.add(new JsonValue(true).withSchemaType("boolean"));
+      values.add(new JsonValue(0.0).withSchemaType("number"));
+    }
+
+    public Derivation createDerivation() {
+      if (index >= values.size())
+        return null;
+      JsonValue value = values.get(index);
+      index++;
+      Formula formula = new ValueFormula<JsonValue>(value);
+      return new Derivation.Builder()
+        .withCallable(callable)
+        .formula(formula)
+        .createDerivation();
+    }
+  }
+
+  // Generate all possible full paths
+  static class AnyPathStream extends MultipleDerivationStream {
+    static List<NameValue> paths = new ArrayList<>();
+    int index = 0;
+    Callable callable;
+
+    public AnyPathStream(Example ex, Callable c) {
+      callable = c;
+      synchronized (paths) {
+        if (paths.isEmpty()) {
+          // Only initialize once
+          for (List<String> path : VegaResources.allPathsMatcher.getPaths()) {
+            paths.add(new NameValue("$." + String.join(".", path)));
+          }
+        }
+      }
+    }
+
+    public Derivation createDerivation() {
+      if (index >= paths.size())
+        return null;
+      NameValue path = paths.get(index);
+      index++;
+      Formula formula = new ValueFormula<NameValue>(path);
+      return new Derivation.Builder()
+          .withCallable(callable)
+          .formula(formula)
+          .createDerivation();
+    }
+  }
+
+  // Generate all possible path elements
+  static class AnyPathElementStream extends MultipleDerivationStream {
+    static List<NameValue> paths = null;
+    int index = 0;
+    Callable callable;
+
+    public AnyPathElementStream(Example ex, Callable c) {
+      callable = c;
+      if (paths == null) {
+        // Only initialize once
+        paths = new ArrayList<>();
+        for (String key : VegaResources.allPathsMatcher.pathKeys()) {
+          paths.add(new NameValue(key));
+        }
+      }
+    }
+
+    public Derivation createDerivation() {
+      if (index >= paths.size())
+        return null;
+      NameValue path = paths.get(index);
+      index++;
+      Formula formula = new ValueFormula<NameValue>(path);
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(formula)

@@ -139,7 +139,11 @@ public abstract class ParserState {
       HashSet<Formula> uniqueFormulas = new HashSet<>();
       List<Derivation> derivsByFormula = new ArrayList<>();
       for (Derivation d : derivations) {
-        boolean contains  = uniqueFormulas.contains(d.formula);
+        if (d == null) {
+          LogInfo.logs("ParserState.mapToFormula: null derivation");
+          continue;
+        }
+        boolean contains = uniqueFormulas.contains(d.formula);
         if (Parser.opts.verbose > 2)
           LogInfo.logs("ParserState.mapToFormula contains:%s (%s) %s in %s", contains, cellDescription, d.formula, uniqueFormulas);
         if (!contains) {
@@ -254,7 +258,7 @@ public abstract class ParserState {
     for (Derivation deriv : predDerivations) {
       deriv.ensureExecuted(parser.executor, ex.context);
       if (ex.targetValue != null)
-        deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
+        deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value, ex.context);
       if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;
     }
     LogInfo.end_track();

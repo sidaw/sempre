@@ -1,13 +1,9 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.stanford.nlp.sempre.Json;
-import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.Option;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -19,7 +15,6 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.script.ScriptEngineManager;
-import javax.script.SimpleBindings;
 
 /**
  * Java bindings to Vega and Vega-lite
@@ -37,7 +32,7 @@ public class VegaEngine {
   }
 
   public static Options opts = new Options();
-  
+
   /**
    * Results of compiling a Vega or Vega-lite spec
    */
@@ -137,7 +132,7 @@ public class VegaEngine {
   }
 
   public static final String COMPILE_SCRIPT =
-      "var vega_spec = vl.compile(JSON.parse(vl_str)).spec;" + 
+      "var vega_spec = vl.compile(JSON.parse(vl_str)).spec;" +
       "var vega_spec_str = JSON.stringify(vega_spec);";
   public static final String SVG_SCRIPT =
       "var view = new vega.View(vega.parse(vega_spec, {logLevel: vega.Info})).renderer('none').initialize();" +
@@ -203,7 +198,7 @@ public class VegaEngine {
       bindings.remove("background");
     }
     if (opts.useCache) {
-      cache.put(cacheKey, vr); 
+      cache.put(cacheKey, vr);
     }
     return vr;
   }

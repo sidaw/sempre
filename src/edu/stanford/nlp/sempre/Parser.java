@@ -59,6 +59,9 @@ public abstract class Parser {
     
     @Option(gloss = "Call SetEvaluation during parsing")
     public boolean callSetEvaluation = true;
+
+    @Option(gloss = "Record top-k accuracy")
+    public int accuracyTopK = 0;  // By default, don't print this
   }
 
   public static final Options opts = new Options();
@@ -257,6 +260,16 @@ public abstract class Parser {
       }
     }
 
+    // Compute top-K and partial top-K accuracy
+    double topK = 0, partTopK = 0;
+    if (ex.targetValue != null) {
+      for (int i = 0; i < opts.accuracyTopK; i++) {
+        if (i >= numCandidates) break;
+        if (compatibilities[i] == 1) topK = 1;
+        if (compatibilities[i] > partTopK) partTopK = compatibilities[i];
+      }
+    }
+
     // Print features (note this is only with respect to the first correct, is NOT the gradient).
     // Things are not printed if there is only partial compatability.
     if (correctIndex != -1 && correct != 1) {
@@ -320,8 +333,10 @@ public abstract class Parser {
     }
 
     evaluation.add("correct", correct);
+    if (opts.accuracyTopK > 0) evaluation.add("top" + opts.accuracyTopK, topK);
     evaluation.add("oracle", correctIndex != -1);
     evaluation.add("partCorrect", partCorrect);
+    if (opts.accuracyTopK > 0) evaluation.add("partTop" + opts.accuracyTopK, partTopK);
     evaluation.add("partOracle", maxCompatibility);
     if (correctIndexAfterParse != -1)
       evaluation.add("correctIndexAfterParse", correctIndexAfterParse);

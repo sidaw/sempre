@@ -7,7 +7,12 @@ import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.FeatureComputer;
 import edu.stanford.nlp.sempre.FeatureExtractor;
+import edu.stanford.nlp.sempre.JsonValue;
 import edu.stanford.nlp.sempre.Rule;
+import edu.stanford.nlp.sempre.Value;
+import edu.stanford.nlp.sempre.ValueFormula;
+import fig.basic.LispTree;
+import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
@@ -80,13 +85,46 @@ public class VegaFeatureComputer implements FeatureComputer {
     return ngrams;
   }
 
-  // Add an indicator for each applied rule.
   private void extractRuleFeatures(Example ex, Derivation deriv) {
-    if (!FeatureExtractor.containsDomain(":rule"))
-      return;
-    if (deriv.rule != Rule.nullRule) {
-      deriv.addFeature(":rule", "fire");
-      deriv.addFeature(":rule", deriv.rule.toString());
+    // Indicators for each JSON type
+    if (deriv.formula instanceof ValueFormula) {
+      Value v = ((ValueFormula) deriv.formula).value;
+      if (v instanceof JsonValue) {
+        String schemaType = ((JsonValue) v).getSchemaType();
+        if (FeatureExtractor.containsDomain("valueType")) {
+          deriv.addFeature("valueType", schemaType);
+        }
+        if (FeatureExtractor.containsDomain("lexValueType")) {
+          for (String lemma: ex.getLemmaTokens())
+            deriv.addFeature("lexValueType", "lemma=" + lemma + ",valueType=" + schemaType);
+        }
+      }
+    }
+
+    // Indicators for each JSON key
+    if (deriv.rule != Rule.nullRule && deriv.rule.lhs.equals("$Action") &&
+        (deriv.rule.rhs.get(0).equals("$PathPattern") ||
+         deriv.rule.rhs.get(0).equals("$DSPathPattern"))) {
+      // Note: doing it here because "*" expansion doesn't happen until after we join
+      // If we change that, should look for lhs == "$PathPattern" instead
+      // But this lets us hold onto everything until we type-check
+      LispTree tree = deriv.formula.toLispTree();
+      String path = tree.child(2).value;
+      String[] pathTokens = path.split("[.]");
+      if (FeatureExtractor.containsDomain("pathPattern")){
+        deriv.addFeature("pathPattern", "path=" + path);
+        for (String token: pathTokens) {
+          deriv.addFeature("pathPattern", "token=" + token);
+        }
+      }
+      if (FeatureExtractor.containsDomain("lexPathPattern")) {
+        for (String lemma: ex.getLemmaTokens()) {
+          deriv.addFeature("lexPathPattern", "lemma=" + lemma + ",path=" + path);
+          for (String token: pathTokens) {
+            deriv.addFeature("lexPathPattern", "lemma=" + lemma + ",token=" + token);
+          }
+        }
+      }
     }
   }
 }
