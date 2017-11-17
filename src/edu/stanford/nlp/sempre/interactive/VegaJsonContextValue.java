@@ -95,7 +95,7 @@ public class VegaJsonContextValue extends ContextValue {
   }
 
   public Collection<Field> getFields() {
-    return fields.values();
+    return fields == null? null : fields.values();
   }
 
   public Field getField(String name) {
