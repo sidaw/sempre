@@ -67,6 +67,8 @@ public class JsonFn extends SemanticFn {
       return new IsPathStream(ex, c);
     } else if (mode == Mode.JsonValue) {
       return new JsonValueStream(ex, c);
+    } else if (mode == Mode.ConstantValue) {
+      return new ConstantValueStream(ex, c);
     } else if (mode == Mode.AnyPath) {
       return new AnyPathStream(ex, c);
     } else if (mode == Mode.AnyPathElement) {
@@ -194,7 +196,7 @@ public class JsonFn extends SemanticFn {
       while (iterator.hasNext()) {
         Pair<List<String>, JsonValue> next = iterator.next();
         if (VegaResources.checkType(next.getFirst(), next.getSecond())) {
-          //LogInfo.logs("JsonFn yield %s %s", next.getFirst(), next.getSecond());
+          LogInfo.logs("JsonFn yield %s %s", next.getFirst(), next.getSecond());
           return derivFromPathValue(next.getFirst(), next.getSecond());
         }
       }

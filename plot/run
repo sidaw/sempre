@@ -148,7 +148,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
 
   o('VegaEngine.verbose', 0),
   o('VegaExecutor.compileVega', false),
-  o('JsonFn.maxJoins', 10000), # hack.
+  # o('JsonFn.maxJoins', 10000), # hack.
 
   # learning stuff
   o('Dataset.datasetReader', "interactive.JsonlDatasetReader"),

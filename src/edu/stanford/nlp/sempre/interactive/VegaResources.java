@@ -40,7 +40,7 @@ public class VegaResources {
     @Option(gloss = "Path elements to exclude") Set<String> excludedPaths;
     @Option(gloss = "File containing all the colors") String colorFile;
     @Option(gloss = "File containing initial plot templates") String initialTemplates;
-    @Option int verbose = 0;
+    @Option(gloss = "verbosity") int verbose = 0;
   }
   public static Options opts = new Options();
   private final Path savePath = Paths.get(JsonMaster.opts.intOutputPath, "vegaResource");
@@ -145,11 +145,12 @@ public class VegaResources {
     JsonSchema jsonSchema = VegaResources.vegaSchema;
     List<JsonSchema> pathSchemas = jsonSchema.schemas(path);
     String stringValue = value.getJsonNode().asText();
+
     for (JsonSchema schema : pathSchemas) {
       String valueType = value.getSchemaType();
       List<String> schemaTypes = schema.schemaTypes();
       if (opts.verbose > 1)
-        LogInfo.logs("schema.simplePath: %s | schemaTypes: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType);
+        System.out.println(String.format("checkType: simplePath: %s | schemaTypes: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType));
       for (String schemaType : schemaTypes) {
 
         List<String> simplePath = schema.simplePath();
@@ -171,8 +172,9 @@ public class VegaResources {
 
         if (schemaType.equals("enum") && schema.enums().contains(stringValue))
           return true;
-        if (valueType.equals(schemaType))
+        if (valueType.equals(schemaType)) {
           return true;
+        }
         if (schemaType.equals(JsonSchema.NOTYPE))
           throw new RuntimeException("JsonFn: schema has no type: " + schema);
       }
@@ -187,9 +189,9 @@ public class VegaResources {
       for (String type : schema.schemaTypes()) {
         if (opts.verbose > 0)
           LogInfo.logs("getValues %s %s", type, path.toString());
-        if (type.equals(JsonSchema.NOTYPE))
-          return values;
-        else if (type.endsWith("enum")) {
+        if (type.equals(JsonSchema.NOTYPE)) {
+          continue;
+        } else if (type.equals("enum")) {
           for (String v : schema.enums())
             values.add(new JsonValue(v).withSchemaType(type));
         } else if (type.equals("boolean")) {
@@ -198,11 +200,13 @@ public class VegaResources {
         } else if (type.equals("number")) {
           values.add(new JsonValue(ThreadLocalRandom.current().nextInt(0, 100)).withSchemaType("number"));
           values.add(new JsonValue(0.1 * ThreadLocalRandom.current().nextInt(1, 10)).withSchemaType("number"));
+          values.add(new JsonValue(0.0).withSchemaType("number"));
         } else if (type.equals("string")) {
           values.add(new JsonValue("X").withSchemaType("string"));
         }
       }
     }
+//    System.out.println(String.format("getValues %s : %s", path, values));
     return values;
   }
 

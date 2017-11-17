@@ -21,13 +21,13 @@ public class VegaJsonContextValue extends ContextValue {
   public VegaJsonContextValue(Object jsonObj) {
     super(null, null, new ArrayList<Exchange>(), null);
     jsonNode = Json.getMapper().convertValue(jsonObj, JsonNode.class);
-    LogInfo.logs("JsonContextValue %s", jsonNode);
+//    LogInfo.logs("JsonContextValue %s", jsonNode);
   }
 
   public VegaJsonContextValue(String jsonString) {
     super(null, null, new ArrayList<Exchange>(), null);
     jsonNode = Json.readValueHard(jsonString, JsonNode.class);
-    LogInfo.logs("JsonContextValue %s", jsonNode);
+//    LogInfo.logs("JsonContextValue %s", jsonNode);
   }
 
   @SuppressWarnings("unchecked")
