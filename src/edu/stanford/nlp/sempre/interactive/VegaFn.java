@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -56,8 +57,7 @@ public class VegaFn extends SemanticFn {
     } else if (mode == Mode.Field) {
       return new VegaValueStream(ex, c, s -> {
         VegaJsonContextValue context = (VegaJsonContextValue) ex.context;
-        List<VegaJsonContextValue.Field> fields = context.getFields();
-
+        Collection<VegaJsonContextValue.Field> fields = context.getFields();
         if (fields == null || fields.size() == 0) return null;
 
         if (fields.stream().anyMatch(f -> s.equals(f.name))) {
