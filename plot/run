@@ -115,7 +115,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('FloatingParser.allowCanonicalUtteranceOverride', true),
   o('Parser.callSetEvaluation', false),
   o('Parser.coarsePrune', false),
-  o('ParserState.mapToFormula', true),
+  o('ParserState.mapToFormula', false),
   o('Parser.beamSize', 10000),
   o('ParserState.customExpectedCounts', 'None'),
 

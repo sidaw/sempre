@@ -1,8 +1,10 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterators;
@@ -24,6 +26,7 @@ import fig.basic.Option;
  * @author sidaw
  */
 public class VegaFn extends SemanticFn {
+
   public static class Options {
     @Option(gloss = "verbosity")
     public int verbose = 0;
@@ -53,11 +56,12 @@ public class VegaFn extends SemanticFn {
     } else if (mode == Mode.Field) {
       return new VegaValueStream(ex, c, s -> {
         VegaJsonContextValue context = (VegaJsonContextValue) ex.context;
-        if (context.getJsonNode().has("fields")) {
-          for(JsonNode field : context.getJsonNode().get("fields")) {
-            if (s.equals(field.textValue()))
-              return Sets.newHashSet("field");
-          }
+        List<VegaJsonContextValue.Field> fields = context.getFields();
+
+        if (fields == null || fields.size() == 0) return null;
+
+        if (fields.stream().anyMatch(f -> s.equals(f.name))) {
+          return Sets.newHashSet("field");
         }
         return null;
       });

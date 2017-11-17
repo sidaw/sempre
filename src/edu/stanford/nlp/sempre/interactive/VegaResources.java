@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.JsonValue;
@@ -25,7 +23,6 @@ import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.MapUtils;
 import fig.basic.Option;
-import fig.basic.Pair;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -49,7 +46,7 @@ public class VegaResources {
 
   public static VegaLitePathMatcher allPathsMatcher;
   private static List<List<String>> filteredPaths;
-  private static List<JsonSchema> descendents;
+  private static List<JsonSchema> descendants;
 
   public static JsonSchema vegaSchema;
 
@@ -77,15 +74,15 @@ public class VegaResources {
         LogInfo.end_track();
       }
 
-      List<JsonSchema> allDescendents = vegaSchema.descendents();
-      descendents = allDescendents.stream().filter(s -> s.node().has("type")).collect(Collectors.toList());
-      LogInfo.logs("Got %d descendents, %d typed", allDescendents.size(), descendents.size());
+      List<JsonSchema> allDescendants = vegaSchema.descendents();
+      descendants = allDescendants.stream().filter(s -> s.node().has("type")).collect(Collectors.toList());
+      LogInfo.logs("Got %d descendants, %d typed", allDescendants.size(), descendants.size());
 
-      filteredPaths = allSimplePaths(descendents);
+      filteredPaths = allSimplePaths(descendants);
       LogInfo.logs("Got %d distinct simple path not containing %s", filteredPaths.size(), opts.excludedPaths);
       allPathsMatcher = new VegaLitePathMatcher(filteredPaths);
       Json.prettyWriteValueHard(new File(savePath.toString()+".path_elements.json"),
-          filteredPaths.stream().flatMap(List::stream)
+          filteredPaths.stream()
           .collect(Collectors.toSet()).stream().collect(Collectors.toList()) );
 
       // generate valueToTypes and valueToSet, for enum types
@@ -130,39 +127,79 @@ public class VegaResources {
   }
 
   private void generateValueMaps() {
-    Set<JsonSchema> descendentsSet = descendents.stream().collect(Collectors.toSet());
+    Set<JsonSchema> descendentsSet = descendants.stream().collect(Collectors.toSet());
     enumValueToTypes = new HashMap<>();
     enumValueToPaths = new HashMap<>();
     for (JsonSchema schema: descendentsSet) {
       if (schema.enums() != null) {
         for (String e : schema.enums()) {
-          MapUtils.addToSet(enumValueToTypes, e, schema.schemaType());
+          MapUtils.addToSet(enumValueToTypes, e, schema.schemaTypes().get(0));
           MapUtils.addToSet(enumValueToPaths, e, schema.simplePath());
         }
       }
     }
   }
 
+  public static boolean checkType(List<String> path, JsonValue value) {
+    JsonSchema jsonSchema = VegaResources.vegaSchema;
+    List<JsonSchema> pathSchemas = jsonSchema.schemas(path);
+    String stringValue = value.getJsonNode().asText();
+    for (JsonSchema schema : pathSchemas) {
+      String valueType = value.getSchemaType();
+      List<String> schemaTypes = schema.schemaTypes();
+      if (opts.verbose > 1)
+        LogInfo.logs("schema.simplePath: %s | schemaTypes: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType);
+      for (String schemaType : schemaTypes) {
+
+        List<String> simplePath = schema.simplePath();
+        String last = simplePath.get(simplePath.size() - 1);
+
+        if (schemaType.equals("string") && (last.endsWith("color") || last.endsWith("Color")
+            || last.equals("fill")
+            || last.equals("stroke") || last.equals("background"))) {
+          if (valueType.equals("color"))
+            return true;
+          else return false;
+        }
+
+        if (schemaType.equals("string") && last.equals("field")) {
+          if (valueType.equals("field"))
+            return true;
+          else return false;
+        }
+
+        if (schemaType.equals("enum") && schema.enums().contains(stringValue))
+          return true;
+        if (valueType.equals(schemaType))
+          return true;
+        if (schemaType.equals(JsonSchema.NOTYPE))
+          throw new RuntimeException("JsonFn: schema has no type: " + schema);
+      }
+    }
+    return false;
+  }
+
   public static List<JsonValue> getValues(List<String> path) {
     List<JsonSchema> schemas = vegaSchema.schemas(path);
     List<JsonValue> values = new ArrayList<>();
     for (JsonSchema schema : schemas) {
-      String type = schema.schemaType();
-      if (opts.verbose > 0)
-        LogInfo.logs("getValues %s %s", type, path.toString());
-      if (type.equals(JsonSchema.NOTYPE))
-        return values;
-      else if (type.endsWith("enum")) {
-        for (String v : schema.enums())
-          values.add(new JsonValue(v).withSchemaType(type));
-      } else if (type.equals("boolean")) {
-        values.add(new JsonValue(true).withSchemaType("boolean"));
-        values.add(new JsonValue(false).withSchemaType("boolean"));
-      } else if (type.equals("number")) {
-        values.add(new JsonValue(ThreadLocalRandom.current().nextInt(0, 100)).withSchemaType("number"));
-        values.add(new JsonValue(0.1 * ThreadLocalRandom.current().nextInt(1, 10)).withSchemaType("number"));
-      } else if (type.equals("string")) {
-        values.add(new JsonValue("X").withSchemaType("string"));
+      for (String type : schema.schemaTypes()) {
+        if (opts.verbose > 0)
+          LogInfo.logs("getValues %s %s", type, path.toString());
+        if (type.equals(JsonSchema.NOTYPE))
+          return values;
+        else if (type.endsWith("enum")) {
+          for (String v : schema.enums())
+            values.add(new JsonValue(v).withSchemaType(type));
+        } else if (type.equals("boolean")) {
+          values.add(new JsonValue(true).withSchemaType("boolean"));
+          values.add(new JsonValue(false).withSchemaType("boolean"));
+        } else if (type.equals("number")) {
+          values.add(new JsonValue(ThreadLocalRandom.current().nextInt(0, 100)).withSchemaType("number"));
+          values.add(new JsonValue(0.1 * ThreadLocalRandom.current().nextInt(1, 10)).withSchemaType("number"));
+        } else if (type.equals("string")) {
+          values.add(new JsonValue("X").withSchemaType("string"));
+        }
       }
     }
     return values;

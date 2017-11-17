@@ -1,15 +1,12 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -172,41 +169,6 @@ public class JsonFn extends SemanticFn {
       iterator = new EnumeratePathsIterator(matchedPaths.iterator(), pathToValue);
     }
 
-    private boolean checkType(List<String> path, JsonValue value) {
-      JsonSchema jsonSchema = VegaResources.vegaSchema;
-      List<JsonSchema> pathSchemas = jsonSchema.schemas(path);
-      String stringValue = value.getJsonNode().asText();
-      for (JsonSchema schema : pathSchemas) {
-        String valueType = value.getSchemaType(), schemaTypes = schema.schemaType();
-        if (opts.verbose > 1)
-          LogInfo.logs("schema: %s | schemaType: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType);
-        for (String schemaType : schemaTypes.split(";")) {
-          if (valueType.equals(schemaType))
-            return true;
-          if (valueType.equals("string") && schemaType.endsWith("string"))
-            return true;
-          if (schemaType.endsWith("enum") && schema.enums().contains(stringValue))
-            return true;
-          if (valueType.equals("color")) {
-            // LogInfo.logs("checking color %s for %s", value, schema.schemaType());
-            // hack for checking color
-            if (schemaType.endsWith(".string") && schemaType.contains("color")
-              || schemaType.contains("Color") || schemaType.contains("fill")
-              || schemaType.contains("stroke") || schemaType.contains("background")) {
-              if (opts.verbose > 1)
-                LogInfo.logs("checked color %s for %s", value, schemaType);
-              return true;
-            }
-          }
-          if (valueType.equals("field") && schemaType.endsWith("field.string"))
-            return true;
-          if (schemaType.equals(JsonSchema.NOTYPE))
-            throw new RuntimeException("JsonFn: schema has no type: " + schema);
-        }
-      }
-      return false;
-    }
-
     private Derivation derivFromPathValue(List<String> path, JsonValue value) {
       NameValue fullPath = new NameValue("$." + String.join(".", path));
       Formula setFormula = new ActionFormula(ActionFormula.Mode.primitive,
@@ -219,7 +181,7 @@ public class JsonFn extends SemanticFn {
           .createDerivation();
       /*deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
           value.getJsonNode().toString(),
-          VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaType())
+          VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaTypes())
           .collect(Collectors.toList()),
           value.getSchemaType());*/
       CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
@@ -231,7 +193,7 @@ public class JsonFn extends SemanticFn {
     public Derivation createDerivation() {
       while (iterator.hasNext()) {
         Pair<List<String>, JsonValue> next = iterator.next();
-        if (checkType(next.getFirst(), next.getSecond())) {
+        if (VegaResources.checkType(next.getFirst(), next.getSecond())) {
           //LogInfo.logs("JsonFn yield %s %s", next.getFirst(), next.getSecond());
           return derivFromPathValue(next.getFirst(), next.getSecond());
         }

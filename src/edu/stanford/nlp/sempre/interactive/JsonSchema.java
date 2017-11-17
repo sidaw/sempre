@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre.interactive;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.google.common.collect.Lists;
 import fig.basic.LogInfo;
 
 import java.io.File;
@@ -89,7 +90,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
   }
 
   public String toString() {
-    return String.format("%s\npath: %s\ntype: %s", name(), schemaPath(), schemaType());
+    return String.format("%s\npath: %s\ntype: %s", name(), schemaPath(), schemaTypes());
   }
 
   @Override
@@ -123,7 +124,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
   }
 
 
-  private List<String> simplePath(List<String> path) {
+  private List<String> simplePathWithDef(List<String> path) {
     if (path.size() == 0) return new ArrayList<>();
     int lastInd = path.size() - 1;
     for (; lastInd > 0; lastInd--) {
@@ -137,37 +138,32 @@ public class JsonSchema implements Comparable<JsonSchema> {
   }
 
   // include enum types, definitions for object items
-  public String schemaType() {
+  public List<String> schemaTypes() {
     if (!node.has("type")) {
-      throw new RuntimeException("type of " + simplePath() + " is an empty string.");
+      throw new RuntimeException("type of " + schemaPath + " is an empty string.");
       //return NOTYPE;
     }
     if (node.get("type").isArray()) {
-      // Join the multiple types with "|"
+      // several fields can be either boolean, string or something else. we are assuming these are basic types
       List<String> types = new ArrayList<>();
       for (JsonNode child : node.get("type")) {
         types.add(child.asText());
       }
-      return String.join(";", types);
+      return types;
     }
+    List<String> simplePath = simplePathWithDef(schemaPath);
+    String lastPath = simplePath.get(simplePath.size() - 1);
     String type = node.get("type").asText();
     if (type.isEmpty()) {
-      throw new RuntimeException("type of " + simplePath() + " is an empty string.");
+      throw new RuntimeException("type of " + simplePath + " is an empty string.");
     }
-    // object types is the last object definition
-    if (type.equals("object")) {
-      return String.join(".", simplePath(schemaPath));
-    }
+
     // enum types are always strings
     if (type.equals("string") && node.has("enum")) {
-      return String.join(".", simplePath(schemaPath)) + ".enum";
+      return Lists.newArrayList("enum");
     }
-    // string types is the immediate field before
-    String prev = schemaPath.get(schemaPath.size()-1);
-    if (type.equals("string") && !prev.startsWith("anyOf[")) {
-      return schemaPath.get(schemaPath.size()-1) + ".string";
-    }
-    return type;
+
+    return Lists.newArrayList(type);
   }
 
   public List<String> enums() {
@@ -275,8 +271,6 @@ public class JsonSchema implements Comparable<JsonSchema> {
         JsonNode refNode = resolver.resolve(ref);
         List<String> newSchemaPath = extendPath(schemaPath, ref);
         schemaSet.add(new JsonSchema(refNode, name, newSchemaPath, resolver));
-      } else {
-        LogInfo.logs("Excluded due to loop %s: %s", this.schemaPath, ref);
       }
     } else if (node.has("properties")) {
       Iterator<Entry<String, JsonNode>> fieldIterator = node.get("properties").fields();
