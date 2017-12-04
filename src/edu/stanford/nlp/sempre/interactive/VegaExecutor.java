@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -181,5 +182,13 @@ public class VegaExecutor extends Executor {
     if (opts.verbose >= 2)
       LogInfo.logs("PathPattern %s -> %s", pathFormula, path);
     return path;
+  }
+
+  public static List<String> stringToPath(String path) {
+    return Lists.newArrayList(path.substring(2).split("\\."));
+  }
+
+  public static String pathToString(List<String> path) {
+    return "$." + String.join(".", path);
   }
 }
