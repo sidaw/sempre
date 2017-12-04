@@ -1,12 +1,8 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -42,14 +38,11 @@ public class JsonFn extends SemanticFn {
 
     @Option(gloss = "max number of joins")
     public int maxJoins = Integer.MAX_VALUE;
-
-    @Option(gloss = "Allow join to apply on * *")
-    public boolean joinOnStarStar = false;
   }
 
   public static Options opts = new Options();
   Formula arg1, arg2;
-  enum Mode {PathElement, JsonValue, ConstantValue, AnyPath, AnyPathElement, Template, Join};
+  enum Mode {PathElement, Path, JsonValue, ConstantValue, AnyPath, AnyPathElement, Template, Join};
   Mode mode;
   DerivationStream stream;
 
@@ -69,8 +62,8 @@ public class JsonFn extends SemanticFn {
       return new ConstantValueStream(ex, c);
     } else if (mode == Mode.AnyPath) {
       return new AnyPathStream(ex, c);
-    } else if (mode == Mode.AnyPathElement) {
-      return new AnyPathElementStream(ex, c);
+    } else if (mode == Mode.Path) {
+      return new PathStream(ex, c);
     } else if (mode == Mode.Join) {
       return new JoinStream(ex, c);
     }
@@ -131,26 +124,6 @@ public class JsonFn extends SemanticFn {
       if (opts.verbose > 1)
         LogInfo.logs("JoinStream %s %s", pathFormula,  valueFormula);
 
-      if (!opts.joinOnStarStar) {
-        // If (join * *) is disallowed ...
-        if ("*".equals(Formulas.getString(pathFormula)) && "*".equals(Formulas.getString(valueFormula))) {
-          if (opts.verbose > 1)
-            LogInfo.logs("JoinStream * * : Skipped");
-          iterator = Collections.emptyIterator();
-          return;
-        }
-      }
-
-      List<List<String>> matchedPaths;
-      if (pathFormula instanceof ValueFormula) {
-        pathPattern = "*".equals(Formulas.getString(pathFormula))? Lists.newArrayList() : Lists.newArrayList(Formulas.getString(pathFormula));
-      } else if (pathFormula instanceof ActionFormula) {
-        pathPattern = VegaExecutor.pathFormulaToList((ActionFormula)pathFormula);
-      } else {
-        throw new RuntimeException("unsuppported path formula: " + pathFormula);
-      }
-      matchedPaths = VegaResources.allPathsMatcher.match(pathPattern);
-
       Function<List<String>, Iterator<JsonValue>> pathToValue;
       if (valueFormula instanceof ValueFormula) {
         if ("*".equals(Formulas.getString(valueFormula))) {
@@ -163,10 +136,10 @@ public class JsonFn extends SemanticFn {
         throw new RuntimeException("Invalid valueFormula: " + valueFormula);
       }
 
-      if (opts.verbose > 0) {
-        LogInfo.logs("JsonFn Path %s, size %s", matchedPaths, matchedPaths.size());
-      }
-      iterator = new EnumeratePathsIterator(matchedPaths.iterator(), pathToValue);
+      List<String> matchedPath = Lists.newArrayList(Formulas.getString(pathFormula).substring(2).split("\\."));
+      List<List<String>> singleton = new ArrayList<>();
+      singleton.add(matchedPath);
+      iterator = new EnumeratePathsIterator(singleton.iterator(), pathToValue);
     }
 
     private Derivation derivFromPathValue(List<String> path, JsonValue value) {
@@ -228,7 +201,6 @@ public class JsonFn extends SemanticFn {
   // takes a token and check if it can be a value
   static class JsonValueStream extends SingleDerivationStream {
     Callable callable;
-    int currIndex = 0;
 
     public JsonValueStream(Example ex, Callable c) {
       callable = c;
@@ -327,21 +299,27 @@ public class JsonFn extends SemanticFn {
     }
   }
 
-  // Generate all possible path elements
-  static class AnyPathElementStream extends MultipleDerivationStream {
-    static List<NameValue> paths = null;
+  // generate matching full matches from pathPattern
+  static class PathStream extends MultipleDerivationStream {
+    List<NameValue> paths = new ArrayList<>();
     int index = 0;
     Callable callable;
 
-    public AnyPathElementStream(Example ex, Callable c) {
+    public PathStream(Example ex, Callable c) {
       callable = c;
-      if (paths == null) {
-        // Only initialize once
-        paths = new ArrayList<>();
-        for (String key : VegaResources.allPathsMatcher.pathKeys()) {
-          paths.add(new NameValue(key));
-        }
+      Formula pathPattern = c.child(0).formula;
+      List<String> matchPattern;
+      if (pathPattern instanceof ActionFormula) {
+        matchPattern = VegaExecutor.pathFormulaToList((ActionFormula) pathPattern);
+      } else if (pathPattern instanceof ValueFormula) {
+        matchPattern = Lists.newArrayList(Formulas.getString(pathPattern));
+      } else {
+        throw new RuntimeException("unsuppported pathPattern: " + pathPattern);
       }
+
+      paths = VegaResources.allPathsMatcher.match(matchPattern)
+          .stream().map(path -> (new NameValue("$." + String.join(".", path))))
+          .collect(Collectors.toList());
     }
 
     public Derivation createDerivation() {

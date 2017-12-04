@@ -74,7 +74,7 @@ public class VegaResources {
         LogInfo.end_track();
       }
 
-      List<JsonSchema> allDescendants = vegaSchema.descendents();
+      List<JsonSchema> allDescendants = vegaSchema.descendants();
       descendants = allDescendants.stream().filter(s -> s.node().has("type")).collect(Collectors.toList());
       LogInfo.logs("Got %d descendants, %d typed", allDescendants.size(), descendants.size());
 
@@ -149,7 +149,7 @@ public class VegaResources {
       String valueType = value.getSchemaType();
       List<String> schemaTypes = schema.types();
       if (opts.verbose > 1)
-        System.out.println(String.format("checkType: simplePath: %s | types: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType));
+        System.out.println(String.format("checkType: path: %s | simplePath: %s | types: %s | valueType: %s", path, schema.simplePath(), schemaTypes, valueType));
       for (String schemaType : schemaTypes) {
 
         List<String> simplePath = schema.simplePath();

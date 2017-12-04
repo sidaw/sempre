@@ -56,7 +56,7 @@ public class VegaExecutor extends Executor {
     if (context instanceof VegaJsonContextValue)
       jsonContext = (VegaJsonContextValue)context;
     else
-      throw new RuntimeException("VegaExecutor only allows VegaJsonContextValue");
+      throw new RuntimeException("VegaExecutor only allows VegaJsonContextValue, got: " + context.getClass());
 
     formula = Formulas.betaReduction(formula);
     try {

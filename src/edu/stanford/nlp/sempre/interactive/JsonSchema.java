@@ -283,11 +283,11 @@ public class JsonSchema implements Comparable<JsonSchema> {
         .collect(Collectors.toList());
   }
 
-  public List<JsonSchema> descendents() {
+  public List<JsonSchema> descendants() {
     List<JsonSchema> schemaSet = new ArrayList<>();
     schemaSet.add(this);
     for (JsonSchema child : children()) {
-      schemaSet.addAll(child.descendents());
+      schemaSet.addAll(child.descendants());
     }
     return schemaSet;
   }
