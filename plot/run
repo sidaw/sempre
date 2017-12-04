@@ -101,7 +101,6 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
   selo(0, 'Grammar.inPaths', "./#{$path}/plot.grammar"),
 
-  o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
   o('Grammar.tags', 'doublestar'),
@@ -118,7 +117,9 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('ParserState.mapToFormula', true),
   o('Parser.beamSize', 10000),
   o('ParserState.customExpectedCounts', 'None'),
+  o('Parser.derivationScoreNoise', 0.0),
 
+  o('Params.initWeightsRandomly', false),
   o('Params.l1Reg', 'nonlazy'),
   o('Params.l1RegCoeff', 0.0001),
 
@@ -137,14 +138,12 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Derivation.showTypes', false),
   o('Derivation.showValues', false),
   o('Derivation.showRules', false),
-  o('Derivation.anchoredBonus', 1.0),
+  o('Derivation.anchoredBonus', 0.0),
+
 
   o('VegaResources.vegaSchema', "./#{$path}/vega-lite-v2.json"),
   o('VegaResources.excludedPaths', 'items', 'vconcat', 'hconcat', 'layer', 'spec', 'repeat'),
   o('VegaResources.colorFile', "./#{$path}/css-color-names.json"),
-  # o('VegaResources.vegaSpecifications', "./#{$path}/templates/population", "./#{$path}/templates/cars", "./#{$path}/templates/stocks"),
-  o('VegaResources.initialTemplates', "./#{$path}/initial-templates.json"),
-  # selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
 
   o('VegaEngine.verbose', 0),
   o('VegaExecutor.compileVega', false),

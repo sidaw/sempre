@@ -51,7 +51,6 @@ public class VegaResources {
 
   public static JsonSchema vegaSchema;
 
-  private static Map<String, List<JsonValue>> typeToValues = new HashMap<>();
   private static Map<String, Set<String>> enumValueToTypes;
   private static Map<String, Set<List<String>>> enumValueToPaths;
 
@@ -134,23 +133,23 @@ public class VegaResources {
     for (JsonSchema schema: descendentsSet) {
       if (schema.enums() != null) {
         for (String e : schema.enums()) {
-          MapUtils.addToSet(enumValueToTypes, e, schema.schemaTypes().get(0));
+          MapUtils.addToSet(enumValueToTypes, e, schema.types().get(0));
           MapUtils.addToSet(enumValueToPaths, e, schema.simplePath());
         }
       }
     }
   }
 
-  public static boolean checkType(List<String> path, JsonValue value) {
+  private static boolean checkType(List<String> path, JsonValue value) {
     JsonSchema jsonSchema = VegaResources.vegaSchema;
     List<JsonSchema> pathSchemas = jsonSchema.schemas(path);
     String stringValue = value.getJsonNode().asText();
 
     for (JsonSchema schema : pathSchemas) {
       String valueType = value.getSchemaType();
-      List<String> schemaTypes = schema.schemaTypes();
+      List<String> schemaTypes = schema.types();
       if (opts.verbose > 1)
-        System.out.println(String.format("checkType: simplePath: %s | schemaTypes: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType));
+        System.out.println(String.format("checkType: simplePath: %s | types: %s | valueType: %s", schema.simplePath(), schemaTypes, valueType));
       for (String schemaType : schemaTypes) {
 
         List<String> simplePath = schema.simplePath();
@@ -170,7 +169,7 @@ public class VegaResources {
           else return false;
         }
 
-        if (schemaType.equals("enum") && schema.enums().contains(stringValue))
+        if (schema.isEnum() && schema.enums().contains(stringValue))
           return true;
         if (valueType.equals(schemaType)) {
           return true;
@@ -182,18 +181,30 @@ public class VegaResources {
     return false;
   }
 
-  public static List<JsonValue> getValues(List<String> path) {
-    List<JsonSchema> schemas = vegaSchema.schemas(path);
+  public static List<JsonValue> getValues(List<String> path, JsonValue value) {
+    if (value != null) {
+      if (checkType(path, value)) {
+        return Lists.newArrayList(value);
+      } else {
+        return Lists.newArrayList();
+      }
+    }
     List<JsonValue> values = new ArrayList<>();
+    List<JsonSchema> schemas = vegaSchema.schemas(path);
     for (JsonSchema schema : schemas) {
-      for (String type : schema.schemaTypes()) {
+      for (String type : schema.types()) {
         if (opts.verbose > 0)
           LogInfo.logs("getValues %s %s", type, path.toString());
+
         if (type.equals(JsonSchema.NOTYPE)) {
           continue;
-        } else if (type.equals("enum")) {
-          for (String v : schema.enums())
-            values.add(new JsonValue(v).withSchemaType(type));
+        } else if (type.equals("string")) {
+          if (schema.isEnum()) {
+            values.addAll(schema.enums().stream().map(s -> new JsonValue(s).withSchemaType("enum"))
+              .collect(Collectors.toList()));
+          } else {
+            values.add(new JsonValue("XX").withSchemaType(type));
+          }
         } else if (type.equals("boolean")) {
           values.add(new JsonValue(true).withSchemaType("boolean"));
           values.add(new JsonValue(false).withSchemaType("boolean"));
@@ -206,8 +217,9 @@ public class VegaResources {
         }
       }
     }
-//    System.out.println(String.format("getValues %s : %s", path, values));
-    return values;
+
+    if (values.size() == 0) return values;
+    return Lists.newArrayList(values.get(ThreadLocalRandom.current().nextInt(values.size())));
   }
 
   public static Set<String> getEnumTypes(String value) {

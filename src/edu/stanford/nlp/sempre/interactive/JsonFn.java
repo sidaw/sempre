@@ -53,8 +53,6 @@ public class JsonFn extends SemanticFn {
   Mode mode;
   DerivationStream stream;
 
-  public static final SemType primitiveType = new AtomicSemType("primitive");
-
   @Override
   public void init(LispTree tree) {
     super.init(tree);
@@ -155,11 +153,11 @@ public class JsonFn extends SemanticFn {
 
       Function<List<String>, Iterator<JsonValue>> pathToValue;
       if (valueFormula instanceof ValueFormula) {
-        Value v = ((ValueFormula)valueFormula).value;
         if ("*".equals(Formulas.getString(valueFormula))) {
-          pathToValue = p -> new HashSet<>(VegaResources.getValues(p)).iterator();
+          pathToValue = p -> new HashSet<>(VegaResources.getValues(p, null)).iterator();
         } else {
-          pathToValue = p -> Iterators.singletonIterator((JsonValue)v);
+          JsonValue v = (JsonValue)((ValueFormula)valueFormula).value;
+          pathToValue = p -> VegaResources.getValues(p, v).iterator();
         }
       } else {
         throw new RuntimeException("Invalid valueFormula: " + valueFormula);
@@ -183,7 +181,7 @@ public class JsonFn extends SemanticFn {
           .createDerivation();
       /*deriv.canonicalUtterance = String.format("%s : %s (types path: %s, value %s)", String.join(" ", path),
           value.getJsonNode().toString(),
-          VegaResources.vegaSchema.schemas(path).stream().map(s -> s.schemaTypes())
+          VegaResources.vegaSchema.schemas(path).stream().map(s -> s.types())
           .collect(Collectors.toList()),
           value.getSchemaType());*/
       CanonicalUtteranceGenerator cuGenerator = new CanonicalUtteranceGenerator(String.join(" ", path), value.getJsonNode().toString());
@@ -195,10 +193,10 @@ public class JsonFn extends SemanticFn {
     public Derivation createDerivation() {
       while (iterator.hasNext()) {
         Pair<List<String>, JsonValue> next = iterator.next();
-        if (VegaResources.checkType(next.getFirst(), next.getSecond())) {
+
+        if (opts.verbose > 2)
           LogInfo.logs("JsonFn yield %s %s", next.getFirst(), next.getSecond());
-          return derivFromPathValue(next.getFirst(), next.getSecond());
-        }
+        return derivFromPathValue(next.getFirst(), next.getSecond());
       }
       return null;
     }
