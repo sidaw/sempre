@@ -193,11 +193,9 @@ public class InteractiveServer {
         Derivation.sortByScore(allCandidates);
         if (allCandidates != null) {
           if (allCandidates.size() > InteractiveServer.opts.maxCandidates) {
-
             response.lines.add(String.format("Exceeded max options: (current: %d / max: %d) ", allCandidates.size(),
                 InteractiveServer.opts.maxCandidates));
-
-            allCandidates = truncateCandidates(allCandidates, InteractiveServer.opts.maxCandidates);
+            allCandidates = truncateCandidates(allCandidates, opts.maxCandidates);
           }
           int errorValueCount = 0;
           for (Derivation deriv : allCandidates) {
@@ -304,19 +302,18 @@ public class InteractiveServer {
         masterResponse = processQuery(session, query);
       }
 
-      Map<String, Object> responseMap = null;
-      {
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(exchange.getResponseBody()));
-        if (masterResponse != null) {
-          // Render answer
-          Example ex = masterResponse.getExample();
-          responseMap = makeJson(masterResponse);
-          out.println(Json.writeValueAsStringHard(responseMap));
-        }
-        out.close();
-      }
-
       synchronized (responseLogLock) { // write the response log log
+        Map<String, Object> responseMap = null;
+        {
+          PrintWriter out = new PrintWriter(new OutputStreamWriter(exchange.getResponseBody()));
+          if (masterResponse != null) {
+            // Render answer
+            Example ex = masterResponse.getExample();
+            responseMap = makeJson(masterResponse);
+            out.println(Json.writeValueAsStringHard(responseMap));
+          }
+          out.close();
+        }
         Map<String, Object> jsonMap = new LinkedHashMap<>();
         LocalDateTime responseTime = LocalDateTime.now();
         // jsonMap.put("responseTime", responseTime.toString());
@@ -354,7 +351,7 @@ public class InteractiveServer {
       }
     }
 
-    private List<Derivation> truncateCandidates(List<Derivation> all, int size) {
+    private synchronized List<Derivation> truncateCandidates(List<Derivation> all, int size) {
       List<Derivation> keep = new ArrayList<>();
       Random rand = new Random();
       for (int i = 0; i < all.size(); i++) {
