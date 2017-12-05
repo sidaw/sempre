@@ -24,3 +24,13 @@ First, run `python vega_lite_paths.py --descriptions True` to generate vega-lite
 Next, run `python generate_lexicon.py` to generate  `plotting.lexicon` and`plotting_tfidf.lexicon`. 
 
 Finally, add run parameter: `-SimpleLexicon.inPaths ./plot/plotting_tfidf.lexicon`
+
+## Experiments
+
+To run a quick test:
+
+`plot/run @mode=plot -server false -Dataset.inPaths train:plot-data/randomWithCanon_train.jsonl dev:plot-data/randomWithCanon_test.jsonl -Learner.maxTrainIters 2`
+
+Ice's parameters for adding init
+
+`plot/run @mode=plot  -printall -maxexamples train:0 +tags init-plot -beamsize 500 -maxCandidates 50 -derivationScoreNoise 1.0`

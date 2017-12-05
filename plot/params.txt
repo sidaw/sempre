@@ -1,14 +1,22 @@
+defaults :: anchored	10.0
+defaults :: setWithoutContext	-20.0
 lexPathPattern :: numExactMatch	2.0
 lexPathPattern :: numSoftMatch	1.0
+rule :: $Action -> $AnyPath $AnyValue (interactive.JsonFn Join) (floating 1)	-20.0
+rule :: $Action -> $Path $AnyValue (interactive.JsonFn Join) (floating 1)	0.0
+rule :: $Action -> $AnyPath $Value (interactive.JsonFn Join) (floating 1)	-10.0
+rule :: $Action -> $Path $Value (interactive.JsonFn Join) (floating 1)	5.0
 rule :: $Regular -> $PHRASE (IdentityFn)	-5.0
 rule :: $Value -> $Regular (interactive.JsonFn JsonValue)	2.0
-rule :: $Value -> $Regular (interactive.VegaFn Enum)	20.0
-rule :: $Value -> $Regular (interactive.VegaFn Field)	20.0
-rule :: $Value -> $Regular (interactive.VegaFn Color)	20.0
+rule :: $Value -> $Regular (interactive.VegaFn Enum)	15.0
+rule :: $Value -> $Regular (interactive.VegaFn Field)	15.0
+rule :: $Value -> $Regular (interactive.VegaFn Color)	15.0
 rule :: $Value -> anyvalue (ConstantFn *) (floating 1)	-10.0
 rule :: $Value -> constantvalue (interactive.JsonFn ConstantValue) (floating 1)	-10.0
 rule :: $PathToken -> $Regular (interactive.JsonFn PathElement)	4.0
 rule :: $PathPattern -> $Regular (SimpleLexiconFn (type PATH)) (anchored 1))	4.0
+valueType :: number	5.0
+valueType :: boolean	5.0
 pathPattern :: path=$.encoding.x.field	4.875197
 pathPattern :: path=$.encoding.x.type	4.875197
 pathPattern :: path=$.mark	4.828314

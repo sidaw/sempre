@@ -75,14 +75,7 @@ public class Session {
       newExchanges.add(context.exchanges.get(i));
     return context.withNewExchange(newExchanges);
   }
-  
-  public void useIndependentLearner(Builder builder) {
-    this.params = new Params();
-    if (!Strings.isNullOrEmpty(opts.inParamsPath))
-      this.params.read(opts.inParamsPath);
-    this.learner = new Learner(builder.parser, this.params, new Dataset());
-  }
- 
+
   @Override
   public String toString() {
     return String.format("%s: %s; last: %s", id, context, lastEx);
