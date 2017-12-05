@@ -151,8 +151,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
 
   # learning stuff
   o('Dataset.datasetReader', "interactive.JsonlDatasetReader"),
-  #o('Dataset.inPaths', "train:./plot-data/sampledata.jsonl"),
-  o('Builder.inParamsPath', 'plot/params.txt'),
+  o('Dataset.inPaths', "train:./plot-data/sampledata.jsonl"),
   o('Parser.callSetEvaluation', true),
   o('Learner.numParallelThreads', 8),
   o('Builder.valueEvaluator', 'interactive.VegaValueEvaluator'),
