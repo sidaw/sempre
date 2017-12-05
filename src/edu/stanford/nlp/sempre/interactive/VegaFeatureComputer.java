@@ -118,12 +118,20 @@ public class VegaFeatureComputer implements FeatureComputer {
         }
       }
       if (FeatureExtractor.containsDomain("lexPathPattern")) {
+        int numExactMatch = 0;
+        int numSoftMatch = 0;
         for (String lemma: ex.getLemmaTokens()) {
           deriv.addFeature("lexPathPattern", "lemma=" + lemma + ",path=" + path);
           for (String token: pathTokens) {
             deriv.addFeature("lexPathPattern", "lemma=" + lemma + ",token=" + token);
+            if (lemma.equals(token))
+              numExactMatch += 1;
+            if (token.toLowerCase().contains(lemma.toLowerCase()))
+              numSoftMatch += 1;
           }
         }
+        deriv.addFeature("lexPathPattern", "numExactMatch", numExactMatch);
+        deriv.addFeature("lexPathPattern", "numSoftMatch", numSoftMatch);
       }
     }
   }
