@@ -29,9 +29,6 @@ public class JsonFn extends SemanticFn {
   public static class Options {
     @Option(gloss = "verbosity")
     public int verbose = 0;
-
-    @Option(gloss = "max number of joins")
-    public int maxJoins = Integer.MAX_VALUE;
   }
 
   public static Options opts = new Options();

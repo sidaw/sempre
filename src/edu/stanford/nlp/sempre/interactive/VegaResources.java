@@ -199,7 +199,19 @@ public class VegaResources {
         if (type.equals(JsonSchema.NOTYPE)) {
           continue;
         } else if (type.equals("string")) {
-          if (schema.isEnum()) {
+
+          List<String> simplePath = schema.simplePath();
+          String last = simplePath.get(simplePath.size() - 1);
+
+          if (last.endsWith("color") || last.endsWith("Color")
+            || last.equals("fill")
+            || last.equals("stroke") || last.equals("background")) {
+            values.add(new JsonValue("red").withSchemaType("string"));
+            values.add(new JsonValue("blue").withSchemaType("string"));
+            values.add(new JsonValue("green").withSchemaType("string"));
+          } else if (last.equals("field")) {
+            values.add(new JsonValue("fieldName").withSchemaType("string"));
+          } else if (schema.isEnum()) {
             values.addAll(schema.enums().stream().map(s -> new JsonValue(s).withSchemaType("enum"))
               .collect(Collectors.toList()));
           } else {
@@ -211,9 +223,8 @@ public class VegaResources {
         } else if (type.equals("number")) {
           values.add(new JsonValue(ThreadLocalRandom.current().nextInt(0, 100)).withSchemaType("number"));
           values.add(new JsonValue(0.1 * ThreadLocalRandom.current().nextInt(1, 10)).withSchemaType("number"));
+          values.add(new JsonValue(-0.1 * ThreadLocalRandom.current().nextInt(1, 10)).withSchemaType("number"));
           values.add(new JsonValue(0.0).withSchemaType("number"));
-        } else if (type.equals("string")) {
-          values.add(new JsonValue("X").withSchemaType("string"));
         }
       }
     }

@@ -99,11 +99,12 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
   o('Executor', 'interactive.VegaExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
+  o('Builder.inParamsPath', "./#{$path}/params.txt"),
   selo(0, 'Grammar.inPaths', "./#{$path}/plot.grammar"),
 
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
-  o('Grammar.tags', 'doublestar'),
+  o('Grammar.tags', 'doublestar', 'init-plot'),
 
   o('LanguageAnalyzer.lowerCaseTokens', false),
 
@@ -123,9 +124,9 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Params.l1Reg', 'nonlazy'),
   o('Params.l1RegCoeff', 0.0001),
 
-  o('Params.initStepSize', 0.5),
+  o('Params.initStepSize', 0.01),
   o('Params.adaptiveStepSize', true),
-  #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
+  #o('Params.stepSizeReduction', 0.25),
 
   o('JsonMaster.intOutputPath', './plot-out/'),
   o('InteractiveServer.numThreads', 8),
@@ -147,7 +148,6 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
 
   o('VegaEngine.verbose', 0),
   o('VegaExecutor.compileVega', false),
-  # o('JsonFn.maxJoins', 10000), # hack.
 
   # learning stuff
   o('Dataset.datasetReader', "interactive.JsonlDatasetReader"),

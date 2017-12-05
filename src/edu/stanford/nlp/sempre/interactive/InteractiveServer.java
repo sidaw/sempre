@@ -13,11 +13,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -197,9 +193,11 @@ public class InteractiveServer {
         Derivation.sortByScore(allCandidates);
         if (allCandidates != null) {
           if (allCandidates.size() > InteractiveServer.opts.maxCandidates) {
+
             response.lines.add(String.format("Exceeded max options: (current: %d / max: %d) ", allCandidates.size(),
                 InteractiveServer.opts.maxCandidates));
-            allCandidates = allCandidates.subList(0, InteractiveServer.opts.maxCandidates);
+
+            allCandidates = truncateCandidates(allCandidates, InteractiveServer.opts.maxCandidates);
           }
           int errorValueCount = 0;
           for (Derivation deriv : allCandidates) {
@@ -354,6 +352,23 @@ public class InteractiveServer {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
+    }
+
+    private List<Derivation> truncateCandidates(List<Derivation> all, int size) {
+      List<Derivation> keep = new ArrayList<>();
+      Random rand = new Random();
+      for (int i = 0; i < all.size(); i++) {
+        Derivation deriv = all.get(i);
+        if (i < 3 || deriv.getProb() > 0.1) {
+          keep.add(deriv);
+        }
+      }
+      while (keep.size() < size) {
+        Derivation deriv = all.get(rand.nextInt(all.size()));
+        //if (deriv.getProb() > rand.nextDouble())
+        keep.add(deriv);
+      }
+      return keep;
     }
   }
 
