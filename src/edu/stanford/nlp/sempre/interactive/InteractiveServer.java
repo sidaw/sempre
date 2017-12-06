@@ -195,7 +195,8 @@ public class InteractiveServer {
           if (allCandidates.size() > InteractiveServer.opts.maxCandidates) {
             response.lines.add(String.format("Exceeded max options: (current: %d / max: %d) ", allCandidates.size(),
                 InteractiveServer.opts.maxCandidates));
-            allCandidates = truncateCandidates(allCandidates, opts.maxCandidates);
+//            allCandidates = truncateCandidates(allCandidates, opts.maxCandidates);
+            allCandidates = allCandidates.subList(0, opts.maxCandidates);
           }
           int errorValueCount = 0;
           for (Derivation deriv : allCandidates) {

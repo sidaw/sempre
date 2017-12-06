@@ -171,7 +171,7 @@ public class VegaResources {
 
         if (schema.isEnum() && schema.enums().contains(stringValue))
           return true;
-        if (valueType.equals(schemaType)) {
+        if (!valueType.equals("string") && valueType.equals(schemaType)) {
           return true;
         }
         if (schemaType.equals(JsonSchema.NOTYPE))
@@ -223,8 +223,6 @@ public class VegaResources {
         } else if (type.equals("number")) {
           values.add(new JsonValue(ThreadLocalRandom.current().nextInt(0, 100)).withSchemaType("number"));
           values.add(new JsonValue(0.1 * ThreadLocalRandom.current().nextInt(1, 10)).withSchemaType("number"));
-          values.add(new JsonValue(-0.1 * ThreadLocalRandom.current().nextInt(1, 10)).withSchemaType("number"));
-          values.add(new JsonValue(0.0).withSchemaType("number"));
         }
       }
     }

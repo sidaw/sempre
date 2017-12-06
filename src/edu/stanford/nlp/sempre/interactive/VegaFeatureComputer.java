@@ -38,7 +38,7 @@ public class VegaFeatureComputer implements FeatureComputer {
     // favor one type over another when context is empty
     if (deriv.isRootCat() && !context.getJsonNode().has("$schema")) {
       String mode = Formulas.getString(((ActionFormula)deriv.formula).args.get(0));
-      if (mode == "set") {
+      if (mode.equals("set")) {
         deriv.addFeature("defaults", "setWithoutContext", 1);
       }
     }

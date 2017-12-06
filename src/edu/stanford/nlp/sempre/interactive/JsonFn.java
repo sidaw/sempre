@@ -32,7 +32,6 @@ public class JsonFn extends SemanticFn {
   }
 
   public static Options opts = new Options();
-  Formula arg1, arg2;
   enum Mode {PathElement, Path, JsonValue, ConstantValue, AnyPath, AnyPathElement, Template, Join};
   Mode mode;
   DerivationStream stream;
@@ -90,14 +89,14 @@ public class JsonFn extends SemanticFn {
     private Derivation derivFromPathValue(String path, JsonValue value) {
       NameValue fullPath = new NameValue(path);
       Formula setFormula = new ActionFormula(ActionFormula.Mode.primitive,
-          Lists.newArrayList(new ValueFormula<NameValue>(new NameValue("set")),
-              new ValueFormula<NameValue>(fullPath),
-              new ValueFormula<JsonValue>(value)));
+          Lists.newArrayList(new ValueFormula<>(new NameValue("set")),
+              new ValueFormula<>(fullPath),
+              new ValueFormula<>(value)));
       Derivation deriv = new Derivation.Builder()
           .withCallable(callable)
           .formula(setFormula)
           .createDerivation();
-      deriv.canonicalUtterance = String.format("set %s to %s", String.join(" ", VegaExecutor.stringToPath(jsonPath)), value.getJsonNode().toString());
+      deriv.canonicalUtterance = String.format("set %s to %s", String.join(" ", VegaExecutor.stringToPath(jsonPath)), value.getJsonNode().asText());
       return deriv;
     }
 
