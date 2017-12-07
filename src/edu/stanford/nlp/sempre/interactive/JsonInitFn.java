@@ -342,6 +342,8 @@ public class JsonInitFn extends SemanticFn {
 
     private boolean check(String mark, List<Formula> channelDefs) {
       List<String> channelNames = new ArrayList<>();
+      // Disallow mark = "text" for now
+      if ("text".equals(mark)) return false;
       // Some channels only go with certain marks
       for (Formula c : channelDefs) {
         ChannelDefFormula channelDef = (ChannelDefFormula) c;
