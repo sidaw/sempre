@@ -169,9 +169,13 @@ public class VegaResources {
           else return false;
         }
 
-        if (schema.isEnum() && schema.enums().contains(stringValue))
-          return true;
-        if (!valueType.equals("string") && valueType.equals(schemaType)) {
+        if (schemaType.equals("string") && schema.isEnum()) {
+          if (schema.enums().contains(stringValue))
+            return true;
+          else return false;
+        }
+
+        if (valueType.equals(schemaType)) {
           return true;
         }
         if (schemaType.equals(JsonSchema.NOTYPE))

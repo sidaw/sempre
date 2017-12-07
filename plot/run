@@ -118,7 +118,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('ParserState.mapToFormula', true),
   o('Parser.beamSize', 10000),
   o('ParserState.customExpectedCounts', 'None'),
-  o('Parser.derivationScoreNoise', 0.0),
+  o('Parser.derivationScoreNoise', 0.001),
 
   o('Params.initWeightsRandomly', false),
   o('Params.l1Reg', 'nonlazy'),
@@ -126,7 +126,7 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
 
   o('Params.initStepSize', 0.01),
   o('Params.adaptiveStepSize', true),
-  #o('Params.stepSizeReduction', 0.25),
+  o('Params.stepSizeReduction', 0.25),
 
   o('JsonMaster.intOutputPath', './plot-out/'),
   o('InteractiveServer.numThreads', 8),
