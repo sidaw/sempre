@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,7 @@ public class VegaExecutor extends Executor {
     if (context instanceof VegaJsonContextValue)
       jsonContext = (VegaJsonContextValue)context;
     else
-      throw new RuntimeException("VegaExecutor only allows VegaJsonContextValue");
+      throw new RuntimeException("VegaExecutor only allows VegaJsonContextValue, got: " + context.getClass());
 
     formula = Formulas.betaReduction(formula);
     try {
@@ -106,17 +107,17 @@ public class VegaExecutor extends Executor {
     JsonNode result = null;
     if (f.mode == ActionFormula.Mode.primitive) {
       // use reflection to call primitive stuff
-      Value method = ((ValueFormula) f.args.get(0)).value;
-      String id = ((NameValue) method).id;
+      String id = Formulas.getString(f.args.get(0));
       // all actions takes a fixed set as argument
       if (id.equals("set")) {
         Formula pathf = f.args.get(1);
         Value value = ((ValueFormula) f.args.get(2)).value;
-        String fullpath = Formulas.getString(pathf);
-        ObjectNode objNode = (ObjectNode) jsonContext.getJsonNode();
-        JsonUtils.setPathValue(objNode, fullpath, ((JsonValue)value).getJsonNode());
+        String jsonPath = Formulas.getString(pathf);
+        ObjectNode objNode = (ObjectNode) jsonContext.cloneJsonNode();
+        JsonUtils.setPathValue(objNode, jsonPath, ((JsonValue)value).getJsonNode());
         result = objNode;
       } else if (id.equals("init")) {
+        // read the formula
         JsonNode mark = ((JsonValue) ((ValueFormula) f.args.get(1)).value).getJsonNode();
         ActionFormula channelDefs = ((ActionFormula) f.args.get(2));
         assert channelDefs.mode == ActionFormula.Mode.sequential;
@@ -127,11 +128,13 @@ public class VegaExecutor extends Executor {
           formula = (ValueFormula<?>) ((ActionFormula) channelDef).args.get(2);
           encoding.set(channelKey, ((JsonValue) formula.value).getJsonNode());
         }
-        ObjectNode objNode = Json.getMapper().createObjectNode();
+        // Create the nodes
+        ObjectNode objNode = (ObjectNode) jsonContext.cloneJsonNode();
         objNode.put("$schema", "https://vega.github.io/schema/vega-lite/v2.json");
         objNode.put("mark", mark);
         objNode.put("encoding", encoding);
-        System.out.println("YAY " + f + " ==> " + objNode.toString());
+        if (opts.verbose >= 1)
+          System.out.println("INIT " + f + " ==> " + objNode.toString());
         result = objNode;
       } else {
         throw new RuntimeException("VegaExecutor: formula not implemented: " + f);
@@ -143,6 +146,7 @@ public class VegaExecutor extends Executor {
       LogInfo.logs("After: %s", result);
     }
 
+    // TODO: perhaps should do some basic schema validation
     if (!opts.compileVega) return result;
 
     // Compile Vega-lite spec
@@ -181,5 +185,13 @@ public class VegaExecutor extends Executor {
     if (opts.verbose >= 2)
       LogInfo.logs("PathPattern %s -> %s", pathFormula, path);
     return path;
+  }
+
+  public static List<String> stringToPath(String path) {
+    return Lists.newArrayList(path.substring(2).split("\\."));
+  }
+
+  public static String pathToString(List<String> path) {
+    return "$." + String.join(".", path);
   }
 }

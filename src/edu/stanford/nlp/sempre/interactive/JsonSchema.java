@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.google.common.collect.Lists;
-import fig.basic.LogInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,7 +89,7 @@ public class JsonSchema implements Comparable<JsonSchema> {
   }
 
   public String toString() {
-    return String.format("%s\npath: %s\ntype: %s", name(), schemaPath(), schemaTypes());
+    return String.format("%s\npath: %s\ntype: %s", name(), schemaPath(), types());
   }
 
   @Override
@@ -137,38 +136,33 @@ public class JsonSchema implements Comparable<JsonSchema> {
         .collect(Collectors.toList());
   }
 
-  // include enum types, definitions for object items
-  public List<String> schemaTypes() {
+  public List<String> types() {
     if (!node.has("type")) {
       throw new RuntimeException("type of " + schemaPath + " is an empty string.");
-      //return NOTYPE;
     }
     if (node.get("type").isArray()) {
-      // several fields can be either boolean, string or something else. we are assuming these are basic types
+      // can be one of several type
       List<String> types = new ArrayList<>();
       for (JsonNode child : node.get("type")) {
         types.add(child.asText());
       }
       return types;
     }
-    List<String> simplePath = simplePathWithDef(schemaPath);
-    String lastPath = simplePath.get(simplePath.size() - 1);
-    String type = node.get("type").asText();
-    if (type.isEmpty()) {
-      throw new RuntimeException("type of " + simplePath + " is an empty string.");
-    }
 
-    // enum types are always strings
-    if (type.equals("string") && node.has("enum")) {
-      return Lists.newArrayList("enum");
-    }
+    String type = node.get("type").asText();
+    // TODO: handle arrays properly
+
 
     return Lists.newArrayList(type);
   }
 
+  public boolean isEnum() {
+    return node.has("enum");
+  }
+
   public List<String> enums() {
     // I'm assuming that enums are always text, although this may not be true.
-    if (!node.has("enum")) {
+    if (!isEnum()) {
       return null;
     }
     JsonNode enumNode = node.get("enum");
@@ -289,11 +283,11 @@ public class JsonSchema implements Comparable<JsonSchema> {
         .collect(Collectors.toList());
   }
 
-  public List<JsonSchema> descendents() {
+  public List<JsonSchema> descendants() {
     List<JsonSchema> schemaSet = new ArrayList<>();
     schemaSet.add(this);
     for (JsonSchema child : children()) {
-      schemaSet.addAll(child.descendents());
+      schemaSet.addAll(child.descendants());
     }
     return schemaSet;
   }

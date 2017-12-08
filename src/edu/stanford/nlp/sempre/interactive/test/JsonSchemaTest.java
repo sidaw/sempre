@@ -84,7 +84,7 @@ public class JsonSchemaTest {
   public void testAllSchemas() throws IOException {
     File f = new File(VEGA_LITE_SCHEMA);
     JsonSchema schema = JsonSchema.fromFile(f);
-    List<JsonSchema> descendents = schema.descendents();
+    List<JsonSchema> descendents = schema.descendants();
     for (JsonSchema desc : descendents) {
       LogInfo.logs("SchemaTest.all %s", desc.schemaPath());
     }

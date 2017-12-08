@@ -39,9 +39,16 @@ public class VegaJsonContextValue extends ContextValue {
   }
 
   /**
-   * Get a fresh copy of the whole JSON.
+   * Get the whole JSON.
    */
   public JsonNode getJsonNode() {
+    return jsonNode;
+  }
+
+  /**
+   * Get a fresh copy of the whole JSON.
+   */
+  public JsonNode cloneJsonNode() {
     return jsonNode.deepCopy();
   }
 
@@ -95,7 +102,7 @@ public class VegaJsonContextValue extends ContextValue {
   }
 
   public Collection<Field> getFields() {
-    return fields == null? null : fields.values();
+    return fields == null? new ArrayList<>() : fields.values();
   }
 
   public Field getField(String name) {
