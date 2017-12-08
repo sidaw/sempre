@@ -173,7 +173,7 @@ public class JsonInitFn extends SemanticFn {
   static class ChannelDefStream extends MultipleDerivationStream {
     Callable callable;
     VegaJsonContextValue context;
-    Iterator<Formula> itr;
+    Iterator<Derivation> itr;
 
     public ChannelDefStream(Example ex, Callable c) {
       callable = c;
@@ -183,15 +183,11 @@ public class JsonInitFn extends SemanticFn {
 
     @Override
     public Derivation createDerivation() {
-      if (!itr.hasNext()) return null;
-      return new Derivation.Builder()
-          .withCallable(callable)
-          .formula(itr.next())
-          .createDerivation();
+      return itr.hasNext() ? itr.next() : null;
     }
 
-    private List<Formula> generate() {
-      List<Formula> formulas = new ArrayList<>();
+    private List<Derivation> generate() {
+      List<Derivation> derivations = new ArrayList<>();
       Formula channelFormula = callable.child(0).formula;
       String channelName = formulaToString(channelFormula),
                fieldName = formulaToString(callable.child(1).formula);
@@ -200,7 +196,10 @@ public class JsonInitFn extends SemanticFn {
         if (checkCountChannel(channelName)) {
           ObjectNode obj = Json.getMapper().createObjectNode();
           obj.put("type", "quantitative").put("aggregate", "count");
-          formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
+          derivations.add(new Derivation.Builder().withCallable(callable)
+              .formula(new ChannelDefFormula(channelFormula, channelName, obj))
+              .canonicalUtterance(String.format("count encoded as %s", channelName))
+              .createDerivation());
         }
       } else {
         VegaJsonContextValue.Field field = context.getField(fieldName);
@@ -209,19 +208,25 @@ public class JsonInitFn extends SemanticFn {
           if (checkNormalChannel(channelName, specType)) {
             ObjectNode obj = Json.getMapper().createObjectNode();
             obj.put("field", fieldName).put("type", specType);
-            formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
+            derivations.add(new Derivation.Builder().withCallable(callable)
+                .formula(new ChannelDefFormula(channelFormula, channelName, obj))
+                .canonicalUtterance(String.format("%s encoded as %s", fieldName, channelName))
+                .createDerivation());
           }
           // AGGREGATE channel
           if (checkAggregateChannel(channelName, specType)) {
             for (String aggregateType : VegaResources.AGGREGATES) {
               ObjectNode obj = Json.getMapper().createObjectNode();
               obj.put("field", fieldName).put("type", specType).put("aggregate", aggregateType);
-              formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
+              derivations.add(new Derivation.Builder().withCallable(callable)
+                  .formula(new ChannelDefFormula(channelFormula, channelName, obj))
+                  .canonicalUtterance(String.format("%s of %s encoded as %s", aggregateType, fieldName, channelName))
+                  .createDerivation());
             }
           }
         }
       }
-      return formulas;
+      return derivations;
     }
 
     private boolean checkCountChannel(String channelName) {
@@ -263,13 +268,16 @@ public class JsonInitFn extends SemanticFn {
     public Derivation createDerivation() {
       List<Formula> channelDefs = new ArrayList<>();
       ChannelDefFormula newChannelDef;
+      String canonicalUtterance;
       if (callable.getChildren().size() == 1) {
         newChannelDef = (ChannelDefFormula) callable.child(0).formula;
+        canonicalUtterance = callable.child(0).canonicalUtterance;
       } else {
         ActionFormula oldChannelDefs = (ActionFormula) (callable.child(0).formula);
         assert oldChannelDefs.mode == ActionFormula.Mode.sequential;
         channelDefs.addAll(oldChannelDefs.args);
         newChannelDef = (ChannelDefFormula) callable.child(1).formula;
+        canonicalUtterance = callable.child(0).canonicalUtterance + "; " + callable.child(1).canonicalUtterance;
       }
       if (!check(channelDefs, newChannelDef)) return null;
       // Create a derivation
@@ -278,6 +286,7 @@ public class JsonInitFn extends SemanticFn {
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(combined)
+          .canonicalUtterance(canonicalUtterance)
           .createDerivation();
     }
 
@@ -334,9 +343,12 @@ public class JsonInitFn extends SemanticFn {
       if (!check(formulaToString(mark), ((ActionFormula) channelDefs).args)) return null;
       ActionFormula finalized = new ActionFormula(ActionFormula.Mode.primitive,
           Arrays.asList(INIT, mark, channelDefs));
+      String canonicalUtterance = String.format("initialize %s plot with %s",
+          formulaToString(mark), callable.child(1).canonicalUtterance);
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(finalized)
+          .canonicalUtterance(canonicalUtterance)
           .createDerivation();
     }
 
