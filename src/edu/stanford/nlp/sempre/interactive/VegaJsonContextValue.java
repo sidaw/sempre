@@ -39,9 +39,16 @@ public class VegaJsonContextValue extends ContextValue {
   }
 
   /**
-   * Get a fresh copy of the whole JSON.
+   * Get the whole JSON.
    */
   public JsonNode getJsonNode() {
+    return jsonNode;
+  }
+
+  /**
+   * Get a fresh copy of the whole JSON.
+   */
+  public JsonNode cloneJsonNode() {
     return jsonNode.deepCopy();
   }
 

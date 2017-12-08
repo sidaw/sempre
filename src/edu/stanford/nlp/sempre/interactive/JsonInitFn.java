@@ -5,6 +5,7 @@ import java.util.*;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.interactive.VegaJsonContextValue.Field;
 import fig.basic.LispTree;
 import fig.basic.Option;
 
@@ -96,7 +97,7 @@ public class JsonInitFn extends SemanticFn {
    */
   static class AnyFieldStream extends MultipleDerivationStream {
     Callable callable;
-    Iterator<VegaJsonContextValue.Field> itr;
+    Iterator<Field> itr;
 
     public AnyFieldStream(Example ex, Callable c) {
       callable = c;
@@ -173,7 +174,7 @@ public class JsonInitFn extends SemanticFn {
   static class ChannelDefStream extends MultipleDerivationStream {
     Callable callable;
     VegaJsonContextValue context;
-    Iterator<Formula> itr;
+    Iterator<Derivation> itr;
 
     public ChannelDefStream(Example ex, Callable c) {
       callable = c;
@@ -183,15 +184,11 @@ public class JsonInitFn extends SemanticFn {
 
     @Override
     public Derivation createDerivation() {
-      if (!itr.hasNext()) return null;
-      return new Derivation.Builder()
-          .withCallable(callable)
-          .formula(itr.next())
-          .createDerivation();
+      return itr.hasNext() ? itr.next() : null;
     }
 
-    private List<Formula> generate() {
-      List<Formula> formulas = new ArrayList<>();
+    private List<Derivation> generate() {
+      List<Derivation> derivations = new ArrayList<>();
       Formula channelFormula = callable.child(0).formula;
       String channelName = formulaToString(channelFormula),
                fieldName = formulaToString(callable.child(1).formula);
@@ -200,28 +197,37 @@ public class JsonInitFn extends SemanticFn {
         if (checkCountChannel(channelName)) {
           ObjectNode obj = Json.getMapper().createObjectNode();
           obj.put("type", "quantitative").put("aggregate", "count");
-          formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
+          derivations.add(new Derivation.Builder().withCallable(callable)
+              .formula(new ChannelDefFormula(channelFormula, channelName, obj))
+              .canonicalUtterance(String.format("count encoded as %s", channelName))
+              .createDerivation());
         }
       } else {
-        VegaJsonContextValue.Field field = context.getField(fieldName);
+        Field field = context.getField(fieldName);
         for (String specType : DATA_TYPE_TO_SPEC_TYPES.get(field.type)) {
           // NORMAL channel
-          if (checkNormalChannel(channelName, specType)) {
+          if (checkNormalChannel(channelName, specType, field)) {
             ObjectNode obj = Json.getMapper().createObjectNode();
             obj.put("field", fieldName).put("type", specType);
-            formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
+            derivations.add(new Derivation.Builder().withCallable(callable)
+                .formula(new ChannelDefFormula(channelFormula, channelName, obj))
+                .canonicalUtterance(String.format("%s encoded as %s", fieldName, channelName))
+                .createDerivation());
           }
           // AGGREGATE channel
-          if (checkAggregateChannel(channelName, specType)) {
+          if (checkAggregateChannel(channelName, specType, field)) {
             for (String aggregateType : VegaResources.AGGREGATES) {
               ObjectNode obj = Json.getMapper().createObjectNode();
               obj.put("field", fieldName).put("type", specType).put("aggregate", aggregateType);
-              formulas.add(new ChannelDefFormula(channelFormula, channelName, obj));
+              derivations.add(new Derivation.Builder().withCallable(callable)
+                  .formula(new ChannelDefFormula(channelFormula, channelName, obj))
+                  .canonicalUtterance(String.format("%s of %s encoded as %s", aggregateType, fieldName, channelName))
+                  .createDerivation());
             }
           }
         }
       }
-      return formulas;
+      return derivations;
     }
 
     private boolean checkCountChannel(String channelName) {
@@ -229,18 +235,36 @@ public class JsonInitFn extends SemanticFn {
           "row".equals(channelName) || "column".equals(channelName) || "shape".equals(channelName));
     }
 
-    private boolean checkNormalChannel(String channelName, String specType) {
-      if ("row".equals(channelName) || "column".equals(channelName))
-        return "ordinal".equals(specType) || "nominal".equals(specType);
+    private static final int MAX_UNIQUE_COUNT_FOR_FACET = 10;
+    private static final int MAX_UNIQUE_COUNT_FOR_SHAPE = 6;
+    private static final int MAX_UNIQUE_COUNT_FOR_COLOR = 10;
+    private static final int MAX_UNIQUE_COUNT_FOR_DISCRETE = 20;
+
+    private boolean checkNormalChannel(String channelName, String specType, Field field) {
+      // Facets
+      if ("row".equals(channelName) || "column".equals(channelName)) {
+        if (!("ordinal".equals(specType) || "nominal".equals(specType))) return false;
+        if (field.uniqueCount > MAX_UNIQUE_COUNT_FOR_FACET) return false;
+      }
+      // Quantitative styles
       if ("opacity".equals(channelName) || "size".equals(channelName) ||
-          "x2".equals(channelName) || "y2".equals(channelName))
-        return "quantitative".equals(specType) || "temporal".equals(specType);
-      if ("shape".equals(channelName))
-        return "nominal".equals(specType);
+          "x2".equals(channelName) || "y2".equals(channelName)) {
+        if (!("quantitative".equals(specType) || "temporal".equals(specType))) return false;
+      }
+      // Discrete styles
+      if ("shape".equals(channelName)) {
+        if (!"nominal".equals(specType)) return false;
+        if (field.uniqueCount > MAX_UNIQUE_COUNT_FOR_SHAPE) return false;
+      }
+      // Max unique count
+      if ("nominal".equals(specType) || "ordinal".equals(specType)) {
+        if (field.uniqueCount > MAX_UNIQUE_COUNT_FOR_DISCRETE) return false;
+        if ("color".equals(channelName) && field.uniqueCount > MAX_UNIQUE_COUNT_FOR_COLOR) return false;
+      }
       return true;
     }
 
-    private boolean checkAggregateChannel(String channelName, String specType) {
+    private boolean checkAggregateChannel(String channelName, String specType, Field field) {
       return "quantitative".equals(specType) && !(
           "row".equals(channelName) || "column".equals(channelName) || "shape".equals(channelName));
     }
@@ -263,13 +287,16 @@ public class JsonInitFn extends SemanticFn {
     public Derivation createDerivation() {
       List<Formula> channelDefs = new ArrayList<>();
       ChannelDefFormula newChannelDef;
+      String canonicalUtterance;
       if (callable.getChildren().size() == 1) {
         newChannelDef = (ChannelDefFormula) callable.child(0).formula;
+        canonicalUtterance = callable.child(0).canonicalUtterance;
       } else {
         ActionFormula oldChannelDefs = (ActionFormula) (callable.child(0).formula);
         assert oldChannelDefs.mode == ActionFormula.Mode.sequential;
         channelDefs.addAll(oldChannelDefs.args);
         newChannelDef = (ChannelDefFormula) callable.child(1).formula;
+        canonicalUtterance = callable.child(0).canonicalUtterance + "; " + callable.child(1).canonicalUtterance;
       }
       if (!check(channelDefs, newChannelDef)) return null;
       // Create a derivation
@@ -278,6 +305,7 @@ public class JsonInitFn extends SemanticFn {
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(combined)
+          .canonicalUtterance(canonicalUtterance)
           .createDerivation();
     }
 
@@ -334,14 +362,19 @@ public class JsonInitFn extends SemanticFn {
       if (!check(formulaToString(mark), ((ActionFormula) channelDefs).args)) return null;
       ActionFormula finalized = new ActionFormula(ActionFormula.Mode.primitive,
           Arrays.asList(INIT, mark, channelDefs));
+      String canonicalUtterance = String.format("initialize %s plot with %s",
+          formulaToString(mark), callable.child(1).canonicalUtterance);
       return new Derivation.Builder()
           .withCallable(callable)
           .formula(finalized)
+          .canonicalUtterance(canonicalUtterance)
           .createDerivation();
     }
 
     private boolean check(String mark, List<Formula> channelDefs) {
       List<String> channelNames = new ArrayList<>();
+      // Disallow mark = "text" for now
+      if ("text".equals(mark)) return false;
       // Some channels only go with certain marks
       for (Formula c : channelDefs) {
         ChannelDefFormula channelDef = (ChannelDefFormula) c;
@@ -361,14 +394,24 @@ public class JsonInitFn extends SemanticFn {
       if (("area".equals(mark) || "line".equals(mark))
           && !(channelNames.contains("x") && channelNames.contains("y")))
         return false;
+      // Aggregate can only appear when there is at least one an ordinal / nominal
       // Count can only appear when all other fields are ordinal / nominal
-      boolean hasCount = false, hasNonDiscrete = false;
+      boolean hasAggregate = false, hasCount = false, hasDiscrete = false, hasNonDiscrete = false;
       for (Formula c : channelDefs) {
         ChannelDefFormula channelDef = (ChannelDefFormula) c;
-        if ("count".equals(channelDef.defValue("aggregate"))) hasCount = true;
+        if ("count".equals(channelDef.defValue("aggregate"))) {
+          hasCount = true;
+        } else if (channelDef.defValue("aggregate") != null) {
+          hasAggregate = true;
+        }
         String type = channelDef.defValue("type");
-        if (!("ordinal".equals(type) || "nominal".equals(type))) hasNonDiscrete = true;
+        if ("ordinal".equals(type) || "nominal".equals(type)) {
+          hasDiscrete = true;
+        } else {
+          hasNonDiscrete = true;
+        }
       }
+      if (hasAggregate && !hasDiscrete) return false;
       if (hasCount && hasNonDiscrete) return false;
       // TODO: Add more constraints
       return true;
