@@ -19,8 +19,7 @@ public class JsonValue extends Value {
   JsonNode json;
   String schemaType = "notype";
   String jsonType = "string";
-  Set<String> schemaTypes;
-  
+
   public JsonNode getJsonNode() {
     return json;
   }

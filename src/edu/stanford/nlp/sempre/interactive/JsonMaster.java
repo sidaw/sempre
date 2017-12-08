@@ -3,12 +3,7 @@ package edu.stanford.nlp.sempre.interactive;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.nlp.sempre.Builder;
-import edu.stanford.nlp.sempre.Example;
-import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.JsonValue;
-import edu.stanford.nlp.sempre.Master;
-import edu.stanford.nlp.sempre.Session;
+import edu.stanford.nlp.sempre.*;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
@@ -52,10 +47,20 @@ public class JsonMaster extends Master {
     server.run();
   }
 
+  private String fakeQuery(String line) {
+    return String.format("[\"q\", {\"utterance\": \"%s\", \"context\":{}, \"schema\":", line)
+      + "{\"a\":{\"name\":\"a\",\"type\":\"string\",\"uniqueCount\":3,\"count\":9,\"probablyYears\":false,\"source\":true},"
+      + "\"b\":{\"name\":\"b\",\"type\":\"integer\",\"uniqueCount\":6,\"count\":9,\"probablyYears\":false,\"source\":true}}}]";
+  }
+
   @Override
   public Response processQuery(Session session, String line) {
     if (session.id.equals("stdin")) {
-      return super.processQuery(session, line);
+      if (line.startsWith("(")) {
+        return super.processQuery(session, line);
+      } else {
+        line = fakeQuery(line);
+      }
     }
     LogInfo.begin_track("JsonMaster.handleQuery");
     LogInfo.logs("session %s", session.id);
@@ -85,7 +90,7 @@ public class JsonMaster extends Master {
        *     "schema": schema map (object),
        *   }]
        *
-       * - If context is an empty object or contains "initialContext" key:
+       * - If context is an empty object
        *     Parse the command for generating a new plot
        * - Otherwise:
        *     Parse the command, either for modifying the plot or generating a new plot
@@ -169,6 +174,13 @@ public class JsonMaster extends Master {
        *   }]
        */
       // TODO
+
+    } else if (command.equals("log")) {
+      /*
+
+       */
+
+    } else if(command.equals("fetch")) {
 
     } else {
       LogInfo.log("Invalid command: " + args);

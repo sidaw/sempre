@@ -36,7 +36,7 @@ public class CanonicalUtteranceGenerator {
       if (!path.equals(firstPathKey))
         path = path.substring(startPath);
     }
-    String u = "Set " + path + " to " + value + ".";
+    String u = "set " + path + " to " + value;
     return u;
   }
 

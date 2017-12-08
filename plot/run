@@ -99,12 +99,12 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('masterType', 'edu.stanford.nlp.sempre.interactive.JsonMaster'),
   o('Executor', 'interactive.VegaExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
+  o('Builder.inParamsPath', "./#{$path}/params.txt"),
   selo(0, 'Grammar.inPaths', "./#{$path}/plot.grammar"),
 
-  o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
-  o('Grammar.tags', 'doublestar'),
+  o('Grammar.tags', 'doublestar', 'init-plot'),
 
   o('LanguageAnalyzer.lowerCaseTokens', false),
 
@@ -116,19 +116,21 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Parser.callSetEvaluation', false),
   o('Parser.coarsePrune', false),
   o('ParserState.mapToFormula', true),
-  o('Parser.beamSize', 10000),
+  o('Parser.beamSize', 1000),
   o('ParserState.customExpectedCounts', 'None'),
+  o('Parser.derivationScoreNoise', 0.001),
 
+  o('Params.initWeightsRandomly', false),
   o('Params.l1Reg', 'nonlazy'),
   o('Params.l1RegCoeff', 0.0001),
 
-  o('Params.initStepSize', 0.5),
+  o('Params.initStepSize', 0.01),
   o('Params.adaptiveStepSize', true),
-  #o('Params.stepSizeReduction', 0.25),  # o('FeatureExtractor.featureDomains', ':rule'),
+  o('Params.stepSizeReduction', 0.25),
 
   o('JsonMaster.intOutputPath', './plot-out/'),
   o('InteractiveServer.numThreads', 8),
-  o('InteractiveServer.maxCandidates', 100),
+  o('InteractiveServer.maxCandidates', 50),
   o('InteractiveServer.queryLogPath', './plot-out/query.jsonl'),
   o('InteractiveServer.responseLogPath', './plot-out/response.jsonl'),
   o('InteractiveServer.port', 8405),
@@ -137,18 +139,15 @@ addMode('plot', 'interactive semantic parsing for plotting', lambda { |e| l(
   o('Derivation.showTypes', false),
   o('Derivation.showValues', false),
   o('Derivation.showRules', false),
-  o('Derivation.anchoredBonus', 1.0),
+  o('Derivation.anchoredBonus', 0.0),
+
 
   o('VegaResources.vegaSchema', "./#{$path}/vega-lite-v2.json"),
   o('VegaResources.excludedPaths', 'items', 'vconcat', 'hconcat', 'layer', 'spec', 'repeat'),
   o('VegaResources.colorFile', "./#{$path}/css-color-names.json"),
-  # o('VegaResources.vegaSpecifications', "./#{$path}/templates/population", "./#{$path}/templates/cars", "./#{$path}/templates/stocks"),
   o('VegaResources.initialTemplates', "./#{$path}/initial-templates.json"),
-  # selo(0, 'VegaResources.allVegaJsonPaths', "./#{$path}/vega-lite-paths.txt", "./plot-out/PathInTemplates.txt"),
-
   o('VegaEngine.verbose', 0),
   o('VegaExecutor.compileVega', false),
-  o('JsonFn.maxJoins', 10000), # hack.
 
   # learning stuff
   o('Dataset.datasetReader', "interactive.JsonlDatasetReader"),
