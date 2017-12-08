@@ -48,6 +48,9 @@ public abstract class Parser {
     @Option(gloss = "Inject random noise into the score (to mix things up a bit)")
     public double derivationScoreNoise = 0;
 
+    @Option(gloss = "Temperature of stochastic sort. Default is 0 = non-stochastic sort.")
+    public double derivationSortTemperature = 0;
+
     @Option(gloss = "Source of random noise")
     public Random derivationScoreRandom = new Random(1);
 
@@ -177,7 +180,12 @@ public abstract class Parser {
     state.setEvaluation();
 
     ex.predDerivations = state.predDerivations;
-    Derivation.sortByScore(ex.predDerivations);
+
+    if (opts.derivationSortTemperature > 0) {
+      Derivation.sortByScoreStochastic(ex.predDerivations, opts.derivationSortTemperature, opts.derivationScoreRandom);
+    } else {
+      Derivation.sortByScore(ex.predDerivations);
+    }
 
     // Evaluate
     if (opts.callSetEvaluation) {

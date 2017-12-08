@@ -495,6 +495,41 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     Collections.sort(trees, derivScoreComparator);
   }
 
+  /**
+   * "Stochastically sort" the list of derivations, in the following manner:
+   * - compute a softmax distribution over derivations, using their scores as log probs, and the given temperature
+   * - sample without replacement from the softmax until all elements have been sampled
+   * - sort the derivations in the order in which they were sampled
+   *
+   * This process is implemented using the Gumbel trick, rather than explicitly sampling with replacement.
+   *
+   * @param derivations
+   * @param temperature
+   */
+  public static void sortByScoreStochastic(List<Derivation> derivations, double temperature, Random random) {
+    double[] probs = getProbs(derivations, temperature);
+    sortStochastic(derivations, probs, random);
+  }
+
+  public static <T> void sortStochastic(List<T> list, double[] probs, Random random) {
+    // compute stochastic scores
+    List<Pair<T, Double>> scoredList = new ArrayList<>();
+    for (int i = 0; i < probs.length; i++) {
+      double uniform = random.nextDouble();
+      double gumbel = -Math.log(-Math.log(uniform));
+      double score = Math.log(probs[i]) + gumbel;
+      scoredList.add(new Pair<>(list.get(i), score));
+    }
+
+    // sort list
+    Collections.sort(scoredList, Comparator.comparingDouble(pair -> -pair.getSecond()));
+
+    // modify original list in-place with stochastically sorted values
+    for (int i = 0; i < list.size(); i++) {
+      list.set(i, scoredList.get(i).getFirst());
+    }
+  }
+
   // Generate a probability distribution over derivations given their scores.
   public static double[] getProbs(List<Derivation> derivations, double temperature) {
     double[] probs = new double[derivations.size()];
