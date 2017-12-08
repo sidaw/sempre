@@ -199,7 +199,7 @@ public class JsonInitFn extends SemanticFn {
           obj.put("type", "quantitative").put("aggregate", "count");
           derivations.add(new Derivation.Builder().withCallable(callable)
               .formula(new ChannelDefFormula(channelFormula, channelName, obj))
-              .canonicalUtterance(String.format("count encoded as %s", channelName))
+              .canonicalUtterance(String.format("count as %s", channelName))
               .createDerivation());
         }
       } else {
@@ -211,7 +211,7 @@ public class JsonInitFn extends SemanticFn {
             obj.put("field", fieldName).put("type", specType);
             derivations.add(new Derivation.Builder().withCallable(callable)
                 .formula(new ChannelDefFormula(channelFormula, channelName, obj))
-                .canonicalUtterance(String.format("%s encoded as %s", fieldName, channelName))
+                .canonicalUtterance(String.format("%s as %s", fieldName, channelName))
                 .createDerivation());
           }
           // AGGREGATE channel
@@ -221,7 +221,7 @@ public class JsonInitFn extends SemanticFn {
               obj.put("field", fieldName).put("type", specType).put("aggregate", aggregateType);
               derivations.add(new Derivation.Builder().withCallable(callable)
                   .formula(new ChannelDefFormula(channelFormula, channelName, obj))
-                  .canonicalUtterance(String.format("%s of %s encoded as %s", aggregateType, fieldName, channelName))
+                  .canonicalUtterance(String.format("%s of %s as %s", aggregateType, fieldName, channelName))
                   .createDerivation());
             }
           }
@@ -362,7 +362,7 @@ public class JsonInitFn extends SemanticFn {
       if (!check(formulaToString(mark), ((ActionFormula) channelDefs).args)) return null;
       ActionFormula finalized = new ActionFormula(ActionFormula.Mode.primitive,
           Arrays.asList(INIT, mark, channelDefs));
-      String canonicalUtterance = String.format("initialize %s plot with %s",
+      String canonicalUtterance = String.format("%s plot with %s",
           formulaToString(mark), callable.child(1).canonicalUtterance);
       return new Derivation.Builder()
           .withCallable(callable)
