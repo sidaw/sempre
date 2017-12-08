@@ -5,6 +5,7 @@ import java.util.*;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.interactive.VegaJsonContextValue.Field;
 import fig.basic.LispTree;
 import fig.basic.Option;
 
@@ -96,7 +97,7 @@ public class JsonInitFn extends SemanticFn {
    */
   static class AnyFieldStream extends MultipleDerivationStream {
     Callable callable;
-    Iterator<VegaJsonContextValue.Field> itr;
+    Iterator<Field> itr;
 
     public AnyFieldStream(Example ex, Callable c) {
       callable = c;
@@ -202,10 +203,10 @@ public class JsonInitFn extends SemanticFn {
               .createDerivation());
         }
       } else {
-        VegaJsonContextValue.Field field = context.getField(fieldName);
+        Field field = context.getField(fieldName);
         for (String specType : DATA_TYPE_TO_SPEC_TYPES.get(field.type)) {
           // NORMAL channel
-          if (checkNormalChannel(channelName, specType)) {
+          if (checkNormalChannel(channelName, specType, field)) {
             ObjectNode obj = Json.getMapper().createObjectNode();
             obj.put("field", fieldName).put("type", specType);
             derivations.add(new Derivation.Builder().withCallable(callable)
@@ -214,7 +215,7 @@ public class JsonInitFn extends SemanticFn {
                 .createDerivation());
           }
           // AGGREGATE channel
-          if (checkAggregateChannel(channelName, specType)) {
+          if (checkAggregateChannel(channelName, specType, field)) {
             for (String aggregateType : VegaResources.AGGREGATES) {
               ObjectNode obj = Json.getMapper().createObjectNode();
               obj.put("field", fieldName).put("type", specType).put("aggregate", aggregateType);
@@ -234,18 +235,36 @@ public class JsonInitFn extends SemanticFn {
           "row".equals(channelName) || "column".equals(channelName) || "shape".equals(channelName));
     }
 
-    private boolean checkNormalChannel(String channelName, String specType) {
-      if ("row".equals(channelName) || "column".equals(channelName))
-        return "ordinal".equals(specType) || "nominal".equals(specType);
+    private static final int MAX_UNIQUE_COUNT_FOR_FACET = 10;
+    private static final int MAX_UNIQUE_COUNT_FOR_SHAPE = 6;
+    private static final int MAX_UNIQUE_COUNT_FOR_COLOR = 10;
+    private static final int MAX_UNIQUE_COUNT_FOR_DISCRETE = 20;
+
+    private boolean checkNormalChannel(String channelName, String specType, Field field) {
+      // Facets
+      if ("row".equals(channelName) || "column".equals(channelName)) {
+        if (!("ordinal".equals(specType) || "nominal".equals(specType))) return false;
+        if (field.uniqueCount > MAX_UNIQUE_COUNT_FOR_FACET) return false;
+      }
+      // Quantitative styles
       if ("opacity".equals(channelName) || "size".equals(channelName) ||
-          "x2".equals(channelName) || "y2".equals(channelName))
-        return "quantitative".equals(specType) || "temporal".equals(specType);
-      if ("shape".equals(channelName))
-        return "nominal".equals(specType);
+          "x2".equals(channelName) || "y2".equals(channelName)) {
+        if (!("quantitative".equals(specType) || "temporal".equals(specType))) return false;
+      }
+      // Discrete styles
+      if ("shape".equals(channelName)) {
+        if (!"nominal".equals(specType)) return false;
+        if (field.uniqueCount > MAX_UNIQUE_COUNT_FOR_SHAPE) return false;
+      }
+      // Max unique count
+      if ("nominal".equals(specType) || "ordinal".equals(specType)) {
+        if (field.uniqueCount > MAX_UNIQUE_COUNT_FOR_DISCRETE) return false;
+        if ("color".equals(channelName) && field.uniqueCount > MAX_UNIQUE_COUNT_FOR_COLOR) return false;
+      }
       return true;
     }
 
-    private boolean checkAggregateChannel(String channelName, String specType) {
+    private boolean checkAggregateChannel(String channelName, String specType, Field field) {
       return "quantitative".equals(specType) && !(
           "row".equals(channelName) || "column".equals(channelName) || "shape".equals(channelName));
     }
@@ -375,14 +394,24 @@ public class JsonInitFn extends SemanticFn {
       if (("area".equals(mark) || "line".equals(mark))
           && !(channelNames.contains("x") && channelNames.contains("y")))
         return false;
+      // Aggregate can only appear when there is at least one an ordinal / nominal
       // Count can only appear when all other fields are ordinal / nominal
-      boolean hasCount = false, hasNonDiscrete = false;
+      boolean hasAggregate = false, hasCount = false, hasDiscrete = false, hasNonDiscrete = false;
       for (Formula c : channelDefs) {
         ChannelDefFormula channelDef = (ChannelDefFormula) c;
-        if ("count".equals(channelDef.defValue("aggregate"))) hasCount = true;
+        if ("count".equals(channelDef.defValue("aggregate"))) {
+          hasCount = true;
+        } else if (channelDef.defValue("aggregate") != null) {
+          hasAggregate = true;
+        }
         String type = channelDef.defValue("type");
-        if (!("ordinal".equals(type) || "nominal".equals(type))) hasNonDiscrete = true;
+        if ("ordinal".equals(type) || "nominal".equals(type)) {
+          hasDiscrete = true;
+        } else {
+          hasNonDiscrete = true;
+        }
       }
+      if (hasAggregate && !hasDiscrete) return false;
       if (hasCount && hasNonDiscrete) return false;
       // TODO: Add more constraints
       return true;
